@@ -1,0 +1,22 @@
+--- ../zaptel-1.4.10.1/kernel/Kbuild	2008-02-20 17:02:06.000000000 -0500
++++ ../zaptel-1.4.10.1/kernel/Kbuild	2008-10-28 19:36:30.000000000 -0400
+@@ -14,7 +14,7 @@
+ EXTRA_CFLAGS+=-Drw_lock_t=rwlock_t
+ endif
+ 
+-zaptel-objs := zaptel-base.o
++zaptel-objs := zaptel-base.o zl_wrap.o
+ 
+ ifeq ($(ARCH),i386)
+ ifneq ($(wildcard $(src)/hpec/hpec_x86_32.o_shipped),)
+--- ../zaptel-1.4.10.1/kernel/zaptel-base.c.	2008-11-16 14:24:48.000000000 -0500
++++ ../zaptel-1.4.10.1/kernel/zaptel-base.c	2008-11-16 14:25:31.000000000 -0500
+@@ -80,7 +80,7 @@
+ #include "fasthdlc.h"
+ 
+ #include "zaptel.h"
+-
++#include "zl_wrap.h"
+ #ifdef LINUX26
+ #include <linux/moduleparam.h>
+ #endif

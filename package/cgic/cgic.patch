@@ -1,0 +1,33 @@
+--- cgic205/Makefile	2008-09-20 13:58:00.000000000 -0400
++++ cgic205/Makefile	2008-09-20 13:59:16.000000000 -0400
+@@ -3,13 +3,14 @@
+ AR=ar
+ RANLIB=ranlib
+ LIBS=-L./ -lcgic
++PREFIX=/usr/local
+ 
+ all: libcgic.a cgictest.cgi capture
+ 
+ install: libcgic.a
+-	cp libcgic.a /usr/local/lib
+-	cp cgic.h /usr/local/include
+-	@echo libcgic.a is in /usr/local/lib. cgic.h is in /usr/local/include.
++	cp libcgic.a $(PREFIX)/lib
++	cp cgic.h $(PREFIX)/include
++	@echo libcgic.a is in $(PREFIX)/lib. cgic.h is in $(PREFIX)/include.
+ 
+ libcgic.a: cgic.o cgic.h
+ 	rm -f libcgic.a
+@@ -19,10 +20,10 @@
+ #mingw32 and cygwin users: replace .cgi with .exe
+ 
+ cgictest.cgi: cgictest.o libcgic.a
+-	gcc cgictest.o -o cgictest.cgi ${LIBS}
++	$(CC) cgictest.o -o cgictest.cgi ${LIBS}
+ 
+ capture: capture.o libcgic.a
+-	gcc capture.o -o capture ${LIBS}
++	$(CC) capture.o -o capture ${LIBS}
+ 
+ clean:
+ 	rm -f *.o *.a cgictest.cgi capture

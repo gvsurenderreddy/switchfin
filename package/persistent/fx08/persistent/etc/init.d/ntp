@@ -1,0 +1,27 @@
+#!/bin/sh
+# Start up file for ntp
+
+. /persistent/etc/network.conf
+case $1 in
+	start) ntpdate -4 $NTPserver &
+	       date;
+               echo "export TZ=$TIMEZONE" > /etc/profile;
+		sleep 5;
+		ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
+	stop) killall -9 ntpd;;
+	restart) killall -9 ntpd; 
+		ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
+	enable) rm -f /persistent/etc/rc.d/S30ntp; 
+	        ln -s /persistent/etc/init.d/ntp /persistent/etc/rc.d/S30ntp;;
+	disable) rm -f /persistent/etc/rc.d/S30ntp;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/ntp [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        restart Restart the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac

@@ -1,0 +1,130 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2008 Astfin <mark@astfin.org>
+# Primary Authors: mark@astfin.org, pawel@astfin.org
+# Update 27 July 2009, Dimitar Penev dpn@ucpbx.com
+#        uClinux 2009R1-RC2 (kernel 2.6.28.10)
+#        blackfin toolchain 2009R1-RC
+# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+#########################################################################
+
+mainmenu "Astfin Configuration"
+
+config SF_HAVE_DOT_CONFIG
+        bool
+        default y
+
+config SF_TARGET_TOOLCHAIN_COMPILER_4
+        bool
+	default y
+
+choice
+        prompt "Target Architecture"
+        default SF_PR1_APPLIANCE
+        help
+          Stuff
+
+config SF_STAMP537
+	bool "Blackfin STAMP 537"
+config SF_PR1_APPLIANCE
+	bool "PR1 Appliance"
+config SF_BR4_APPLIANCE
+        bool "BR4 Appliance"
+config SF_TL_2XS
+	bool "TL 2XS Board"
+config SF_IP04
+	bool "IP04/IP08 Analog PBX"
+config SF_IP01
+	bool "IP01 Analog PBX"
+config SF_FX08
+	bool "FX08 Analog PBX"
+
+endchoice
+
+choice
+	prompt "Target Architecture Configuration"
+	default SF_TARGET_DEFAULTS
+config SF_TARGET_DEFAULTS
+	bool "Default Settings"
+config SF_TARGET_CUSTOM
+	bool "Custom Kernel Options"
+endchoice
+
+source "package/Config.in"
+
+menu "Build options"
+
+config SF_WGET
+	string "Wget command"
+	default "wget --passive-ftp -nd"
+
+config SF_SVN
+	string "Subversion (svn) checkout command"
+	default "svn co"
+
+config SF_TAR_OPTIONS
+	string "Tar options"
+	default ""
+	help
+	  Options to pass to tar when extracting the sources.
+	  E.g. " -v --exclude='*.svn*'" to exclude all .svn internal files
+	  and to be verbose.
+
+config SF_DL_DIR
+	string "Download dir"
+	default "$(BASE_DIR)/dl"
+	help
+	  Directory to store all the source files that we need to fetch.
+
+config SF_SOURCEFORGE_MIRROR
+	string "Sourceforge mirror site"
+	default "easynews"
+	help
+	    Sourceforge has a system of mirror sites.  Some sites may be closer
+	    to your location, and sometimes mirror sites go down and are no longer
+	    available.  This option allows you to select your preferred Sourceforge
+	    mirror site.
+
+	    The list of mirrors is available here:
+	    http://prdownloads.sourceforge.net/index-sf.html?download
+
+config SF_TOPDIR_PREFIX
+	string "Custom build dir prefix"
+	default ""
+	help
+	    Add a custom string to the beginning of the build directories.
+
+	    build_ARCH -> [PREFIX]_build_ARCH
+	    toolchain_build_ARCH -> [PREFIX]_toolchain_build_ARCH
+
+config SF_TOPDIR_SUFFIX
+	string "Custom build dir suffix"
+	default ""
+	help
+	    Add a custom string to the end of the build directories.
+
+	    build_ARCH -> build_ARCH_[SUFFIX]
+	    toolchain_build_ARCH -> toolchain_build_ARCH_[SUFFIX]
+
+config SF_GNU_BUILD_SUFFIX
+	string "GNU build hostname suffix"
+	default "bfin-uclinux"
+	help
+	    The string used to pass to configure scripts via the
+	    --build= option.  Just specify the suffix here, the leading
+	    arch will be filled in automatically.
+
+config SF_JLEVEL
+	int "Number of jobs to run simultaneously"
+	default "1"
+	help
+	    Number of jobs to run simultanesouly
+
+endmenu

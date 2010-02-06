@@ -1,0 +1,22 @@
+--- u-boot-1.1.6/lib_blackfin/post.c	2009-08-29 17:01:41.000000000 +0300
++++ u-boot-1.1.6/lib_blackfin/post_.c	2009-08-29 17:01:24.000000000 +0300
+@@ -352,7 +352,7 @@
+ 	}
+ }
+ 
+-int post_log (char *format, ...)
++__attribute__((longcall)) int post_log (char *format, ...)
+ {
+ 	va_list args;
+ 	uint i;
+--- u-boot-1.1.6/include/post.h	2009-08-29 17:00:50.000000000 +0300
++++ u-boot-1.1.6/include/post_.h	2009-08-29 17:00:33.000000000 +0300
+@@ -67,7 +67,7 @@
+ void post_output_backlog ( void );
+ int post_run (char *name, int flags);
+ int post_info (char *name);
+-int post_log (char *format, ...);
++__attribute__((longcall)) int post_log (char *format, ...);
+ void post_reloc (void);
+ unsigned long post_time_ms (unsigned long base);
+ 

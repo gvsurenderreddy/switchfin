@@ -1,0 +1,21 @@
+--- uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2007-11-09 20:01:29.000000000 -0500
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2007-11-09 20:23:26.000000000 -0500
+@@ -1,6 +1,6 @@
+ choice
+ 	prompt "System type"
+-	default BFIN537_STAMP
++	default BR4_APPLIANCE
+ 	help
+ 	  Select your board!
+ 
+@@ -32,4 +32,10 @@
+ 	help
+ 	  Generic or Custom board support.
+ 
++config BR4_APPLIANCE
++       bool "BR4_APPLIANCE"
++       depends on (BF537)
++       help
++         BR4_APPLIANCE board Support
++
+ endchoice

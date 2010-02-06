@@ -1,0 +1,21 @@
+#
+# Zarlink Hardware Based Echo Cancellation Module
+#
+
+#menu "LEC Support"
+config SF_PACKAGE_LEC	 
+         bool "Support for Zarlink Hardware Based Echo Canceller"	 
+         depends on SF_PACKAGE_UCLINUX_DIST && (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)	 
+         default "y"	 
+         ---help---	 
+           Say Y here if you have a hardware based echo cancellation	 
+           installed in your appliance.
+
+config SF_LEC_128
+            bool "Support for 128ms tail length (Zarlink chip)"
+            depends on  SF_PACKAGE_LEC && SF_BR4_APPLIANCE
+            help
+              Use this option if you have at least 16 channels chip.
+
+
+#endmenu

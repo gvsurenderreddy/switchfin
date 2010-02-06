@@ -1,0 +1,262 @@
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/arch/blackfin/Kconfig	2008-01-31 02:12:59.000000000 +1030
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/Kconfig	2008-03-23 06:28:15.000000000 +1030
+@@ -260,9 +260,12 @@
+ 	default y
+ 
+ config MEM_MT48LC32M16A2TG_75
+-	bool
+-	depends on (BFIN527_EZKIT)
++        bool
++        depends on (BFIN527_EZKIT || BFIN532_IP0X)
+ 	default y
++	help
++	  refresh period 64mS, 8192 row addresses, CAS Latency 3, 10 col addresses
++
+ 
+ source "arch/blackfin/mach-bf527/Kconfig"
+ source "arch/blackfin/mach-bf533/Kconfig"
+@@ -293,6 +296,7 @@
+ 	default "25000000" if (BFIN537_STAMP || BFIN527_EZKIT || H8606_HVSISTEMAS)
+ 	default "30000000" if BFIN561_EZKIT
+ 	default "24576000" if PNAV10
++	default "10000000" if BFIN532_IP0X
+ 	help
+ 	  The frequency of CLKIN crystal oscillator on the board in Hz.
+ 
+@@ -425,6 +429,7 @@
+ 	default 128 if BFIN533_STAMP
+ 	default  64 if PNAV10
+ 	default  32 if H8606_HVSISTEMAS
++	default  64 if BFIN532_IP0X
+ 
+ config MEM_ADD_WIDTH
+ 	int "SDRAM Memory Address Width"
+@@ -436,6 +441,7 @@
+ 	default 10 if BFIN537_STAMP
+ 	default 11 if BFIN533_STAMP
+ 	default 10 if PNAV10
++	default 10 if BFIN532_IP0X
+ 
+ 
+ choice
+@@ -460,6 +466,27 @@
+ 	  code.
+ 	  For example: PF0 --> 0,PF1 --> 1,PF2 --> 2, etc.
+ 
++comment "Hardware addresses"
++
++config IP0X_NET1
++	hex "DM9000 eth0 hardware address"
++	default 0x20100000
++	help
++	  Base address of DM9000A Ethernet chip used for eth0
++
++config IP0X_NET2
++	hex "DM9000 eth1 hardware address"
++	default 0x20200000
++	help
++	  Base address of DM9000A Ethernet chip used for eth1
++
++config IP0X_USB
++	hex "ISP1362 address"
++	default 0x20300000
++	help
++	  Base address of ISP1362 USB controller
++
++
+ config BOOT_LOAD
+ 	hex "Kernel load address for booting"
+ 	default "0x1000"
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2007-11-04 05:22:49.000000000 +1030
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2008-03-23 06:11:01.000000000 +1030
+@@ -26,6 +26,12 @@
+ 	help
+ 	  HV Sistemas H8606 board support.
+ 
++config BFIN532_IP0X
++	bool "IP04/IP08 IP-PBX"
++	depends on (BF532 || BF533)
++	help
++	  Core support for IP04/IP04 open hardware IP-PBX.
++
+ config GENERIC_BF533_BOARD
+ 	bool "Generic"
+ 	help
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2007-05-17 20:27:29.000000000 +0930
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/include/asm-blackfin/mach-bf533/mem_init.h	2008-03-22 13:44:14.000000000 +1030
+@@ -29,7 +29,15 @@
+  * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  */
+ 
+-#if (CONFIG_MEM_MT48LC16M16A2TG_75 || CONFIG_MEM_MT48LC64M4A2FB_7E || CONFIG_MEM_GENERIC_BOARD)
++#if (   CONFIG_MEM_MT48LC16M16A2TG_75 ||
++	CONFIG_MEM_MT48LC16M16A2TG_7E ||
++	CONFIG_MEM_MT48LC8M16A2TG_75 ||
++	CONFIG_MEM_MT48LC8M16A2TG_7E ||
++	CONFIG_MEM_MT48LC32M16A2TG_75 ||
++	CONFIG_MEM_MT48LC32M16A2TG_7E ||
++	CONFIG_MEM_MT48LC64M4A2FB_7E ||
++	CONFIG_MEM_GENERIC_BOARD)
++
+ #if (CONFIG_SCLK_HZ > 119402985)
+ #define SDRAM_tRP       TRP_2
+ #define SDRAM_tRP_num   2
+@@ -118,6 +126,13 @@
+ #define SDRAM_CL    CL_3
+ #endif
+ 
++#if (CONFIG_MEM_MT48LC32M16A2TG_75)
++  /*SDRAM INFORMATION: */
++#define SDRAM_Tref  64		/* Refresh period in milliseconds   */
++#define SDRAM_NRA   8192	/* Number of row addresses in SDRAM */
++#define SDRAM_CL    CL_3
++#endif
++
+ #if (CONFIG_MEM_GENERIC_BOARD)
+   /*SDRAM INFORMATION: Modify this for your board */
+ #define SDRAM_Tref  64		/* Refresh period in milliseconds   */
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2007-11-04 05:22:49.000000000 +1030
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf533/boards/Makefile	2008-03-23 05:48:03.000000000 +1030
+@@ -4,6 +4,7 @@
+ 
+ obj-$(CONFIG_GENERIC_BF533_BOARD)      += generic_board.o
+ obj-$(CONFIG_BFIN533_STAMP)            += stamp.o
++obj-$(CONFIG_BFIN532_IP0X)             += ip0x.o
+ obj-$(CONFIG_BFIN533_EZKIT)            += ezkit.o
+ obj-$(CONFIG_BFIN533_BLUETECHNIX_CM)   += cm_bf533.o
+ obj-$(CONFIG_H8606_HVSISTEMAS)         += H8606.o
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-01-16 17:52:34.000000000 +1030
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2008-03-22 13:44:14.000000000 +1030
+@@ -56,21 +56,13 @@
+ 	{
+ 		.name = "linux kernel",
+ 		.offset = 0,
+-		.size = 4 *1024*1024,
++		.size = 0x800000,
+ 	},
+-#ifdef CONFIG_PNAV10 /* 1G x 8 NAND Flash */
+ 	{
+ 		.name = "file system",
+-		.offset = 4 *1024*1024,
+-		.size = (1024-4) *1024*1024,
++		.offset = 0x800000,
++		.size = (CONFIG_BFIN_NAND_SIZE-0x800000),
+ 	}
+-#else
+-	{
+-		.name = "file system",
+-		.offset = 4 *1024*1024,
+-		.size = (128-4) *1024*1024,
+-	}
+-#endif
+ };
+ 
+ /*
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/drivers/mtd/nand/Kconfig	2007-11-04 06:09:40.000000000 +1030
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/drivers/mtd/nand/Kconfig	2008-03-22 13:44:14.000000000 +1030
+@@ -47,10 +47,20 @@
+ config BFIN_NAND_BASE
+ 	hex "NAND Flash Base Address"
+ 	depends on MTD_NAND_BFIN
+-	default 0x20212000
++	default 0x20000000
+ 	help
+ 	  NAND Flash Base Address
+ 
++config BFIN_NAND_SIZE
++	hex "NAND Flash Size"
++	depends on MTD_NAND_BFIN
++	default 0x10000000
++	help
++	  NAND Flash size, for example 0x10000000 for 256Mbyte, or
++          0x02000000 for 32MByte.  The NAND will be divided into
++	  two partitions.  The first partition is 8M (kernel), the 
++	  second partition the remaining space (e.g. yaffs).
++
+ config BFIN_NAND_CLE
+ 	int "NAND Flash Command Latch Enable (CLE) Address strobe A[x]"
+ 	depends on MTD_NAND_BFIN
+@@ -73,7 +83,7 @@
+ 	range 0 15 if (BF533 || BF532 || BF531)
+ 	range 0 47 if (BF534 || BF536 || BF537)
+ 	range 0 47 if BF561
+-	default 3
++	default 10
+ 	help
+ 	  NAND Flash Ready Strobe PF[x]
+ 
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/drivers/net/dm9000.c	2007-10-23 03:13:17.000000000 +0930
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/drivers/net/dm9000.c	2008-03-22 13:44:14.000000000 +1030
+@@ -392,6 +392,32 @@
+ 	}
+ }
+ 
++static inline unsigned char str2hexnum(unsigned char c)
++{
++        if(c >= '0' && c <= '9')
++                return c - '0';
++        if(c >= 'a' && c <= 'f')
++                return c - 'a' + 10;
++        if(c >= 'A' && c <= 'F')
++                return c - 'A' + 10;
++        return 0; /* foo */
++}
++
++static inline void str2eaddr(unsigned char *ea, unsigned char *str)
++{
++        int i;
++
++        for(i = 0; i < 6; i++) {
++                unsigned char num;
++
++                if((*str == '.') || (*str == ':'))
++                        str++;
++                num = str2hexnum(*str++) << 4;
++                num |= (str2hexnum(*str++));
++                ea[i] = num;
++        }
++}
++
+ #define res_size(_r) (((_r)->end - (_r)->start) + 1)
+ 
+ /*
+@@ -408,6 +434,9 @@
+ 	int iosize;
+ 	int i;
+ 	u32 id_val;
++        char *pmac;
++        char ethaddr[6];
++        char s[30];
+ 
+ 	/* Init network device */
+ 	ndev = alloc_etherdev(sizeof (struct board_info));
+@@ -585,6 +614,18 @@
+ 	for (i = 0; i < 6; i++)
+ 		ndev->dev_addr[i] = db->srom[i];
+ 
++        /* Check the command line argument */
++        if (pdev-> id)
++                sprintf (s, "ethaddr%i", pdev-> id);
++        else
++                strcpy (s, "ethaddr");
++        if (((pmac = strstr(saved_command_line, s)) != NULL) &&
++        ((pmac = strstr(pmac, "=")) != NULL)) {
++
++                str2eaddr(ethaddr, pmac + 1);
++                memcpy(ndev->dev_addr, ethaddr, 6);
++        }
++
+ 	if (!is_valid_ether_addr(ndev->dev_addr)) {
+ 		/* try reading from mac */
+ 
+--- uClinux-dist-2008R1-RC8-orig/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-11 13:37:19.000000000 +1030
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/drivers/serial/bfin_5xx.c	2008-03-22 13:44:14.000000000 +1030
+@@ -1021,7 +1021,7 @@
+ {
+ 	struct bfin_serial_port *uart;
+ # ifdef CONFIG_SERIAL_BFIN_CONSOLE
+-	int baud = 57600;
++	int baud = 115200;
+ 	int bits = 8;
+ 	int parity = 'n';
+ #  ifdef CONFIG_SERIAL_BFIN_CTSRTS

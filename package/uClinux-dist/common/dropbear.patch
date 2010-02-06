@@ -1,0 +1,140 @@
+--- uClinux-dist/user/dropbear/dropbear-0.52/config.h.in	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/dropbear-0.52/config_.h.in	2009-07-14 19:12:02.000000000 +0300
+@@ -22,7 +22,7 @@
+ #undef CONF_WTMP_FILE
+ 
+ /* Disable use of lastlog() */
+-#undef DISABLE_LASTLOG
++#define DISABLE_LASTLOG=y
+ 
+ /* Use PAM */
+ #undef DISABLE_PAM
+--- uClinux-dist/user/dropbear/dropbear-0.52/Makefile.in	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/dropbear-0.52/Makefile_.in	2009-07-14 19:13:14.000000000 +0300
+@@ -10,7 +10,7 @@
+ # Hopefully that seems intuitive.
+ 
+ ifndef PROGRAMS
+-	PROGRAMS=dropbear dbclient dropbearkey dropbearconvert
++	PROGRAMS=dropbear dbclient dropbearkey dropbearconvert ssh scp
+ endif
+ 
+ LTC=libtomcrypt/libtomcrypt.a
+--- uClinux-dist/user/dropbear/dropbear-0.52/svr-main.c	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/dropbear-0.52/svr-main_.c	2009-07-14 19:15:53.000000000 +0300
+@@ -269,7 +269,13 @@
+ #ifdef DEBUG_NOFORK
+ 			fork_ret = 0;
+ #else
+-			fork_ret = fork();
++
++#ifdef __uClinux__
++                        fork_ret = vfork();
++#else
++                        fork_ret = fork();
++#endif
++
+ #endif
+ 			if (fork_ret < 0) {
+ 				dropbear_log(LOG_WARNING, "error forking: %s", strerror(errno));
+--- uClinux-dist/user/dropbear/dropbear-0.52/compat.c	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/dropbear-0.52/compat_.c	2009-07-14 19:17:02.000000000 +0300
+@@ -162,7 +162,12 @@
+ 
+ 	int fd;
+ 
+-	switch (fork()) {
++
++#ifdef __uClinux__
++       switch (vfork()) {
++#else
++        switch (fork()) {
++#endif
+ 		case -1:
+ 			return (-1);
+ 		case 0:
+--- uClinux-dist/user/dropbear/dropbear-0.52/cli-authpasswd.c	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/dropbear-0.52/cli-authpasswd_.c	2009-07-14 19:18:14.000000000 +0300
+@@ -66,7 +66,11 @@
+ 		return NULL;
+ 	}
+ 
+-	pid = fork();
++#ifdef __uClinux__
++       pid = vfork();
++#else
++        pid = fork();
++#endif
+ 
+ 	if (pid < 0) {
+ 		TRACE(("fork error"))
+--- uClinux-dist/user/dropbear/dropbear-0.52/options.h	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/dropbear-0.52/options_.h	2009-07-14 19:19:38.000000000 +0300
+@@ -133,7 +133,7 @@
+ 
+ /* Whether to print the message of the day (MOTD). This doesn't add much code
+  * size */
+-#define DO_MOTD
++//#define DO_MOTD
+ 
+ /* The MOTD file path */
+ #ifndef MOTD_FILENAME
+--- uClinux-dist/user/login/passwd.c	2007-05-28 08:06:07.000000000 +0300
++++ uClinux-dist/user/login/passwd_.c	2009-07-14 19:31:54.000000000 +0300
+@@ -33,7 +33,7 @@
+ char *version = "v1.0.3";
+ 
+ #if defined(CONFIG_USER_FLATFSD_FLATFSD)
+-#define WORK_DIR	"/etc/config/"
++#define WORK_DIR	"/etc/"
+ #else
+ #define WORK_DIR	"/var/"
+ #endif
+@@ -81,8 +81,8 @@
+ 	int foundit = 0;
+ 	int isroot;
+ 
+-	unlink("/etc/config/npasswd");
+-	fto = fopen("/etc/config/npasswd", "w");
++	unlink("/persistent/etc/npasswd");
++	fto = fopen("/persistent/etc/npasswd", "w");
+ 	if (fto) {
+ 		for(setpwent(); (pwp = getpwent()) != NULL;) {
+ 			if (strcmp(pwp->pw_name, user) == 0) {
+@@ -103,7 +103,7 @@
+ 			putpwent(&pws, fto);
+ 		}
+ 		fclose(fto);
+-		rename("/etc/config/npasswd", "/etc/config/passwd");
++		rename("/persistent/etc/npasswd", "/persistent/etc/passwd");
+ 	}
+ }
+ 
+@@ -120,7 +120,7 @@
+ 			if (-1 == set_password("root", password1))
+ 				printf("Unable to write password file\n");
+ #ifdef CONFIG_USER_OLD_PASSWORDS
+-			else if (-1 == writeConfig("/etc/config/config", "passwd",
++			else if (-1 == writeConfig("/persistent/etc/config", "passwd",
+ 						crypt_old(password1, crypt_make_salt())))
+ 				printf("Unable to write legacy password\n");
+ #endif
+--- uClinux-dist/user/dropbear/Makefile	2008-11-12 19:14:26.000000000 +0200
++++ uClinux-dist/user/dropbear/Makefile_	2009-07-14 19:27:01.000000000 +0300
+@@ -3,7 +3,7 @@
+ FLTFLAGS = -s 0x4000
+ 
+ export MULTI = 1
+-export PROGRAMS = dropbear dbclient dropbearkey dropbearconvert scp
++export PROGRAMS = dropbear dropbearkey dropbearconvert dbclient ssh scp
+ 
+ AUTOTOOLS_BUILD_HOST = true
+ 
+@@ -19,6 +19,7 @@
+ 	$(ROMFSINST) -d build-$(VER)/dropbearmulti /usr/bin/dropbear
+ 	$(ROMFSINST) -s dropbear /usr/bin/dropbearkey
+ 	$(ROMFSINST) -s dropbear /usr/bin/dbclient
++	$(ROMFSINST) -s dropbear /usr/bin/ssh
+ 	$(ROMFSINST) -s dropbear /usr/bin/dropbearconvert
+ 	$(ROMFSINST) -s dropbear /usr/bin/scp
+ 	$(ROMFSINST) -a "ssh     stream tcp nowait root /usr/bin/dropbear -i 2 > /dev/null" /etc/inetd.conf

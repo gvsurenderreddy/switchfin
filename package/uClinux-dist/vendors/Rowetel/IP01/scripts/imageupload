@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Script for loading binary images to compact flash
+RESULTFILENAME=/var/lib/asterisk/static-http/flashresult
+
+if [ "$1" = "" ]; then
+        exit 1
+fi
+
+# Get the image from the source
+if [ "$1" = "tftp" ]; then
+    $@
+        if [ "$?" != "0" ]; then 
+                echo "Downloading firmware via TFTP failed!"
+                rm -f ${SAVEDFILENAME}
+                echo "FAIL: ${FILENAME} tftp transfer failed" > ${RESULTFILENAME}
+                exit 1
+        fi
+else
+        if [ "$1" = "file" ]; then
+            $@
+        else
+            $@
+                if [ "$?" != "0" ]; then 
+                        echo "Downloading firmware via wget failed!"
+                        echo "FAIL: ${FILENAME} wget download failed." > ${RESULTFILENAME}
+                        rm -f ${SAVEDFILENAME}
+                        exit 1
+                fi
+        fi
+fi
+
+echo "PASSED"
+echo "PASS: image successfully loaded" > ${RESULTFILENAME}

@@ -1,0 +1,39 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2008 Astfin <mark@astfin.org>
+# Primary Authors: mark@astfin.org, pawel@astfin.org
+# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+#########################################################################
+
+menu "Package Selection for the target"
+
+comment "The default minimal system"
+source "package/uClinux-dist/Config.in"
+source "package/uBoot/Config.in"
+
+
+comment "Zaptel/Hardware settings"
+source "package/zaptel/Config.in"
+source "package/lec/Config.in"
+source "package/oslec/Config.in"
+
+comment "Applications"
+source "package/asterisk/Config.in"
+source "package/tftpd/Config.in"
+source "package/perl/Config.in"
+source "package/mISDN/Config.in"
+source "package/mISDNuser/Config.in"
+source "package/lighttpd/Config.in"
+source "package/ssmtp/Config.in"
+source "package/n2n/Config.in"
+source "package/rsync/Config.in"
+source "package/cgic/Config.in"
+endmenu
+

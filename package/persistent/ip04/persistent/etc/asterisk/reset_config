@@ -1,0 +1,2 @@
+#!/bin/hush
+rm -rf /etc/asterisk/.unpacked

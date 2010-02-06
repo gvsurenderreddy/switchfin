@@ -1,0 +1,19 @@
+#!/bin/sh
+SOUNDS_CORE_VERSION=1.4.5
+SOUNDS_EXTRA_VERSION=1.4.4
+SOUNDS_LANGUAGE=en
+echo "Downloading and unpacking sounds"
+cd /persistent/sounds || exit 1
+mkdir -p voicemail
+mkdir -p meetme
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
+mkdir -p moh
+cd moh
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-freeplay-alaw.tar.gz -O - | gzip -dc | tar xvf -
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-freeplay-ulaw.tar.gz -O - | gzip -dc | tar xvf -
+echo "Restarting now...."
+reboot
+

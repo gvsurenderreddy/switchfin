@@ -1,0 +1,78 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2008 Astfin <mark@astfin.org>
+# Primary Authors: mark@astfin.org, pawel@astfin.org
+# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+#########################################################################
+
+config SF_PACKAGE_ASTERISK
+	bool "Asterisk"
+	default y
+	help
+		Open source PBX
+
+config SF_PACKAGE_ASTERISK_VERBOSE
+	bool "Asterisk custom setting"
+	default n
+	depends SF_PACKAGE_ASTERISK
+	help
+		Custom setting for Asterisk menuconfig
+
+config SF_SPANDSP_CALLERID
+        bool "SpanDSP based CallerID"
+        default y
+        depends SF_PACKAGE_ASTERISK
+        help    
+                SpanDSP based CallerID decoding, experimental
+
+config SF_PACKAGE_ASTERISK-H323
+        bool "h.323 support for Asterisk"
+        default n
+        depends SF_PACKAGE_ASTERISK
+        help
+                h.323 support for Asterisk, experimental
+
+choice
+        prompt "Asterisk GUI"
+        depends on (SF_PACKAGE_ASTERISK)
+        default SF_PACKAGE_ASTERISKGUI if (SF_IP04 || SF_PR1_APPLIANCE || SF_BR4_APPLIANCE || SF_FX08)
+
+config SF_PACKAGE_ASTERISKGUI
+        bool "Asterisk GUI ver. 2"
+        depends on (SF_PACKAGE_ASTERISK)
+        help
+          Digium's Asterisk GUI ver. 2.
+
+
+config SF_PACKAGE_NOGUI
+        bool "Asterisk without GUI"
+        depends on (SF_PACKAGE_ASTERISK)
+        help
+          Asterisk without web based GUI.
+endchoice
+
+config SF_PACKAGE_ASTERISK_G729
+        bool "g.729 codec EVALUATION ONLY, READ HELP!!!!"
+        default n
+        depends SF_PACKAGE_ASTERISK && !SF_IP01
+        help    
+                g.729 codec for testing/evaluation purposes only.
+                You need to pay royalties to patent holders if
+                you want to use it for commercial purposes.
+                Please contact SIPRO (www.sipro.com) to obtain applicable
+                licenses.
+
+                Astfin is not responsible nor shall it be held liable
+                for licensing and/or patent infringement,
+                including but not limited to indirect infingment,
+                contributory infringement and induced infringement.
+
+		Please note that in addition you will need to compile g729 library (libgfdots).
+	

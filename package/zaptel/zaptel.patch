@@ -1,0 +1,39 @@
+--- Makefile	2008-05-19 10:29:22.000000000 -0400
++++ Makefile	2008-05-19 10:32:19.000000000 -0400
+@@ -114,8 +114,8 @@
+ endif
+ #SUBDIRS_UTILS	+= ppp
+ 
+-TOPDIR_MODULES:=pciradio tor2 torisa wcfxo wct1xxp wctdm wcte11xp wcusb zaptel ztd-eth ztd-loc ztdummy ztdynamic zttranscode
+-SUBDIR_MODULES:=wct4xxp wctc4xxp xpp wctdm24xxp wcte12xp
++TOPDIR_MODULES:=zaptel bfsi wcfxs sport_interface wpr1 ztdummy ztd-eth ztd-loc ztdynamic
++SUBDIR_MODULES:=
+ TOPDIR_MODULES+=$(MODULES_EXTRA)
+ SUBDIR_MODULES+=$(SUBDIRS_EXTRA)
+ BUILD_TOPDIR_MODULES:=$(filter-out $(MENUSELECT_MODULES),$(TOPDIR_MODULES))
+@@ -157,7 +157,7 @@
+ CFLAGS_PPC:=-fsigned-char
+ endif
+ ifneq (,$(findstring x86_64,$(UNAME_M)))
+-CFLAGS_x86_64:=-m64
++#CFLAGS_x86_64:=-m64
+ endif
+ CFLAGS+=$(CFLAGS_PPC) $(CFLAGS_x86_64)
+ KFLAGS=-I$(KINCLUDES) -O6
+
+--- ztscan.c	2009-07-29 20:52:52.000000000 +0300
++++ ztscan.c	2009-07-29 20:53:09.000000000 +0300
+@@ -132,8 +132,11 @@
+ 		fprintf(stdout, "framing=");
+ 		if (spaninfo.lineconfig & ZT_CONFIG_ESF) fprintf(stdout, "ESF");
+ 		else if (spaninfo.lineconfig & ZT_CONFIG_D4) fprintf(stdout, "D4");
+-		else if (spaninfo.lineconfig & ZT_CONFIG_CCS) fprintf(stdout, "CCS");
+-		else if (spaninfo.lineconfig & ZT_CONFIG_CRC4) fprintf(stdout, "/CRC4");
++                else
++                if (spaninfo.lineconfig & ZT_CONFIG_CCS) {
++                        fprintf(stdout, "CCS");
++                        if (spaninfo.lineconfig & ZT_CONFIG_CRC4) fprintf(stdout, "/CRC4"); //Penev in general CRC4 can go together with CAS as well
++                }
+ 		fprintf(stdout, "\n");
+ 	} else {
+ 		/* this is an analog span */

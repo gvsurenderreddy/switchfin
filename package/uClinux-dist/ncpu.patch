@@ -1,0 +1,14 @@
+--- uClinux-dist/Makefile	2009-11-28 23:46:45.000000000 +0200
++++ uClinux-dist/Makefile	2009-11-28 23:46:57.000000000 +0200
+@@ -43,11 +43,7 @@
+ DOWNLOADDIR = $(ROOTDIR)/download
+ TFTPDIR    = /tftpboot
+ BUILD_START_STRING ?= $(shell date "+%a, %d %b %Y %T %z")
+-ifndef NON_SMP_BUILD
+-HOST_NCPU := $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* 2; else echo $$n; fi; else echo 1; fi)
+-else
+ HOST_NCPU := 1
+-endif
+ 
+ LINUX_CONFIG  = $(ROOTDIR)/$(LINUXDIR)/.config
+ CONFIG_CONFIG = $(ROOTDIR)/config/.config

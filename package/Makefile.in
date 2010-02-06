@@ -1,0 +1,113 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2008 Astfin <mark@astfin.org>
+# Primary Authors: mark@astfin.org, pawel@astfin.org
+# Update 27 July 2009, Dimitar Penev dpn@ucpbx.com
+#        uClinux 2009R1-RC2 (kernel 2.6.28.10)
+#        blackfin toolchain 2009R1-RC7
+#        Big thanks to Jeff Palmer jpalmer@gsat.us
+# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+#########################################################################
+
+MAKE1=make
+MAKE=make -j$(SF_JLEVEL)
+
+# Strip off the annoying quoting
+#ARCH:=$(strip $(subst ",, $(SF_ARCH)))
+#"
+WGET:=$(strip $(subst ",, $(SF_WGET)))
+#"
+SVN:=$(strip $(subst ",, $(SF_SVN)))
+#"
+
+TARGET_CFLAGS=$(TARGET_OPTIMIZATION) $(TARGET_DEBUGGING)
+HOSTCC:=gcc
+
+BASE_DIR:=${shell pwd}
+
+ifeq ($(strip ${shell uname -i}),x86_64)
+HOST_ARCH=64bit
+else
+HOST_ARCH=32bit
+endif
+
+TOPDIR_PREFIX:=$(strip $(subst ",, $(BR2_TOPDIR_PREFIX)))_
+TOPDIR_SUFFIX:=_$(strip $(subst ",, $(BR2_TOPDIR_SUFFIX)))
+
+ifeq ($(TOPDIR_PREFIX),_)
+TOPDIR_PREFIX:=
+endif
+
+ifeq ($(TOPDIR_SUFFIX),_)
+TOPDIR_SUFFIX:=
+endif
+
+DL_DIR=$(strip $(subst ",, $(BR2_DL_DIR)))
+
+ifeq ($(DL_DIR),)
+DL_DIR:=$(BASE_DIR)/dl
+endif
+
+ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
+TARGET_MACHINE=br4
+endif
+
+ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
+TARGET_MACHINE=pr1
+endif
+
+ifeq ($(strip $(SF_IP04)),y)
+TARGET_MACHINE=ip04
+endif
+
+ifeq ($(strip $(SF_FX08)),y)
+TARGET_MACHINE=fx08
+endif
+
+ifeq ($(strip $(SF_IP01)),y)
+TARGET_MACHINE=ip01
+endif
+
+BUILD_DIR=$(BASE_DIR)/$(TOPDIR_PREFIX)build_$(TOPDIR_SUFFIX)$(TARGET_MACHINE)
+TARGET_DIR=$(BUILD_DIR)/root
+
+UCLINUX_DIRNAME=uClinux-dist
+UCLINUX_DIR=$(BUILD_DIR)/$(UCLINUX_DIRNAME)
+
+PATCH_KERNEL=$(BASE_DIR)/config/kernel-patch.sh
+SOURCES_DIR=$(BASE_DIR)/package/sources
+
+###############################################
+# TARGET
+###############################################
+
+# Most of these aren't used in astfin
+CROSS_COMPILE=bfin-linux-uclibc
+TARGET_CROSS=$(BASE_DIR)/toolchain/opt/uClinux/$(CROSS_COMPILE)/bin/bfin-linux-uclibc-
+TARGET_CC=$(TARGET_CROSS)gcc
+TARGET_CXX=$(TARGET_CROSS)g++
+TARGET_RANLIB=$(TARGET_CROSS)ranlib
+TARGET_AR=$(TARGET_CROSS)ar
+TARGET_STRIP=$(TARGET_CROSS)strip
+
+INSTALL=/usr/bin/install
+
+##############################################
+# IMAGE
+##############################################
+IMAGE_DIR:=$(BUILD_DIR)/$(TOPDIR_PREFIX)image_$(TOPDIR_SUFFIX)$(TARGET_MACHINE)
+
+# We hard code astfin staging to be the same as uClinux-dist staging.  This
+# makes finding header and library files easier, for example busybox searches
+# this path already.
+
+STAGING_DIR:=$(UCLINUX_DIR)/staging
+STAGING_INC=$(STAGING_DIR)/usr/include
+STAGING_LIB=$(STAGING_DIR)/usr/lib

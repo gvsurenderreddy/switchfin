@@ -1,0 +1,10 @@
+diff -Naur uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards-org/Makefile uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile
+--- uClinux-dist.R1.1-RC3/linux-2.6.x/arch/blackfin/mach-bf537/boards-org/Makefile	2007-11-09 21:21:44.000000000 -0500
++++ uClinux-dist.R1.1-RC3/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2007-11-09 21:23:26.000000000 -0500
+@@ -4,5 +4,6 @@
+ 
+ obj-$(CONFIG_GENERIC_BOARD)            += generic_board.o
+ obj-$(CONFIG_BFIN537_STAMP)            += stamp.o led.o
++obj-$(CONFIG_PR1_APPLIANCE)            += pr1_appliance.o led.o
+ obj-$(CONFIG_BFIN537_BLUETECHNIX_CM)   += cm_bf537.o
+ obj-$(CONFIG_PNAV10)                   += pnav10.o

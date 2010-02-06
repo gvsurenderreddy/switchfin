@@ -1,0 +1,25 @@
+#!/bin/sh
+
+case $1 in
+        start) sh /persistent/etc/network.sh start;;
+			#   rm -f /var/run/dhcpcd*;
+            #   dhcpcd & sleep 5;;
+        stop) sh /persistent/etc/network.sh stop;;
+			#  killall -9 dhcpcd;
+            #  rm -f /var/run/dhcpcd*;;
+	restart) sh /persistent/etc/network.sh stop;
+		sh /persistent/etc/network.sh start;;
+        enable) rm -f /persistent/etc/rc.d/S10network;
+                ln -s /persistent/etc/init.d/network /persistent/etc/rc.d/S10network;;
+        disable) rm -f /persistent/etc/rc.d/S10network;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/network [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        restart Restart the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac

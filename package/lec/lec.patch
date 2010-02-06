@@ -1,0 +1,28 @@
+--- main_orig.c	2009-08-19 22:57:54.000000000 +0300
++++ main.c	2009-08-19 22:58:22.000000000 +0300
+@@ -506,7 +506,7 @@
+         EchoCanceller_Proc = create_proc_entry(PROCFS_NAME, S_IFREG | S_IRUGO, NULL);
+ 
+         if (EchoCanceller_Proc == NULL) {
+-                remove_proc_entry(PROCFS_NAME, &proc_root);
++                remove_proc_entry(PROCFS_NAME, NULL);
+                 printk("Error: Could not initialize /proc/%s\n", PROCFS_NAME);
+                 return -ENOMEM;
+         }
+@@ -535,7 +535,7 @@
+ //* Unloading module (# rmmod xxx)
+ void EchoCanceler_exit(void) {
+ 	/* Removing the proc entry */
+-	remove_proc_entry(PROCFS_NAME, &proc_root);
++	remove_proc_entry(PROCFS_NAME, NULL);
+ 	/* Freeing the major number */
+ 	unregister_chrdev(EchoCanceler_major, "EchoCanceler");
+ 	INFO("Removing EchoCanceler module\n");
+--- Makefile_orig	2009-08-19 22:59:40.000000000 +0300
++++ Makefile	2009-08-19 22:54:49.000000000 +0300
+@@ -1,4 +1,4 @@
+-CFLAGS=-g -Wall
++EXTRA_CFLAGS=-g -Wall
+ obj-m	:= ec_module.o
+ ec_module-objs := getopt.o main.o
+ 

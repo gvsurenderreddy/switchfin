@@ -1,0 +1,53 @@
+#!/bin/sh
+# Start up file for misdn
+MISDNCONF="/persistent/etc/misdn-init.conf"
+TMP=`grep  'te_ptmp' ${MISDNCONF}`
+if [[ "`echo ${TMP}|grep '1'`" != "" ]]
+then
+PORT1="0x2"
+else
+PORT1="0x402"
+fi
+if [ "`echo ${TMP}|grep '2'`" != "" ]
+then
+PORT2="0x2"
+else
+PORT2="0x402"
+fi
+if [ "`echo $TMP|grep '3'`" != "" ]
+then
+PORT3="0x2"
+else
+PORT3="0x402"
+fi
+if [ "`echo $TMP|grep '4'`" != "" ]
+then
+PORT4="0x2"
+else
+PORT4="0x402"
+fi
+
+case $1 in
+	start)	modprobe ztdummy;
+		modprobe bfsi_tlg debug=0x0 tdm_clkX2=0;
+		modprobe mISDN_core debug=0;
+		modprobe mISDN_l1 debug=0;
+		modprobe mISDN_l2 debug=0;
+		modprobe l3udss1 debug=0;
+		modprobe xhfc debug=0 protocol=$PORT1,$PORT2,$PORT3,$PORT4 layermask=0xf,0xf,0xf,0xf pcm=1 pcm_config=0x0D000000 spi_sel=5;;
+	stop) ;;
+	restart) ;;
+	enable) rm -f /persistent/etc/rc.d/S40misdn; 
+	        ln -s /persistent/etc/init.d/misdn /persistent/etc/rc.d/S40misdn;;
+	disable) rm -f /persistent/etc/rc.d/S40misdn;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/misdn [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        restart Restart the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac

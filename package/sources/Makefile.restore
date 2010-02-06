@@ -1,0 +1,4 @@
+CFLAGS=-g -Wall
+obj-m	:= restore.o
+
+VERSION=0.1

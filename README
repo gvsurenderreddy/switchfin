@@ -1,0 +1,104 @@
+The SwitchFin(R) Open Source PBX
+
+Copyright (C) 2010 SwitchFin dpn@switchvoice.com
+================================================================
+
+* WHAT IS SwitchFin ?
+  SwitchFin is an Open Source uClinux/Asterisk based distribution
+  runing on top of Blackfin CPUs from Analog Devices www.analog.com
+  DSP processors. The compilation result is
+  uBoot for the hardware target you have selected
+  image file you need to load in your target so you turn the hardware
+  in the useful PBX.
+
+* History
+  SwitchFin is an branch of Astfin (astfin.org) telephony uClinux/Asterisk 
+  based distribution.
+  Why this project was created? Well at the begining of 2010 me and few 
+  colegues I was working with, had become one of the major contributors 
+  for Astfin 2.1 project. The project father Mark however has shared with 
+  us that he wants Astfin to migrate a bit out of telephony area which is 
+  not exactly what we see its future. 
+  We want to work on a purely telephony oriented project and that's why
+  we have created SwitchFin. 
+  Lets wish SwitchFin to become useful peace in the global open source 
+  society.
+
+  For more information on the project itself, please visit the
+  SwitchFin home page at:
+
+  http://sourceforge.net/projects/switchfin/
+
+* SUPPORTED DEVELOPMENT OPERATING SYSTEMS
+
+  The SwitchFin is developed and tested primarily on the GNU/Linux operating
+  system, and is supported on every major GNU/Linux distribution.
+
+* GETTING STARTED
+  To be able to compile SwitchFin you can use any popular Linux distribution
+  like Fedora, Debian, Ubuntu, CentOS, etc
+
+  In order to use the compiled images you will need one of the following 
+  supported targets:
+
+	BR4 Appliance
+	PR1 Appliance
+	IP08
+	IP02
+	IP01
+	IP01p
+	FX08
+
+* NEW INSTALLATIONS
+
+  SwitchFin requires lzo and lzo-devel packages. It will download and install 
+  GNU C Compiler Collection (GCC) cross compilation toolchain
+
+So let's proceed:
+
+1) Read this README file.
+
+2) Run "make uBoot" 
+
+   this will compile u-boot and the result u-boot.ldr will be stored in 
+   {switchfin_root}/build_{target}/image_{target}/ 
+
+3) Run "make menuconfig" in the SwitchFin directory
+
+  Execute the menuconfig target so you adjust:
+  Target Architecture (one of BR4/PR1/IP0x/FX0x)
+  Kernel settings
+  Package Selection for the target (include/exclude various optional
+  pacjkages, select the amount type of the SDRAM/FLASH etc.)
+
+4) Run "make" in the SwitchFin directory
+
+  This will download and install the toolchain if reaquired,
+  will download and install all of the required components like Asterisk, 
+  mISDN etc.
+  Assuming the build completes successfully:
+
+5) Run "make image" in the SwitchFin directory
+
+  This will prepare the images to be downloaded in your hardware target.
+  The images are produced in {switchfin_root}/build_{target}/image_{target}/ 
+  and you will get there:
+  u-boot.ldr - uboot image to be loaded in the target hardware using 
+               JTAG tool
+  uImage     - target image you can load in the hardware.
+               uboot loader should be up an druning on it.
+  uImage-md5 - image with the attached 32 bytes MD5 checksum for 
+               noise protection.
+
+----
+Asterisk is a trademark belonging to Digium, inc
+
+
+----
+Remark:
+Currently SwitchFin compiles successfully for the following boards
+PR1-Appliance
+BR4-Appliance
+
+
+Dimitar Penev

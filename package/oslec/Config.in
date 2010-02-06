@@ -1,0 +1,9 @@
+config SF_PACKAGE_ZAPTEL_OSLEC
+        bool  "oslec support"
+        depends on SF_PACKAGE_ZAPTEL && !SF_PACKAGE_LEC && !SF_BR4_APPLIANCE && !SF_PR1_APPLIANCE
+	default "y"
+        ---help---
+          Say Y here if you want to have support for the OpenSource
+          Line Echo Canceller (oslec).
+
+          For more information see http://www.rowetel.com.

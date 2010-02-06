@@ -1,0 +1,25 @@
+#!/bin/sh
+# Start up file for Zaptel
+
+case $1 in
+	start) modprobe wcfxs;
+	       zapscan;
+	       ztcfg;;
+	stop) modprobe -r wcfxs;;
+	restart) modprobe -r wcfxs;
+		modprobe wcfxs;
+		ztcfg;;
+	enable) rm -f /persistent/etc/rc.d/S40zaptel; 
+	        ln -s /persistent/etc/init.d/zaptel /persistent/etc/rc.d/S40zaptel;;
+	disable) rm -f /persistent/etc/rc.d/S40zaptel;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/zaptel [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        restart Restart the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac

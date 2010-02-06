@@ -1,0 +1,130 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2008 Astfin <mark@astfin.org>
+# Primary Authors: mark@astfin.org, pawel@astfin.org
+# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+#########################################################################
+
+config SF_PACKAGE_UCLINUX_DIST
+	bool "Blackfin uClinux Dist"
+	default y
+	help
+		Disturbition of Blackfin uClinux version
+
+config SF_PACKAGE_UCLINUX_CONFIG
+        string "uClinux configuration file to use?"
+        depends SF_PACKAGE_UCLINUX_DIST
+        default "package/uClinux-dist/uClinux-dist.config"
+        help
+          Some people may wish to use their own modified uClinux configuration
+          file, and will specify their config file location with this option.
+
+          Most people will just use the default uClinux configuration file.
+
+choice  
+        prompt "CPU Clock Speed"
+        default SF_CPU_600
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+
+config SF_CPU_600
+        bool "600 MHz"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if your CPU operates at 600MHz
+
+config SF_CPU_500
+        bool "500 MHz"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if your CPU operates at 500MHz
+
+endchoice
+
+choice  
+        prompt "CPU Silicon Revisions"
+        default SF_CPU_REV_3
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+
+config SF_CPU_REV_2
+        bool "BF537/6 1.0.2"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have silicon revision 2.
+
+config SF_CPU_REV_3
+        bool "BF537/6 1.0.3"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have silicon revision 3.
+
+
+endchoice
+
+choice  
+        prompt "Amount of SDRAM"
+        default SF_SDRAM_64 if (SF_BR4_APPLIANCE)
+        default SF_SDRAM_128 if (SF_PR1_APPLIANCE)
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+
+config SF_SDRAM_128
+        bool "128MB SDRAM"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have 128MB of SDRAM.
+
+
+config SF_SDRAM_64
+        bool "64MB SDRAM"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have 64MB of SDRAM.
+
+endchoice
+
+choice  
+        prompt "SDRAM CAS Latency"
+	default SF_CAS_3
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+
+config SF_CAS_2
+        bool "CAS Latency 2 (faster)"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have SDRAM which can operate at CAS Latency 2.
+
+
+config SF_CAS_3
+        bool "CAS Latency 3 (slower)"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have SDRAM which can operate at CAS Latency 3.
+	  This is the safe choice if you are not sure what kind of SDRAM do you have.
+
+endchoice
+
+choice
+	prompt "NAND flash"
+	default SF_NAND_1GB if SF_PR1_APPLIANCE
+	default SF_NAND_256MB if SF_BR4_APPLIANCE
+	depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+
+config SF_NAND_256MB
+	bool "256MB NAND Flash"
+	depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+	help
+	  Use this option if you have 256MB NAND flash
+
+config SF_NAND_1GB
+        bool "1GB NAND Flash"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have 1GB NAND flash
+
+endchoice

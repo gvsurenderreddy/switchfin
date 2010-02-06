@@ -1,0 +1,200 @@
+#!/bin/sh
+#
+#/etc/rc
+#
+## The astfin main rc file - FX08 version
+echo "Initializing rc.."
+hostname FX08
+mount -a
+mount -t ramfs ramfs /var/log
+[ ! -d /var/tmp ] && mkdir /var/tmp
+mount -t ramfs ramfs /var/tmp
+
+[ -d /sys/kernel/debug ] && mount -t debugfs debugfs /sys/kernel/debug
+[ -d /proc/sys/fs/binfmt_misc ] && mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+[ -d /sys/kernel/security ] && mount -t securityfs securityfs /sys/kernel/security
+grep -qs nfsd /proc/filesystems && mount -t nfsd nfsd /proc/fs/nfsd
+if [ -e /bin/mdev ] ; then
+        echo /bin/mdev 2>/dev/null > /proc/sys/kernel/hotplug
+        /bin/mdev -s 2> /dev/null
+fi
+
+##### Following looks for an image to burn into FLASH before starting asterisk.
+echo "Checking for upload image to program"
+if [ -d "/persistent/imageupdate" ]; then
+        if [ -f "/persistent/imageupdate/uImage" ]; then
+                echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup 
+                flashupdate file /persistent/imageupdate/uImage
+                if [ "$?" = "0" ] ; then
+                        rm -f /persistent/imageupdate/uImage >/dev/null 2>/dev/null
+			date > /persistent/imageupdate/flashresult
+                        echo "**************************************" >> /persistent/imageupdate/flashresult
+                        echo "**************************************" >> /persistent/imageupdate/flashresult
+                        echo "SUCCESS - updating binary image success" >> /persistent/imageupdate/flashresult
+                        if [ -f "/persistent/imageupdate/.clear_persistent" ]; then
+                                rm -rf /persistent/.unpacked
+                                echo "Full factory default will be executed!" >> /persistent/imageupdate/flashresult
+                        else
+                                echo "Your configurations will be kept!!!" >> /persistent/imageupdate/flashresult
+
+                        fi
+                        echo "**************************************" >> /persistent/imageupdate/flashresult
+                        echo "**************************************" >> /persistent/imageupdate/flashresult
+                        cat /persistent/imageupdate/flashresult
+                        sleep 2 
+                        reboot
+                else
+			date > /persistent/imageupdate/flashresult
+                        echo "??????????????????????????????????????" >> /persistent/imageupdate/flashresult
+                        echo "ERROR - updating binary image uImage " >> /persistent/imageupdate/flashresult
+                        echo "??????????????????????????????????????" >> /persistent/imageupdate/flashresult
+                        cat /persistent/imageupdate/flashresult
+                        sleep 5
+                fi
+        fi
+else
+        mkdir -p /persistent/imageupdate
+fi
+### Guarantee that image file does not exist
+rm -f /persistent/imageupdate/uImage >/dev/null 2>/dev/null
+rm -f /persistent/imageupdate/.clear_persistent >/dev/null 2>/dev/null
+
+
+# start checking restore
+modprobe restore
+if [ -f /proc/rs ]
+then
+    if [ -n "`grep "s1" /proc/rs`" ]
+    then
+        rm -rf /persistent/.unpacked
+        echo 1 > /proc/rsc
+    fi
+fi
+
+if [ -f /persistent/.unpacked ]; then
+echo "We already have unpacked default configuration..."
+else
+echo "Can not find persistent configuration files"
+echo "We are going to unpack default configuration!!!"
+gzip -dc defaults.tgz | ( tar xvf - )
+touch /persistent/.unpacked
+fi
+rm /defaults.tgz
+rm -rf /etc/ppp
+
+#We will link all files/folders fro /etc/persistnet back to /etc
+for filename in `ls /persistent/etc/`; do
+        ln -sf /persistent/etc/$filename /etc/
+done
+
+# Mount Asterisk agi-bin as persistent
+ln -sf /persistent/var/lib/asterisk/agi-bin /var/lib/asterisk/
+
+if [ -d /etc/scripts ]; then
+ln -sf /etc/scripts /etc/asterisk/
+fi
+
+[ ! -d /persistent/log/asterisk ] && mkdir -p /persistent/log/asterisk
+rm -rf /var/log/asterisk
+ln -sf /persistent/log/asterisk /var/log/
+[ ! -d /var/log/asterisk/cdr-csv ] && mkdir /var/log/asterisk/cdr-csv
+[ ! -d /var/log/asterisk/cdr-custom ] && mkdir /var/log/asterisk/cdr-custom
+[ ! -d /var/run ] && mkdir /var/run
+[ ! -d /var/lock ] && mkdir /var/lock
+[ ! -d /persistent/storage ] && mkdir /persistent/storage
+ln -sf /persistent/storage /
+
+# write the log files to sd/mmc card
+modprobe spi_mmc
+sleep 2
+[ ! -d /mnt/sd ] && mkdir /mnt/sd
+mount -t vfat /dev/mmc /mnt/sd
+sleep 2
+if [ -f /proc/spi_mmc ]
+then
+    if [ -z "`grep 'No MMC/SD' /proc/spi_mmc`" ]
+    then
+        echo "found a mmc/sd card"
+        echo 1 > /etc/mmc
+	if [ ! -f /mnt/sd/.format ]
+	then
+	    echo "found one new mmc/sd card, try to format it for first use!!!"
+	    umount /mnt/sd
+	    /bin/mkdosfs /dev/mmc
+	    mount -t vfat /dev/mmc /mnt/sd
+	    touch /mnt/sd/.format
+	else
+	   echo "the card has been already formatted"
+	fi
+        [ ! -d /mnt/sd/asterisk ] && mkdir /mnt/sd/asterisk
+        echo "[directories]" > /etc/asterisk/asterisk.conf
+        echo "astlogdir => /mnt/sd/asterisk" >> /etc/asterisk/asterisk.conf
+        [ ! -d /mnt/sd/asterisk/cdr-csv ] && mkdir /mnt/sd/asterisk/cdr-csv
+        [ ! -d /mnt/sd/asterisk/cdr-custom ] && mkdir /mnt/sd/asterisk/cdr-custom
+        ln -sf /mnt/sd/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+    else
+        echo "no sd/mmc card found"
+        echo 0 > /etc/mmc
+        echo "[directories]" > /etc/asterisk/asterisk.conf
+        echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf    
+        ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+        modprobe -r spi_mmc
+    fi
+else
+    echo "can't load spi_mmc module!!!"
+    echo 0 > /etc/mmc
+    echo "[directories]" > /etc/asterisk/asterisk.conf
+    echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf    
+    ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+    modprobe -r spi_mmc
+fi
+
+#if [ ! -d /default/etc/asterisk ]; then
+#	mkdir -p /default/etc
+#	cp -r /etc/asterisk /default/etc
+#fi
+
+ifconfig lo 127.0.0.1
+sed -i '/telnet  stream tcp nowait root/d'  /etc/inetd.conf
+inetd &
+
+# setting up localtime for asterisk timezone
+[ -d /persistent/zoneinfo ] && ln -sf /persistent/zoneinfo /usr/share/
+[ -f /persistent/zoneinfo/.setlocaltime ] && . /persistent/zoneinfo/.setlocaltime
+[ -d /persistent/gui_backups ] && ln -sf /persistent/gui_backups /var/lib/asterisk/
+
+# start up services
+for i in /etc/rc.d/S*; do
+        $i start
+done
+
+sleep 5
+
+if [ -d /persistent/sounds/digits ];then
+rm -rf /var/lib/asterisk/sounds
+ln -sf /persistent/sounds /var/lib/asterisk/
+else
+sleep 3
+if test `ping -c 1 downloads.digium.com |grep "ttl" |wc -l` -gt 0
+then
+echo "now try to get the sounds from Digium website..."
+/bin/create_sounds
+fi
+fi
+ln -sf /persistent/sounds/moh /var/lib/asterisk/
+ln -sf /persistent/sounds/meetme /var/spool/asterisk/
+ln -sf /persistent/sounds/voicemail /var/spool/asterisk/
+ln -sfn /persistent/sounds /sounds
+
+# checking asterisk running
+if [ -f /var/run/asterisk.pid ]
+then
+    echo "Asterisk running ok!"
+    if [ -f /proc/sys_led ]
+    then
+        echo 1 > /proc/sys_led
+    fi
+fi
+
+# with some strange behavior, we needs reload asterisk before use pickup call
+asterisk -rx 'module reload' >/dev/null 2>/dev/null

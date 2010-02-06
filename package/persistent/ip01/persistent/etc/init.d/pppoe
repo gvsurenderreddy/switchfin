@@ -1,0 +1,25 @@
+#!/bin/sh
+
+case $1 in
+        start) modprobe ppp_async;
+		adsl-start&;;
+        stop) adsl-stop;
+	      modprobe -r ppp_async;;
+	restart) adsl-stop;
+		modprobe -r ppp_async;
+		modprobe ppp_async;
+		adsl_start&;;
+        enable) rm -f /persistent/etc/rc.d/S12pppoe;
+                ln -s /persistent/etc/init.d/pppoe /persistent/etc/rc.d/S12pppoe;;
+        disable) rm -f /persistent/etc/rc.d/S12pppoe;;
+        *) cat <<EOF;;
+Syntax: /etc/init.d/pppoe [command]
+
+Available commands:
+        start   Start the service
+        stop    Stop the service
+        restart Restart the service
+        enable  Enable service autostart
+        disable Disable service autostart
+EOF
+esac

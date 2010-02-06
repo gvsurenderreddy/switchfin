@@ -1,0 +1,21 @@
+--- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2009-02-04 16:23:50.000000000 +0200
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig_	2009-07-14 13:06:05.000000000 +0300
+@@ -1,6 +1,6 @@
+ choice
+ 	prompt "System type"
+-	default BFIN537_STAMP
++	default PR1_APPLIANCE
+ 	help
+ 	  Select your board!
+ 
+@@ -33,4 +33,10 @@
+ 	help
+ 	  Board supply package for CSP Minotaur
+ 
++config PR1_APPLIANCE
++       bool "PR1_APPLIANCE"
++       depends on (BF537)
++       help
++         PR1_APPLIANCE board Support
++
+ endchoice

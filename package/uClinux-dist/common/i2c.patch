@@ -1,0 +1,102 @@
+--- uClinux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-01-08 10:58:03.000000000 +0200
++++ uClinux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-09-01 19:25:15.000000000 +0300
+@@ -2,6 +2,7 @@
+     pca9539.c - 16-bit I/O port with interrupt and reset
+ 
+     Copyright (C) 2005 Ben Gardner <bgardner@wabtec.com>
++    Modified for BR4-Appliance by <mark@astfin.org> & <dpn@SwitchVoice.com)
+ 
+     This program is free software; you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+@@ -14,8 +15,10 @@
+ #include <linux/i2c.h>
+ #include <linux/hwmon-sysfs.h>
+ 
+-/* Addresses to scan: none, device is not autodetected */
+-static const unsigned short normal_i2c[] = { I2C_CLIENT_END };
++/* Addresses to scan */
++static unsigned short normal_i2c[] = {0x74, I2C_CLIENT_END};
++
++struct i2c_client *self_i2c_client;
+ 
+ /* Insmod parameters */
+ I2C_CLIENT_INSMOD_1(pca9539);
+@@ -98,6 +101,9 @@
+ 		return -ENODEV;
+ 
+ 	strlcpy(info->type, "pca9539", I2C_NAME_SIZE);
++	
++	printk(KERN_ERR "In pca9539_detect\n");
++	self_i2c_client=client;
+ 
+ 	return 0;
+ }
+@@ -105,11 +111,13 @@
+ static int pca9539_probe(struct i2c_client *client,
+ 			 const struct i2c_device_id *id)
+ {
++	int ret;
+ 	/* Register sysfs hooks */
+-	return sysfs_create_group(&client->dev.kobj,
+-				  &pca9539_defattr_group);
++	ret=sysfs_create_group(&client->dev.kobj, &pca9539_defattr_group);
++	printk(KERN_ERR "In pca9539_probe => %d\n", ret);
++	if (!ret) self_i2c_client=client;
++	return(ret);
+ }
+-
+ static int pca9539_remove(struct i2c_client *client)
+ {
+ 	sysfs_remove_group(&client->dev.kobj, &pca9539_defattr_group);
+@@ -143,6 +151,51 @@
+ 	i2c_del_driver(&pca9539_driver);
+ }
+ 
++int  pca9539_set_byte(u8 val, int cmd)
++{
++  /* Validate the command buffer */
++  if ((cmd != PCA9539_OUTPUT_0) && (cmd != PCA9539_OUTPUT_1) && (cmd != PCA9539_DIRECTION_0) && (cmd != PCA9539_DIRECTION_1)){
++    printk(KERN_ERR "%s:Invalid Command %x\n,",__FUNCTION__,cmd);
++    return  -EINVAL;;
++  }
++
++  /* Check the client has been set */
++  if (self_i2c_client == NULL){
++    printk(KERN_ERR "%s:Device is not attached to smbus subsystem\n,",__FUNCTION__);
++    return -ENODEV;
++  }
++
++  i2c_smbus_write_byte_data(self_i2c_client, cmd, val);
++
++  return 0;
++}
++
++
++int  pca9539_get_byte(u8 *val, int cmd)
++{
++  /* Validate the command buffer */
++  if ((cmd != PCA9539_OUTPUT_0) && (cmd != PCA9539_OUTPUT_1) && (cmd != PCA9539_DIRECTION_0) && (cmd != PCA9539_DIRECTION_1)){
++    printk(KERN_ERR "%s:Invalid Command %x\n,",__FUNCTION__,cmd);
++    return  -EINVAL;;
++  }
++
++  /* Check the client has been set */
++  if (self_i2c_client == NULL){
++    printk(KERN_ERR "%s:Device is not attached to smbus subsystem\n,",__FUNCTION__);
++    return -ENODEV;
++  }
++
++  *val = i2c_smbus_read_byte_data(self_i2c_client, cmd);
++
++  return 0;
++}
++
++
++
++EXPORT_SYMBOL(pca9539_set_byte);
++EXPORT_SYMBOL(pca9539_get_byte);
++
++
+ MODULE_AUTHOR("Ben Gardner <bgardner@wabtec.com>");
+ MODULE_DESCRIPTION("PCA9539 driver");
+ MODULE_LICENSE("GPL");

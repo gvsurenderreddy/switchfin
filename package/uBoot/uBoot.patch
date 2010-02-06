@@ -1,0 +1,539 @@
+diff -Naur u-boot-1.1.6.orig/common/cmd_bootm.c u-boot-1.1.6/common/cmd_bootm.c
+--- u-boot-1.1.6.orig/common/cmd_bootm.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/common/cmd_bootm.c	2008-04-24 19:04:19.000000000 -0400
+@@ -90,9 +90,11 @@
+ 
+ #if (CONFIG_COMMANDS & CFG_CMD_IMLS)
+ #include <flash.h>
++#if (!CFG_NO_FLASH)
+ extern flash_info_t flash_info[]; /* info for FLASH chips */
+ static int do_imls (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
+ #endif
++#endif
+ 
+ static void print_type (image_header_t *hdr);
+ 
+@@ -1247,7 +1249,7 @@
+ 
+ #endif	/* CFG_CMD_IMI */
+ 
+-#if (CONFIG_COMMANDS & CFG_CMD_IMLS)
++#if (CONFIG_COMMANDS & CFG_CMD_IMLS & !CGF_NO_FLASH)
+ /*-----------------------------------------------------------------------
+  * List all images found in flash.
+  */
+diff -Naur u-boot-1.1.6.orig/common/cmd_doc.c u-boot-1.1.6/common/cmd_doc.c
+--- u-boot-1.1.6.orig/common/cmd_doc.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/common/cmd_doc.c	2008-04-24 19:04:19.000000000 -0400
+@@ -12,6 +12,7 @@
+ #include <malloc.h>
+ #include <asm/io.h>
+ 
++
+ #ifdef CONFIG_SHOW_BOOT_PROGRESS
+ # include <status_led.h>
+ # define SHOW_BOOT_PROGRESS(arg)	show_boot_progress(arg)
+@@ -592,7 +593,7 @@
+ 	if (len <= 0)
+ 		return;
+ 
+-	for (i = 0; i < len; i++)
++	for (i = 0; i < len; i++) 
+ 		WriteDOC_(buf[i], docptr, doc->ioreg + i);
+ 
+ 	if (DoC_is_Millennium(doc)) {
+diff -Naur u-boot-1.1.6.orig/common/cmd_flash.c u-boot-1.1.6/common/cmd_flash.c
+--- u-boot-1.1.6.orig/common/cmd_flash.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/common/cmd_flash.c	2008-04-24 19:04:19.000000000 -0400
+@@ -43,6 +43,7 @@
+ 		u8 *part_num, struct part_info **part);
+ #endif
+ 
++#if (!CFG_NO_FLASH)
+ extern flash_info_t flash_info[];	/* info for FLASH chips */
+ 
+ /*
+@@ -733,3 +734,4 @@
+ #undef	TMP_PROT_OFF
+ 
+ #endif	/* CFG_CMD_FLASH */
++#endif
+diff -Naur u-boot-1.1.6.orig/common/cmd_jffs2.c u-boot-1.1.6/common/cmd_jffs2.c
+--- u-boot-1.1.6.orig/common/cmd_jffs2.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/common/cmd_jffs2.c	2008-04-24 19:04:19.000000000 -0400
+@@ -719,7 +719,7 @@
+ static int device_validate(u8 type, u8 num, u32 *size)
+ {
+ 	if (type == MTD_DEV_TYPE_NOR) {
+-#if (CONFIG_COMMANDS & CFG_CMD_FLASH)
++#if (CONFIG_COMMANDS & CFG_CMD_FLASH & !CFG_NO_FLASH)
+ 		if (num < CFG_MAX_FLASH_BANKS) {
+ 			extern flash_info_t flash_info[];
+ 			*size = flash_info[num].size;
+@@ -1938,6 +1938,18 @@
+ 	return 1;
+ }
+ 
++#ifdef CFG_NO_FLASH
++/*
++* Need a stub here to avoid detection of cramfs filesystems. (Cramfs fail to
++* compile when no
++* flash support is compiled in
++*/
++int cramfs_check (struct part_info *info)
++{ 
++    return 0; 
++}
++#endif /* CFG_NO_FLASH */
++
+ /**
+  * Routine implementing u-boot fsinfo command. This routine prints out
+  * miscellaneous filesystem informations/statistics.
+diff -Naur u-boot-1.1.6.orig/examples/Makefile u-boot-1.1.6/examples/Makefile
+--- u-boot-1.1.6.orig/examples/Makefile	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/examples/Makefile	2008-04-24 19:04:19.000000000 -0400
+@@ -88,12 +88,16 @@
+ ifeq ($(ARCH),blackfin)
+ ifneq ($(BOARD),bf537-stamp)
+ ifneq ($(BOARD),bf537-pnav)
++ifneq ($(BOARD),br4)
++ifneq ($(BOARD),pr1)
+ ELF	+= smc91111_eeprom
+ SREC	+= smc91111_eeprom.srec
+ BIN 	+= smc91111_eeprom.bin
+ endif
+ endif
+ endif
++endif
++endif
+ 
+ # The following example is pretty 8xx specific...
+ ifeq ($(CPU),mpc8xx)
+diff -Naur u-boot-1.1.6.orig/fs/cramfs/cramfs.c u-boot-1.1.6/fs/cramfs/cramfs.c
+--- u-boot-1.1.6.orig/fs/cramfs/cramfs.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/fs/cramfs/cramfs.c	2008-04-24 19:04:19.000000000 -0400
+@@ -28,6 +28,10 @@
+ #include <malloc.h>
+ 
+ #if (CONFIG_COMMANDS & CFG_CMD_JFFS2)
++/* Required as the flash_info_t structure is not defined (rightly) if
++* CFG_NO_FLASH is defined,
++* And this file does not compile without that structure */
++#ifndef CFG_NO_FLASH 
+ 
+ #include <asm/byteorder.h>
+ #include <linux/stat.h>
+@@ -343,5 +347,5 @@
+ 	}
+ 	return 1;
+ }
+-
++#endif /* CFG_NO_FLASH */
+ #endif /* CFG_FS_CRAMFS */
+diff -Naur u-boot-1.1.6.orig/fs/jffs2/jffs2_1pass.c u-boot-1.1.6/fs/jffs2/jffs2_1pass.c
+--- u-boot-1.1.6.orig/fs/jffs2/jffs2_1pass.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/fs/jffs2/jffs2_1pass.c	2008-04-24 19:04:19.000000000 -0400
+@@ -277,7 +277,7 @@
+ #endif /* #if defined(CONFIG_JFFS2_NAND) && (CONFIG_COMMANDS & CFG_CMD_NAND) */
+ 
+ 
+-#if (CONFIG_COMMANDS & CFG_CMD_FLASH)
++#if (CONFIG_COMMANDS & CFG_CMD_FLASH & !CMD_NO_FLASH)
+ /*
+  * Support for jffs2 on top of NOR-flash
+  *
+@@ -311,7 +311,7 @@
+ {
+ 	struct mtdids *id = current_part->dev->id;
+ 
+-#if (CONFIG_COMMANDS & CFG_CMD_FLASH)
++#if (CONFIG_COMMANDS & CFG_CMD_FLASH &!CFG_NO_FLASH)
+ 	if (id->type == MTD_DEV_TYPE_NOR)
+ 		return get_fl_mem_nor(off);
+ #endif
+@@ -329,7 +329,7 @@
+ {
+ 	struct mtdids *id = current_part->dev->id;
+ 
+-#if (CONFIG_COMMANDS & CFG_CMD_FLASH)
++#if (CONFIG_COMMANDS & CFG_CMD_FLASH & !CFG_NO_FLASH)
+ 	if (id->type == MTD_DEV_TYPE_NOR)
+ 		return get_node_mem_nor(off);
+ #endif
+diff -Naur u-boot-1.1.6.orig/include/asm-blackfin/io.h u-boot-1.1.6/include/asm-blackfin/io.h
+--- u-boot-1.1.6.orig/include/asm-blackfin/io.h	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/include/asm-blackfin/io.h	2008-04-24 19:04:19.000000000 -0400
+@@ -46,6 +46,7 @@
+  * memory location directly.
+  */
+ 
++#define eieio()
+ 
+ #define readb(addr)		({ unsigned char __v = (*(volatile unsigned char *) (addr));asm("ssync;"); __v; })
+ #define readw(addr)		({ unsigned short __v = (*(volatile unsigned short *) (addr)); asm("ssync;");__v; })
+diff -Naur u-boot-1.1.6.orig/include/asm-blackfin/mem_init.h u-boot-1.1.6/include/asm-blackfin/mem_init.h
+--- u-boot-1.1.6.orig/include/asm-blackfin/mem_init.h	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/include/asm-blackfin/mem_init.h	2008-04-24 19:04:19.000000000 -0400
+@@ -22,11 +22,13 @@
+  * MA 02111-1307 USA
+  */
+ 
+-#if (CONFIG_MEM_MT48LC16M16A2TG_75 || \
++#if 	(CONFIG_MEM_MT48LC16M16A2TG_75 || \
+ 	CONFIG_MEM_MT48LC64M4A2FB_7E || \
+ 	CONFIG_MEM_MT48LC16M8A2TG_75 || \
+ 	CONFIG_MEM_MT48LC8M16A2TG_7E || \
+-  CONFIG_MEM_MT48LC8M32B2B5_7  || \
++  	CONFIG_MEM_MT48LC8M32B2B5_7  || \
++	CONFIG_MEM_MT48LC64M8A2P_75  || \
++	CONFIG_MEM_MT48LC32M8A2_7E   || \
+ 	CONFIG_MEM_MT48LC32M8A2_75)
+ 
+ 	#if ( CONFIG_SCLK_HZ > 119402985 )
+@@ -103,6 +105,13 @@
+ 	#endif
+ #endif
+ 
++#if (CONFIG_MEM_MT48LC64M8A2P_75)
++        /*SDRAM INFORMATION: */
++        #define SDRAM_Tref      64      /* Refresh period in milliseconds   */
++        #define SDRAM_NRA       8192    /* Number of row addresses in SDRAM */
++        #define SDRAM_CL        CL_3
++#endif
++
+ #if (CONFIG_MEM_MT48LC16M16A2TG_75)
+ 	/*SDRAM INFORMATION: */
+ 	#define SDRAM_Tref	64       /* Refresh period in milliseconds   */
+@@ -125,12 +134,20 @@
+ #endif
+ 
+ #if (CONFIG_MEM_MT48LC32M8A2_75)
+-  /*SDRAM INFORMATION: */
+-#define SDRAM_Tref  64		/* Refresh period in milliseconds   */
+-#define SDRAM_NRA   8192	/* Number of row addresses in SDRAM */
+-#define SDRAM_CL    CL_3
++  	/*SDRAM INFORMATION: */
++	#define SDRAM_Tref  64		/* Refresh period in milliseconds   */
++	#define SDRAM_NRA   8192	/* Number of row addresses in SDRAM */
++	#define SDRAM_CL    CL_3
+ #endif
+ 
++#if (CONFIG_MEM_MT48LC32M8A2_7E)
++  	/*SDRAM INFORMATION: */
++	#define SDRAM_Tref  64          /* Refresh period in milliseconds   */
++	#define SDRAM_NRA   8192        /* Number of row addresses in SDRAM */
++	#define SDRAM_CL    CL_2
++#endif
++
++
+ #if (CONFIG_MEM_MT48LC8M16A2TG_7E)
+ 	/*SDRAM INFORMATION: */
+ 	#define SDRAM_Tref	64       /* Refresh period in milliseconds   */
+diff -Naur u-boot-1.1.6.orig/lib_blackfin/board.c u-boot-1.1.6/lib_blackfin/board.c
+--- u-boot-1.1.6.orig/lib_blackfin/board.c	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/lib_blackfin/board.c	2008-04-24 19:04:19.000000000 -0400
+@@ -348,7 +348,7 @@
+ 	post_reloc();
+ #endif
+ 
+-#if	(CONFIG_STAMP || CONFIG_BF537 || CONFIG_EZKIT561) && !defined(CFG_NO_FLASH)
++#if	(CONFIG_STAMP || CONFIG_BF537 || CONFIG_EZKIT561) && !defined(CFG_NO_FLASH) && !defined(CONFIG_BR4)
+ 	/* There are some other pointer constants we must deal with */
+ 	/* configure available FLASH banks */
+ 	size = flash_init();
+@@ -416,7 +416,7 @@
+ #endif
+ 	
+ #if ((BFIN_CPU == ADSP_BF537) || (BFIN_CPU == ADSP_BF536))
+-	printf("Net:    ");
++	printf("Net:   ");
+ 	eth_initialize(bd);
+ #endif
+ 
+diff -Naur u-boot-1.1.6.orig/localversion-adi u-boot-1.1.6/localversion-adi
+--- u-boot-1.1.6.orig/localversion-adi	2008-04-24 19:02:17.000000000 -0400
++++ u-boot-1.1.6/localversion-adi	2008-04-24 19:04:19.000000000 -0400
+@@ -1 +1 @@
+- (ADI-2007R1)
++ (astfin.org)
+diff -Naur u-boot-1.1.6.orig/Makefile u-boot-1.1.6/Makefile
+--- u-boot-1.1.6.orig/Makefile	2008-04-24 19:02:18.000000000 -0400
++++ u-boot-1.1.6/Makefile	2008-04-24 19:04:19.000000000 -0400
+@@ -2264,6 +2264,14 @@
+ bf537-pnav_config	:	unconfig
+ 	@$(MKCONFIG) $(@:_config=) blackfin bf537 bf537-pnav
+ 
++########################################################################
++## SwitchVoice / Astfin Boards
++br4_config		:	unconfig
++	@$(MKCONFIG) $(@:_config=) blackfin bf537 br4 SwitchVoice
++
++pr1_config		:	unconfig
++	@$(MKCONFIG) $(@:_config=) blackfin bf537 pr1 SwitchVoice
++
+ #========================================================================
+ # AVR32
+ #========================================================================
+--- u-boot-1.1.6/cpu/bf537/start.S	2007-03-06 02:35:05.000000000 -0500
++++ u-boot-1.1.6/cpu/bf537/start.S	2008-02-08 18:13:53.000000000 -0500
+@@ -57,7 +57,7 @@
+ .global init_sdram;
+ .global _icache_enable;
+ .global _dcache_enable;
+-#if defined(CONFIG_BF537)&&defined(CONFIG_POST)
++#if defined(CONFIG_BF537)&&defined(CONFIG_POST)&&(BFIN_BOOT_MODE != BF537_SPI_MASTER_BOOT)
+ .global _memory_post_test;
+ .global _post_flag;
+ #endif 
+@@ -271,7 +271,7 @@
+ #endif
+ 
+ 
+-#if defined(CONFIG_BF537)&&defined(CONFIG_POST)
++#if defined(CONFIG_BF537)&&defined(CONFIG_POST)&&(BFIN_BOOT_MODE != BF537_SPI_MASTER_BOOT)
+ 	/* DMA POST code to Hi of L1 SRAM */
+ postcopy:
+         /* P1 Points to the beginning of SYSTEM MMR Space */
+@@ -546,7 +546,7 @@
+  	[p1++] = r0;
+ _clear_bss_skip:
+ 
+-#if defined(CONFIG_BF537)&&defined(CONFIG_POST)
++#if defined(CONFIG_BF537)&&defined(CONFIG_POST)&&(BFIN_BOOT_MODE != BF537_SPI_MASTER_BOOT)
+         p0.l = _post_flag;
+         p0.h = _post_flag;
+         r0   = r7;
+--- u-boot-1.1.6/mkconfig	2006-12-22 13:30:05.000000000 -0500
++++ u-boot-1.1.6/mkconfig	2008-04-27 12:06:40.000000000 -0400
+@@ -82,6 +82,29 @@
+ 	> config.h		# Create new config file
+ fi
+ echo "/* Automatically generated - do not edit */" >>config.h
++echo "#define $UBOOT_FLAGS 1" >> config.h
++echo "#define $UBOOT_FLAGS2 1" >> config.h
++echo "#ifdef SDRAM_64MB_FAST" >> config.h
++echo "#define CONFIG_MEM_SIZE                 64" >> config.h
++echo "#define CONFIG_MEM_ADD_WDTH             10" >> config.h
++echo "#define CONFIG_MEM_MT48LC32M8A2_7E      1" >> config.h
++echo "#elif SDRAM_64MB_SLOW" >> config.h
++echo "#define CONFIG_MEM_SIZE                 64" >> config.h
++echo "#define CONFIG_MEM_ADD_WDTH             10" >> config.h
++echo "#define CONFIG_MEM_MT48LC32M8A2_75      1" >> config.h
++echo "#elif SDRAM_128M" >> config.h
++echo "#define CONFIG_MEM_SIZE                 128" >> config.h
++echo "#define CONFIG_MEM_ADD_WDTH             11" >> config.h
++echo "#define CONFIG_MEM_MT48LC64M8A2P_75     1" >> config.h
++echo "#endif" >> config.h
++echo "#ifdef CPU_500" >> config.h
++echo "#define CONFIG_VCO_MULT                 20" >> config.h
++echo "#define CONFIG_SCLK_DIV                 4" >> config.h
++echo "#endif" >> config.h
++echo "#ifdef CPU_600" >> config.h
++echo "#define CONFIG_VCO_MULT                 24" >> config.h
++echo "#define CONFIG_SCLK_DIV                 5" >> config.h
++echo "#endif" >> config.h
+ echo "#include <configs/$1.h>" >>config.h
+ 
+ exit 0
+--- u-boot-1.1.6/cpu/bf537/i2c.c	2007-01-11 23:32:46.000000000 -0500
++++ u-boot-1.1.6/cpu/bf537/i2c.c	2008-05-02 07:41:24.000000000 -0400
+@@ -425,14 +425,14 @@
+ 	uchar buf;
+ 
+ 	PRINTD("i2c_reg_read: chip=0x%02x, reg=0x%02x\n", chip, reg);
+-	i2c_read(chip, reg, 0, &buf, 1);
++	i2c_read(chip, reg, 1, &buf, 1);
+ 	return (buf);
+ }
+ 
+ void  i2c_reg_write(uchar chip, uchar reg, uchar val)
+ {
+ 	PRINTD("i2c_reg_write: chip=0x%02x, reg=0x%02x, val=0x%02x\n",chip,reg,val);
+-	i2c_write(chip, reg, 0, &val, 1);
++	i2c_write(chip, reg, 1, &val, 1);
+ }
+ 
+ #endif	/* CONFIG_HARD_I2C */
+--- u-boot-1.1.6/drivers/nand/nand_base.c	2008-11-08 15:49:48.000000000 -0500
++++ u-boot-1.1.6/drivers/nand/nand_base.c	2008-11-08 15:47:30.000000000 -0500
+@@ -88,6 +88,9 @@
+ #include <jffs2/jffs2.h>
+ #endif
+ 
++
++
++
+ /* Define default oob placement schemes for large and small page devices */
+ static struct nand_oobinfo nand_oob_8 = {
+ 	.useecc = MTD_NANDECC_AUTOPLACE,
+@@ -2310,6 +2313,10 @@
+ 	/* Select the device */
+ 	this->select_chip(mtd, 0);
+ 
++	//DPN: We need to reset the chip !!! 
++	this->cmdfunc (mtd, NAND_CMD_RESET, -1, -1);	
++
++
+ 	/* Send the command for reading device ID */
+ 	this->cmdfunc (mtd, NAND_CMD_READID, 0x00, -1);
+ 
+@@ -2317,6 +2324,7 @@
+ 	nand_maf_id = this->read_byte(mtd);
+ 	nand_dev_id = this->read_byte(mtd);
+ 
++
+ 	/* Print and store flash device information */
+ 	for (i = 0; nand_flash_ids[i].name != NULL; i++) {
+ 
+@@ -2331,8 +2339,10 @@
+ 			int extid;
+ 			/* The 3rd id byte contains non relevant data ATM */
+ 			extid = this->read_byte(mtd);
++
+ 			/* The 4th id byte is the important one */
+ 			extid = this->read_byte(mtd);
++
+ 			/* Calc pagesize */
+ 			mtd->oobblock = 1024 << (extid & 0x3);
+ 			extid >>= 2;
+@@ -2354,6 +2364,7 @@
+ 			busw = nand_flash_ids[i].options & NAND_BUSWIDTH_16;
+ 		}
+ 
++
+ 		/* Check, if buswidth is correct. Hardware drivers should set
+ 		 * this correct ! */
+ 		if (busw != (this->options & NAND_BUSWIDTH_16)) {
+--- u-boot-1.1.6/drivers/nand/nand_ids.c	2008-11-08 15:50:10.000000000 -0500
++++ u-boot-1.1.6/drivers/nand/nand_ids.c	2008-11-08 15:47:30.000000000 -0500
+@@ -92,9 +92,10 @@
+ 
+ 	/* 8 Gigabit */
+ 	{"NAND 1GiB 1,8V 8-bit", 	0xA3, 0, 1024, 0, NAND_SAMSUNG_LP_OPTIONS | NAND_NO_AUTOINCR},
+-	{"NAND 1GiB 3,3V 8-bit", 	0xD3, 0, 1024, 0, NAND_SAMSUNG_LP_OPTIONS | NAND_NO_AUTOINCR},
++	//{"NAND 1GiB 3,3V 8-bit", 	0xD3, 0, 1024, 0, NAND_SAMSUNG_LP_OPTIONS | NAND_NO_AUTOINCR}, DPN: commented
+ 	{"NAND 1GiB 1,8V 16-bit", 	0xB3, 0, 1024, 0, NAND_SAMSUNG_LP_OPTIONS | NAND_BUSWIDTH_16 | NAND_NO_AUTOINCR},
+ 	{"NAND 1GiB 3,3V 16-bit", 	0xC3, 0, 1024, 0, NAND_SAMSUNG_LP_OPTIONS | NAND_BUSWIDTH_16 | NAND_NO_AUTOINCR},
++	{"NAND 1GiB 3,3V 8-bit",        0xD3, 0, 1024, 0, 0}, //DPN: for the MT29F8G08M
+ 
+ 	/* 16 Gigabit */
+ 	{"NAND 2GiB 1,8V 8-bit", 	0xA5, 0, 2048, 0, NAND_SAMSUNG_LP_OPTIONS | NAND_NO_AUTOINCR},
+--- u-boot-1.1.6/net/net.c	2006-12-22 13:30:05.000000000 -0500
++++ u-boot-1.1.6/net/net.c	2009-07-06 10:51:57.000000000 -0400
+@@ -590,7 +590,13 @@
+ #else	/* !CONFIG_NET_MULTI*/
+ 	eth_halt ();
+ 	eth_try_another (!NetRestarted);
+-	eth_init (gd->bd);
++	//eth_init (gd->bd);
++	if(eth_init (gd->bd) < 0) {
++                eth_halt ();
++                NetState = NETLOOP_FAIL;
++		 //printf("Failing the loop\n");
++                return;
++        }
+ 	if (NetRestartWrap) {
+ 		NetRestartWrap = 0;
+ 		if (NetDevExists && !once) {
+--- u-boot-1.1.6/common/cmd_nvedit.c	2006-12-22 18:30:05.000000000 +0000
++++ u-boot-1.1.6/common/cmd_nvedit.c	2009-07-01 00:17:54.000000000 +0000
+@@ -145,10 +145,78 @@
+ 	return rcode;
+ }
+ 
++int do_memtoenv (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
++{
++	char *name = argv[1];
++	ulong	addr1, size;
++	char buf[256];
++	char *ptr = buf;
++
++	if (argc != 4) {
++		printf ("Usage:\n%s\n", cmdtp->usage);
++		return 1;
++	}
++	if ((size = simple_strtoul(argv[3], NULL, 16)) < 1)
++                return 1;
++	if (size > sizeof(buf))
++		return 1;
++
++	addr1 = simple_strtoul(argv[2], NULL, 16);
++
++	(void)memcpy(ptr, (void *)(addr1), size);
++	buf[size] = '\0';
++	setenv(name, buf);
++	printf("Copied %i bytes variable %s\n", size, name);
++	return 0;
++}
++
++int do_envtomem (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
++{
++	int j, k, nxt;
++	int rcode = 0;
++	char *name = argv[1];
++	int offset = 0;
++	ulong	addr1;
++
++	if (argc != 3) {
++		printf ("Usage:\n%s\n", cmdtp->usage);
++		return 1;
++	}
++
++	addr1 = simple_strtoul(argv[2], NULL, 16);
++
++	k = -1;
++
++	for (j=0; env_get_char(j) != '\0'; j=nxt+1) {
++
++		for (nxt=j; env_get_char(nxt) != '\0'; ++nxt)
++			;
++		k = envmatch((uchar *)name, j);
++		if (k < 0) {
++			continue;
++		}
++		while (k < nxt) {
++			unsigned char buf[2];
++			buf[0] = env_get_char(k++);
++			(void)memcpy((void *)(addr1 + offset), &buf, 1);
++			//printf("copied %c to %08X\n", buf[0], addr1+offset);
++			offset++;
++		}
++		puts("Copied to memory\n");
++		break;
++	}
++	if (k < 0) {
++		printf ("## Error: \"%s\" not defined\n", name);
++		rcode ++;
++	}
++	return rcode;
++}
++
+ /************************************************************************
+  * Set a new environment variable,
+  * or replace or delete an existing one.
+  *
++		(void)memcpy((void *)(load_addr + offset), src, len);
+  * This function will ONLY work with a in-RAM copy of the environment
+  */
+ 
+@@ -585,6 +653,20 @@
+ );
+ 
+ U_BOOT_CMD(
++	envtomem, 3, 0,	do_envtomem,
++	"envtomem- copy environment variable to memory address\n",
++	"envtomem name address\n"
++	"    - copy variable 'name' to memory 'address'\n"
++);
++
++U_BOOT_CMD(
++	memtoenv, 4, 0,	do_memtoenv,
++	"memtoenv- copy memory address to environment variable\n",
++	"memtoenv name address\n"
++	"    - copy memory 'address' to variable 'name'\n"
++);
++
++U_BOOT_CMD(
+ 	setenv, CFG_MAXARGS, 0,	do_setenv,
+ 	"setenv  - set environment variables\n",
+ 	"name value ...\n"

@@ -1,0 +1,44 @@
+--- uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/kernel/vmlinux.lds.S	2008/04/10 15:34:12	4585
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/kernel/vmlinux.lds.S	2008/04/11 08:00:11	4586
+@@ -77,6 +77,11 @@
+ 		. = ALIGN(32);
+ 		*(.data.cacheline_aligned)
+ 
++#if !L1_DATA_A_LENGTH
++		. = ALIGN(32);
++		*(.data_l1.cacheline_aligned)
++#endif
++
+ 		DATA_DATA
+ 		*(.data.*)
+ 		CONSTRUCTORS
+
+--- uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/kernel/setup.c	2008/04/10 15:34:12	4585
++++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/kernel/setup.c	2008/04/11 08:00:11	4586
+@@ -101,7 +101,7 @@
+ 
+ 	l1_code_length = _etext_l1 - _stext_l1;
+ 	if (l1_code_length > L1_CODE_LENGTH)
+-		l1_code_length = L1_CODE_LENGTH;
++		panic("L1 Instruction SRAM Overflow\n");
+ 	/* cannot complain as printk is not available as yet.
+ 	 * But we can continue booting and complain later!
+ 	 */
+@@ -111,14 +111,14 @@
+ 
+ 	l1_data_a_length = _ebss_l1 - _sdata_l1;
+ 	if (l1_data_a_length > L1_DATA_A_LENGTH)
+-		l1_data_a_length = L1_DATA_A_LENGTH;
++		panic("L1 Data SRAM Bank A Overflow\n");
+ 
+ 	/* Copy _sdata_l1 to _ebss_l1 to L1 data bank A SRAM */
+ 	dma_memcpy(_sdata_l1, _l1_lma_start + l1_code_length, l1_data_a_length);
+ 
+ 	l1_data_b_length = _ebss_b_l1 - _sdata_b_l1;
+ 	if (l1_data_b_length > L1_DATA_B_LENGTH)
+-		l1_data_b_length = L1_DATA_B_LENGTH;
++		panic("L1 Data SRAM Bank B Overflow\n");
+ 
+ 	/* Copy _sdata_b_l1 to _ebss_b_l1 to L1 data bank B SRAM */
+ 	dma_memcpy(_sdata_b_l1, _l1_lma_start + l1_code_length +
+

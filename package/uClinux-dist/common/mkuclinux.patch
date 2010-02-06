@@ -1,0 +1,10 @@
+--- Makefile	2009-07-14 13:18:20.000000000 +0300
++++ Makefile_	2009-07-14 13:34:33.000000000 +0300
+@@ -429,6 +429,7 @@
+ 	yes "" | config/setconfig defaults
+ 	config/setconfig final
+ 	#$(MAKE) dep
++	cp vendors/$(@:_defconfig=)/config.linux* linux*/.config
+ %_default: Kconfig conf
+ 	$(MAKE) $(@:_default=_defconfig)
+ 	$(MAKE)
