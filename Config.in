@@ -37,8 +37,6 @@ config SF_PR1_APPLIANCE
 	bool "PR1 Appliance"
 config SF_BR4_APPLIANCE
         bool "BR4 Appliance"
-config SF_TL_2XS
-	bool "TL 2XS Board"
 config SF_IP04
 	bool "IP04/IP08 Analog PBX"
 config SF_IP01
