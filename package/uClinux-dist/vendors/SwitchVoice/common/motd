@@ -1,19 +1,21 @@
-                          ________________________________________________________
-                         /                                                        \
-        a8888b.         /            Welcome to the uClinux distribution           \
-       d888888b.       /       	  ___         __  _____        ____       ____      |
-       8P"YP"Y88      / 	 /   |  _____/ /_/ __(_)___   / _  \	 /_  / (TM) |
-       8|o||o|88      \ 	/ /| | / ___/ __/ /_/ / __ \  \/ / /     /  /       |
-       8'    .88       \       / ___ |(__  ) /_/ __/ / / / /    / /_ _  /  /        |
-       8`._.' Y8.	\     /_/  |_/____/\__/_/ /_/_/ /_/    /___/(_)/__/         |           
-      d/      `8b._____/ \                                                          | 
-     dP   .    Y8b.       \           For embedded telephony based on               |
-    d8:'  "  `::88b        \          the Analog Devices Blackfin                  /
-   d8"         'Y88b        \_____________________________________________________/
+                           _____________________________________________________
+                          /                                                     \
+                         /         Welcome to the uClinux distribution           \                            
+        a8888b.         /       ______         _         _     ______             \                                         
+       d888888b.       /       / ____/ _    _ (_)_  ___ / /   / ___(_)____         |
+       8P"YP"Y88      /       / /__  / /   / / / /_/ __/ /_  / /_ / / __  \  (TM)  |
+       8|o||o|88      \      (____ )/ /_/\/ / / __/ / / _  \/  __/ / /  / /        |
+       8'    .88       \    _____/ /       / / /_/ /_/ / / / /  / / /  / /         | 
+       8`._.' Y8.	\  /______/_/\_/\_/_/\__/\__/_/ /_/_/  /_/_/  /_/          |           
+      d/      `8b._____/ \                                                         | 
+     dP   .    Y8b.       \          For embedded telephony based on               |
+    d8:'  "  `::88b        \           the Analog Devices Blackfin                /
+   d8"         'Y88b        \____________________________________________________/
   :8P    '      :888
-   8a.   :     _a88P         For further information, check out:
- ._/"Yaa_:   .| 88P|            - http://blog.astfin.org/
- \    YP"    `| 8P  `.          - http://SwitchVoice.com/
- /     \.___.d|    .'           - http://blackfin.uclinux.org/
- `--..__)8888P`._.'  		- http://www.uclinux.org/
+   8a.   :     _a88P                 For further information, check out:
+ ._/"Yaa_:   .| 88P|                   - http://switchvoice.com
+ \    YP"    `| 8P  `.                 - http://switchfin.org
+ /     \.___.d|    .'                  - http://blog.astfin.org
+ `--..__)8888P`._.'  		       - http://blackfin.uclinux.org
+                                       - http://www.asterisk.org
 
