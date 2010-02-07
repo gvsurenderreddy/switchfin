@@ -28,7 +28,7 @@ PORT4="0x402"
 fi
 
 case $1 in
-	start)	modprobe ztdummy;
+	start)	modprobe dahdi_dummy;
 		modprobe bfsi_tlg debug=0x0 tdm_clkX2=0;
 		modprobe mISDN_core debug=0;
 		modprobe mISDN_l1 debug=0;

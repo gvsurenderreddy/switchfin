@@ -1,27 +1,27 @@
---- asterisk/main/frame.c	2008-03-30 13:24:11.000000000 -0400
-+++ asterisk/main/frame.c	2008-03-30 13:26:04.000000000 -0400
-@@ -114,7 +114,7 @@
+--- asterisk/main/frame.c	2009-11-22 18:27:50.000000000 +0200
++++ asterisk/main/frame.c	2009-11-22 18:30:58.000000000 +0200
+@@ -110,7 +110,7 @@
  	{ 1, AST_FORMAT_SLINEAR, "slin", "16 bit Signed Linear PCM", 160, 10, 70, 10, 20, AST_SMOOTHER_FLAG_BE },	/*!< 7 */
  	{ 1, AST_FORMAT_LPC10, "lpc10", "LPC10", 7, 20, 20, 20, 20 },		/*!<  8: codec_lpc10.c */ 
  	{ 1, AST_FORMAT_G729A, "g729", "G.729A", 10, 10, 230, 10, 20, AST_SMOOTHER_FLAG_G729 },	/*!<  9: Binary commercial distribution */
 -	{ 1, AST_FORMAT_SPEEX, "speex", "SpeeX", 10, 10, 60, 10, 20 },		/*!< 10: codec_speex.c */
-+	{ 1, AST_FORMAT_SPEEX, "speex", "SpeeX", 38, 20, 300, 20, 20 },		/*!< 10: codec_speex.c */
++	{ 1, AST_FORMAT_SPEEX, "speex", "SpeeX", 38, 20, 300, 20, 20 },         /*!< 10: codec_speex.c */
  	{ 1, AST_FORMAT_ILBC, "ilbc", "iLBC", 50, 30, 30, 30, 30 },		/*!< 11: codec_ilbc.c */ /* inc=30ms - workaround */
  	{ 1, AST_FORMAT_G726_AAL2, "g726aal2", "G.726 AAL2", 40, 10, 300, 10, 20 },	/*!<  12: codec_g726.c */
  	{ 1, AST_FORMAT_G722, "g722", "G722"},					/*!< 13 */
-@@ -1509,7 +1509,9 @@
+@@ -1490,7 +1490,9 @@
  	int samples=0;
  	switch(f->subclass) {
  	case AST_FORMAT_SPEEX:
 -		samples = speex_samples(f->data, f->datalen);
-+		/* DR: hard coded for quality=8 mode.  
-+		   300 bits (38 bytes) converted to 160 samples */
++		/* DR: hard coded for quality=8 mode.
++			300 bits (38 bytes) converted to 160 samples */
 +		samples = 160 * (f->datalen / 38);
  		break;
  	case AST_FORMAT_G723_1:
                  samples = g723_samples(f->data, f->datalen);
---- asterisk/main/callerid.c	2008-03-30 13:27:12.000000000 -0400
-+++ asterisk/main/callerid.c	2008-03-30 13:39:44.000000000 -0400
+--- asterisk/main/callerid.c	2009-11-22 18:31:26.000000000 +0200
++++ asterisk/main/callerid.c	2009-11-22 18:46:23.000000000 +0200
 @@ -45,7 +45,31 @@
  #include "asterisk/options.h"
  #include "asterisk/utils.h"
@@ -46,11 +46,11 @@
 +#endif
 +
  struct callerid_state {
-+#ifdef USE_SPANDSP_CALLERID	
++#ifdef USE_SPANDSP_CALLERID
 +	adsi_rx_state_t adsi;
 +	char adsi_output[256];
 +	int  adsi_len;
-+#endif 
++#endif
  	fsk_data fskd;
  	char rawdata[256];
  	short oldstuff[160];
@@ -66,7 +66,7 @@
  
  #define AST_CALLERID_UNKNOWN	"<unknown>"
  
-+#ifdef USE_SPANDSP_CALLERID	
++#ifdef USE_SPANDSP_CALLERID
 +void cid_put_msg_func_t(void *user_data, const uint8_t *msg, int len)
 +{
 +	/*given the nature of calling adsi_rx for each sample, we'll always
@@ -96,9 +96,9 @@
  	struct callerid_state *cid;
  
  	if ((cid = ast_calloc(1, sizeof(*cid)))) {
-+		#ifdef USE_SPANDSP_CALLERID
-+		adsi_rx_init(&cid->adsi, 
-+				(cid_signalling == 2) ? ADSI_STANDARD_CLIP : ADSI_STANDARD_CLASS, 
++#ifdef USE_SPANDSP_CALLERID
++		adsi_rx_init(&cid->adsi,
++				(cid_signalling == 2) ? ADSI_STANDARD_CLIP : ADSI_STANDARD_CLASS,
 +				cid_put_msg_func_t,
 +				cid);
 +#endif
@@ -115,7 +115,7 @@
  		res = fsk_serie(&cid->fskd, buf, &mylen, &b);
 +#endif
  		if (mylen < 0) {
- 			ast_log(LOG_ERROR, "fsk_serie made mylen < 0 (%d)\n", mylen);
+ 			ast_log(LOG_ERROR, "No start bit found in fsk data.\n");
  			free(obuf);
 @@ -572,6 +630,13 @@
  			return -1;
@@ -135,43 +135,33 @@
  				if (!cid->len) {
  					cid->rawdata[cid->pos] = '\0';
  					cid->sawflag = 5;
-+#ifndef USE_SPANDSP_CALLERID
++#ifndef USE_SPANDSP_CALLERID				
  				}
  				break;
  			case 5: /* Check checksum */
-@@ -615,6 +681,7 @@
+@@ -615,7 +681,7 @@
  					cid->sawflag = 0;
  					break;
  				}
+-		
 +#endif
- 		
  				cid->number[0] = '\0';
  				cid->name[0] = '\0';
-@@ -692,10 +759,16 @@
+ 				/* If we get this far we're fine.  */
+@@ -692,10 +758,16 @@
  				}
  				free(obuf);
  				return 1;
-+#ifdef USE_SPANDSP_CALLERID	
-+				}
++#ifdef USE_SPANDSP_CALLERID
++                               }
 +#endif
  				break;
  			default:
  				ast_log(LOG_ERROR, "Dunno what to do with a digit in sawflag %d\n", cid->sawflag);
  			}
-+#ifdef USE_SPANDSP_CALLERID	
++#ifdef USE_SPANDSP_CALLERID
 +		} /*for*/
 +#endif
  		}
  	}
  	if (mylen) {
---- asterisk/res/res_agi.c	2008-03-30 13:40:36.000000000 -0400
-+++ asterisk/res/res_agi.c	2008-03-30 13:40:52.000000000 -0400
-@@ -291,7 +291,7 @@
- 	/* Block SIGHUP during the fork - prevents a race */
- 	sigfillset(&signal_set);
- 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
--	pid = fork();
-+	pid = vfork();
- 	if (pid < 0) {
- 		ast_log(LOG_WARNING, "Failed to fork(): %s\n", strerror(errno));
- 		pthread_sigmask(SIG_SETMASK, &old_set, NULL);

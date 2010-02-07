@@ -16,7 +16,7 @@
 # Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
 #########################################################################
 
-MAKE1=make
+MAKE1=make -j1
 MAKE=make -j$(SF_JLEVEL)
 
 # Strip off the annoying quoting

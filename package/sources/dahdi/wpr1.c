@@ -34,13 +34,13 @@
  * 04/14/08 : Mark @ Astfin . org - Applied David Rowe's DMA buffer selection bugfix
  * 04/14/08 : Mark @ Astfin . org - Overall code cleanup
  * 10/04/08 : Mark @ Astfin . org - Added support for Zarlink echo can (double rate clock)
- * 10/05/08 : DPN @ SwitchVoice . com   - Added support for clock master mode
- * 10/13/08 : DPN @ SwitchVoice . com   - Added support for different terminations we need for T1/E1
+ * 10/05/08 : DPN @ uCpbx . com   - Added support for clock master mode
+ * 10/13/08 : DPN @ uCpbx . com   - Added support for different terminations we need for T1/E1
  * 				    T1: 100 Ohm; E1: 120 Ohm 	
  * 12/16/08 : Mark @ Astfin . org - Added support for Legacy 2.1 version
+ * 12/23/09 : dpn@switchvoice.com - Dimitar Penev, migration to DAHDI
  *
- * Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
- *
+ * Copyright @ 2010 SwitchFin <dpn@switchvoice.com> 
  ******************************************************************************/
 
 #include <linux/kernel.h>
@@ -57,9 +57,9 @@
 #include <linux/dma-mapping.h>
 #include <linux/proc_fs.h>
 
-#include "zaptel.h"
+#include <dahdi/kernel.h>
 
-#ifdef LINUX26
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 #include <linux/moduleparam.h>
 #endif
 
@@ -325,7 +325,7 @@ if (debug) printk("wpr1 : stop_alarm\n");
 	wc->blinktimer = 0;
 }
 
-static int pr1_open(struct zt_chan *chan)
+static int pr1_open(struct dahdi_chan *chan)
 {
 	struct t1 *wc = chan->pvt;
 
@@ -334,7 +334,7 @@ static int pr1_open(struct zt_chan *chan)
 	if (wc->dead)
 		return -ENODEV;
 	wc->usecount++;
-#ifndef LINUX26	
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)	
 	MOD_INC_USE_COUNT;
 #else
 	try_module_get(THIS_MODULE);
@@ -342,7 +342,7 @@ static int pr1_open(struct zt_chan *chan)
 	return 0;
 }
 
-static int pr1_close(struct zt_chan *chan)
+static int pr1_close(struct dahdi_chan *chan)
 {
 	struct t1 *wc = chan->pvt;
 
@@ -350,7 +350,7 @@ static int pr1_close(struct zt_chan *chan)
 		printk("wpr1 : pr1_close \n");
 
 	wc->usecount--;
-#ifndef LINUX26	
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)	
 	MOD_DEC_USE_COUNT;
 #else
 	module_put(THIS_MODULE);
@@ -430,7 +430,7 @@ static void pr1_release(struct t1 *wc)
 {
 	if (debug) printk("wpr1 : pr1_release \n");
 
-	zt_unregister(&wc->span);
+	dahdi_unregister(&wc->span);
 	kfree(wc);
 	if(fakemode) kfree(tFakeBuffer);
 	printk("Freed a Wildcard\n");
@@ -519,10 +519,9 @@ static int pr1_enable_interrupts(struct t1 *wc)
 {
 	if (debug) printk("wpr1 : Enable RX interrupt\n");
 	
-	if(request_irq(IRQ_SPORT0_RX, sport_rx_isr,
-                       IRQF_DISABLED, "sport rx", NULL) != 0) {
-        if (debug) printk("wpr1 : Enable RX interrupt : Failure \n");
-                return -EBUSY;
+	if(request_irq(IRQ_SPORT0_RX, sport_rx_isr,IRQF_DISABLED, "sport rx", NULL) != 0) {
+        	if (debug) printk("wpr1 : Enable RX interrupt : Failure \n");
+                	return -EBUSY;
         }
 	/* enable DMA1 for BF533 or BF532 */
         /* enable DMA3 for BF537 sport0 Rx interrupt */
@@ -568,13 +567,13 @@ static u8 *isr_write_processing(void) {
 	   offset doesn't kill the echo cancellation, e.g. if we
 	   get echo samples in rx before tx has sent them!
 	*/
-	if (x >= (WPR_NBCHAN*ZT_CHUNKSIZE)) {
+	if (x >= (WPR_NBCHAN*DAHDI_CHUNKSIZE)) {
 		writechunk = iTxBuffer1;
 		writechunk_first++;
 		writepingpong = PING;
 	}
 	else {
-		writechunk = iTxBuffer1 + ZT_CHUNKSIZE*WPR_NBCHAN;
+		writechunk = iTxBuffer1 + DAHDI_CHUNKSIZE*WPR_NBCHAN;
 		writechunk_second++;
 		writepingpong = PONG;
 	}
@@ -611,16 +610,16 @@ static u8 *isr_read_processing(void) {
 
 	readchunk_x=x;
 
-	/* possible values for x are 8*ZT_CHUNKSIZE=0x100 at the
-	   end of the first row and 2*8*ZT_CHUNKSIZE=0x200 at the
+	/* possible values for x are 8*DAHDI_CHUNKSIZE=0x100 at the
+	   end of the first row and 2*8*DAHDI_CHUNKSIZE=0x200 at the
 	   end of the second row */
-	if ((x >= (WPR_NBCHAN*ZT_CHUNKSIZE))&&(x<(2*(WPR_NBCHAN*ZT_CHUNKSIZE)))) {
+	if ((x >= (WPR_NBCHAN*DAHDI_CHUNKSIZE))&&(x<(2*(WPR_NBCHAN*DAHDI_CHUNKSIZE)))) {
 		readchunk = iRxBuffer1;
 		readchunk_first++;
 		readpingpong = PING;
 	}
 	else {
-		readchunk = iRxBuffer1 + ZT_CHUNKSIZE*WPR_NBCHAN;
+		readchunk = iRxBuffer1 + DAHDI_CHUNKSIZE*WPR_NBCHAN;
 		readchunk_second++;
 		readpingpong = PONG;
 	}
@@ -646,7 +645,7 @@ static u8 *isr_read_processing(void) {
 	return readchunk;
 }
 
-static irqreturn_t sport_rx_isr(int irq, void *dev_id, struct pt_regs * regs)
+static irqreturn_t sport_rx_isr(int irq, void *dev_id)
 {
   unsigned int  start_cycles = cycles();
   u8           *read_samples;
@@ -732,7 +731,7 @@ static void __t1_set_clear(struct t1 *wc)
 	unsigned short val=0;
 	for (i=0;i<24;i++) {
 		j = (i/8);
-		if (wc->span.chans[i].flags & ZT_FLAG_CLEAR) 
+		if (wc->chans[i]->flags & DAHDI_FLAG_CLEAR) 
 			val |= 1 << (7 - (i % 8));
 		if ((i % 8)==7) {
 			if (debug)
@@ -744,11 +743,11 @@ static void __t1_set_clear(struct t1 *wc)
 	return;
 }
 
-static int pr1_ioctl(struct zt_chan *chan, unsigned int cmd, unsigned long data)
+static int pr1_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long data)
 {
 	int val;
 	switch(cmd){
-               case ZT_TONEDETECT:
+               case DAHDI_TONEDETECT:
                         val=1;         //We don't do DTMF detection in hardware so chan_zap should do it
                         break;
 
@@ -760,28 +759,28 @@ static int pr1_ioctl(struct zt_chan *chan, unsigned int cmd, unsigned long data)
        return val;
 }
 
-static int __t1_maint(struct zt_span *span, int cmd)
+static int __t1_maint(struct dahdi_span *span, int cmd)
 {
 	struct t1 *wc = span->pvt;
 
 	if (wc->spantype == E1) {
 		switch(cmd) {
-		case ZT_MAINT_NONE:
+		case DAHDI_MAINT_NONE:
 			printk("wpr1: E1 - Turn off local and remote loops E1 XXX\n");
 			break;
-		case ZT_MAINT_LOCALLOOP:
+		case DAHDI_MAINT_LOCALLOOP:
 			printk("wpr1: E1 - Turn on local loopback E1 XXX\n");
 			break;
-		case ZT_MAINT_REMOTELOOP:
+		case DAHDI_MAINT_REMOTELOOP:
 			printk("wpr1: E1 - Turn on remote loopback E1 XXX\n");
 			break;
-		case ZT_MAINT_LOOPUP:
+		case DAHDI_MAINT_LOOPUP:
 			printk("wpr1: E1 - Send loopup code E1 XXX\n");
 			break;
-		case ZT_MAINT_LOOPDOWN:
+		case DAHDI_MAINT_LOOPDOWN:
 			printk("wpr1: E1 - Send loopdown code E1 XXX\n");
 			break;
-		case ZT_MAINT_LOOPSTOP:
+		case DAHDI_MAINT_LOOPSTOP:
 			printk("wpr1: E1 - Stop sending loop codes E1 XXX\n");
 			break;
 		default:
@@ -790,22 +789,22 @@ static int __t1_maint(struct zt_span *span, int cmd)
 		}
 	} else {
 		switch(cmd) {
-	    case ZT_MAINT_NONE:
+	    case DAHDI_MAINT_NONE:
 			printk("wpr1: T1 -  Turn off local and remote loops T1 XXX\n");
 			break;
-	    case ZT_MAINT_LOCALLOOP:
+	    case DAHDI_MAINT_LOCALLOOP:
 			printk("wpr1: T1 - Turn on local loop and no remote loop XXX\n");
 			break;
-	    case ZT_MAINT_REMOTELOOP:
+	    case DAHDI_MAINT_REMOTELOOP:
 			printk("wpr1: T1 - Turn on remote loopup XXX\n");
 			break;
-	    case ZT_MAINT_LOOPUP:
+	    case DAHDI_MAINT_LOOPUP:
 			t1_framer_out8(wc, FALC56_XSP_FMR5, 0x50);	/* FMR5: Nothing but RBS mode */
 			break;
-	    case ZT_MAINT_LOOPDOWN:
+	    case DAHDI_MAINT_LOOPDOWN:
 			t1_framer_out8(wc, FALC56_XSP_FMR5, 0x60);	/* FMR5: Nothing but RBS mode */
 			break;
-	    case ZT_MAINT_LOOPSTOP:
+	    case DAHDI_MAINT_LOOPSTOP:
 			t1_framer_out8(wc, FALC56_XSP_FMR5, 0x40);	/* FMR5: Nothing but RBS mode */
 			break;
 	    default:
@@ -816,7 +815,7 @@ static int __t1_maint(struct zt_span *span, int cmd)
 	return 0;
 }
 
-static int t1_rbsbits(struct zt_chan *chan, int bits)
+static int t1_rbsbits(struct dahdi_chan *chan, int bits)
 {
 int iRet=0;
 struct t1 *wc = chan->pvt;
@@ -830,7 +829,7 @@ unsigned long flags;
 
 }
 
-static int __t1_rbsbits(struct zt_chan *chan, int bits)
+static int __t1_rbsbits(struct dahdi_chan *chan, int bits)
 {
         u_char m,c;
         int n,b;
@@ -851,7 +850,7 @@ static int __t1_rbsbits(struct zt_chan *chan, int bits)
                 wc->txsigs[b] = c;
                   /* output them to the chip */
                 __t1_framer_out8(wc,0x71 + b,c); /* PEF XS1->XS16 Transmit CAS Register */
-        } else if (wc->span.lineconfig & ZT_CONFIG_D4) {
+        } else if (wc->span.lineconfig & DAHDI_CONFIG_D4) {
                 n = chan->chanpos - 1;
                 b = (n/4);
                 c = wc->txsigs[b];
@@ -862,7 +861,7 @@ static int __t1_rbsbits(struct zt_chan *chan, int bits)
                   /* output them to the chip */
                 __t1_framer_out8(wc,0x70 + b,c); /* RS1 + b Receive Signaling Register */
                 __t1_framer_out8(wc,0x70 + b + 6,c);/* RS1 + b +6 */
-        } else if (wc->span.lineconfig & ZT_CONFIG_ESF) {
+        } else if (wc->span.lineconfig & DAHDI_CONFIG_ESF) {
                 n = chan->chanpos - 1;
                 b = (n/2);
                 c = wc->txsigs[b];
@@ -885,46 +884,46 @@ static void __t1_check_sigbits(struct t1 *wc)
 
         //if (debug) printk("wpr1 : __t1_check_sigbits\n");
 
-	if (!(wc->span.flags & ZT_FLAG_RUNNING))
+	if (!(wc->span.flags & DAHDI_FLAG_RUNNING))
 		return;
 	if (wc->spantype == E1) { /* This  case for E1 with  Robbed bits signaling */
 		for (i = 0; i < 15; i++) {
 			a = __t1_framer_in8(wc, 0x71 + i); /* XS1 + i Tx CAS Register */
 			/* Get high channel in low bits */
 			rxs = (a & 0xf);
-			if (!(wc->span.chans[i+16].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i+16].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i+16], rxs);
+			if (!(wc->chans[i+16]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+16]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i+16], rxs);
 			}
 			rxs = (a >> 4) & 0xf;
-			if (!(wc->span.chans[i].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i], rxs);
+			if (!(wc->chans[i]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i], rxs);
 			}
 		}
-	} else if (wc->span.lineconfig & ZT_CONFIG_D4) {
+	} else if (wc->span.lineconfig & DAHDI_CONFIG_D4) {
 		for (i = 0; i < 24; i+=4) {
 			a = __t1_framer_in8(wc, 0x70 + (i>>2)); /* RS1 + x */
 			/* Get high channel in low bits */
 			rxs = (a & 0x3) << 2;
-			if (!(wc->span.chans[i+3].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i+3].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i+3], rxs);
+			if (!(wc->chans[i+3]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+3]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i+3], rxs);
 			}
 			rxs = (a & 0xc);
-			if (!(wc->span.chans[i+2].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i+2].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i+2], rxs);
+			if (!(wc->chans[i+2]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+2]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i+2], rxs);
 			}
 			rxs = (a >> 2) & 0xc;
-			if (!(wc->span.chans[i+1].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i+1].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i+1], rxs);
+			if (!(wc->chans[i+1]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+1]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i+1], rxs);
 			}
 			rxs = (a >> 4) & 0xc;
-			if (!(wc->span.chans[i].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i], rxs);
+			if (!(wc->chans[i]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i], rxs);
 			}
 		}
 	} else {
@@ -932,14 +931,14 @@ static void __t1_check_sigbits(struct t1 *wc)
 			a = __t1_framer_in8(wc, 0x70 + (i>>1));/* PEF RS1 + x */
 			/* Get high channel in low bits */
 			rxs = (a & 0xf);
-			if (!(wc->span.chans[i+1].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i+1].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i+1], rxs);
+			if (!(wc->chans[i+1]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+1]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i+1], rxs);
 			}
 			rxs = (a >> 4) & 0xf;
-			if (!(wc->span.chans[i].sig & ZT_SIG_CLEAR)) {
-				if (wc->span.chans[i].rxsig != rxs)
-					zt_rbsbits(&wc->span.chans[i], rxs);
+			if (!(wc->chans[i]->sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i]->rxsig != rxs)
+					dahdi_rbsbits(wc->chans[i], rxs);
 			}
 		}
 	}
@@ -1093,7 +1092,7 @@ static void __t1_configure_t1(struct t1 *wc, int lineconfig, int txlevel)
 	__t1_framer_out8(wc, FALC56_FMR2, fmr2);
 
 	/* Configure line interface */
-	if (lineconfig & ZT_CONFIG_AMI) 
+	if (lineconfig & DAHDI_CONFIG_AMI) 
 	{
 		line = "AMI";
 		fmr0 = 0xa0;
@@ -1103,7 +1102,7 @@ static void __t1_configure_t1(struct t1 *wc, int lineconfig, int txlevel)
 		line = "B8ZS";
 		fmr0 = 0xf0;
 	}
-	if (lineconfig & ZT_CONFIG_D4) 
+	if (lineconfig & DAHDI_CONFIG_D4) 
 	{
 		framing = "D4";
 	} 
@@ -1176,7 +1175,7 @@ static void __t1_configure_e1(struct t1 *wc, int lineconfig)
 	if (loopback)
 		fmr2 |= 0x4;
 
-	if (lineconfig & ZT_CONFIG_CRC4) {
+	if (lineconfig & DAHDI_CONFIG_CRC4) {
 		fmr1 |= 0x08;	/* CRC4 transmit */
 		fmr2 |= 0xc0;	/* CRC4 receive */
 		crc4 = "/CRC4";
@@ -1185,7 +1184,7 @@ static void __t1_configure_e1(struct t1 *wc, int lineconfig)
 	__t1_framer_out8(wc, FALC56_FMR2, fmr2);
 
 	/* Configure line interface */
-	if (lineconfig & ZT_CONFIG_AMI) {
+	if (lineconfig & DAHDI_CONFIG_AMI) {
 		line = "AMI";
 		fmr0 = 0xa0;
 	} else {
@@ -1193,7 +1192,7 @@ static void __t1_configure_e1(struct t1 *wc, int lineconfig)
 		fmr0 = 0xf0;
 	}
 
-	if (lineconfig & ZT_CONFIG_CCS) {
+	if (lineconfig & DAHDI_CONFIG_CCS) {
 		framing = "CCS";
 	} else {
 		framing = "CAS";
@@ -1240,9 +1239,9 @@ static void __t1_configure_e1(struct t1 *wc, int lineconfig)
 	printk("wpr1: Span configured for %s/%s%s\n", framing, line, crc4);
 }
 
-static void pr1_framer_start(struct t1 *wc, struct zt_span *span)
+static void pr1_framer_start(struct t1 *wc, struct dahdi_span *span)
 {
-	int alreadyrunning = wc->span.flags & ZT_FLAG_RUNNING;
+	int alreadyrunning = wc->span.flags & DAHDI_FLAG_RUNNING;
 	unsigned long flags;
 
         if (debug) printk("wpr1 : pr1_framer_start\n");
@@ -1260,27 +1259,27 @@ static void pr1_framer_start(struct t1 *wc, struct zt_span *span)
 	}
 	
 	if (!alreadyrunning) 
-		wc->span.flags |= ZT_FLAG_RUNNING;
+		wc->span.flags |= DAHDI_FLAG_RUNNING;
 
 	spin_unlock_irqrestore(&wc->lock, flags);
 }
 
 
-static int pr1_startup(struct zt_span *span)
+static int pr1_startup(struct dahdi_span *span)
 {
 	struct t1 *wc = span->pvt;
-	int i,alreadyrunning = span->flags & ZT_FLAG_RUNNING;
+	int i,alreadyrunning = span->flags & DAHDI_FLAG_RUNNING;
 
 	if(debug)
-		printk("wpr1: pr1_startup - Calling startup (flags is %d)\n", span->flags);
+		printk(KERN_INFO "wpr1: pr1_startup - Calling startup (flags is %lu)\n", span->flags);
 
 	/* initialize the start value for the entire chunk of last ec buffer */
 	for(i = 0; i < span->channels; i++)
 	{
 		memset(wc->ec_chunk1[i],
-			ZT_LIN2X(0,&span->chans[i]),ZT_CHUNKSIZE);
+			DAHDI_LIN2X(0,span->chans[i]),DAHDI_CHUNKSIZE);
 		memset(wc->ec_chunk2[i],
-			ZT_LIN2X(0,&span->chans[i]),ZT_CHUNKSIZE);
+			DAHDI_LIN2X(0,span->chans[i]),DAHDI_CHUNKSIZE);
 	}
 
 	/* Reset framer with proper parameters and start */
@@ -1290,12 +1289,12 @@ static int pr1_startup(struct zt_span *span)
 		/* Only if we're not already going */
 		pr1_dma_sport_start();
 		pr1_enable_interrupts(wc);
-		span->flags |= ZT_FLAG_RUNNING;
+		span->flags |= DAHDI_FLAG_RUNNING;
 	}
 	return 0;
 }
 
-static int pr1_shutdown(struct zt_span *span)
+static int pr1_shutdown(struct dahdi_span *span)
 {
 	struct t1 *wc = span->pvt;
 	unsigned long flags;
@@ -1306,17 +1305,17 @@ static int pr1_shutdown(struct zt_span *span)
 	spin_lock_irqsave(&wc->lock, flags);
 	__t1_framer_out8(wc, FALC56_GCR, 0x41);	/* GCR: Interrupt on Activation/Deactivation of AIX, LOS */
 	pr1_dma_sport_stop();
-	span->flags &= ~ZT_FLAG_RUNNING;
+	span->flags &= ~DAHDI_FLAG_RUNNING;
 	spin_unlock_irqrestore(&wc->lock, flags);
 	return 0;
 }
 
 
-static int pr1_chanconfig(struct zt_chan *chan, int sigtype)
+static int pr1_chanconfig(struct dahdi_chan *chan, int sigtype)
 {
 	struct t1 *wc = chan->pvt;
 	unsigned long flags;
-	int alreadyrunning = chan->span->flags & ZT_FLAG_RUNNING;
+	int alreadyrunning = chan->span->flags & DAHDI_FLAG_RUNNING;
 
 	if (debug)
 		printk("wpr1 : pr1_chanconfig \n");
@@ -1330,7 +1329,7 @@ static int pr1_chanconfig(struct zt_chan *chan, int sigtype)
 	return 0;
 }
 
-static int pr1_spanconfig(struct zt_span *span, struct zt_lineconfig *lc)
+static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc)
 {
 	struct t1 *wc = span->pvt;
 
@@ -1343,7 +1342,7 @@ static int pr1_spanconfig(struct zt_span *span, struct zt_lineconfig *lc)
 	/* Do we want to SYNC on receive or not */
 	wc->sync = lc->sync;
 	/* If already running, apply changes immediately */
-	if (span->flags & ZT_FLAG_RUNNING)
+	if (span->flags & DAHDI_FLAG_RUNNING)
 		return pr1_startup(span);
 	return 0;
 }
@@ -1355,13 +1354,13 @@ static int pr1_software_init(struct t1 *wc)
 	if (debug)
 		printk("wpr1 : pr1_software_init \n");
 
- 	pr1_sport_start(wc, regular_interrupt_processing, ZT_CHUNKSIZE, debug);
+ 	pr1_sport_start(wc, regular_interrupt_processing, DAHDI_CHUNKSIZE, debug);
 
 	wc->num = 1;
 	sprintf(wc->span.name, "WCT1/%d", wc->num);
 	sprintf(wc->span.desc, "%s Card %d", wc->variety, wc->num);
 
-	wc->span.manufacturer 	= "SwitchVoice";
+	wc->span.manufacturer 	= "uCpbx";
 	strncpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
 	wc->span.spanconfig 	= pr1_spanconfig;
 	wc->span.chanconfig 	= pr1_chanconfig;
@@ -1379,32 +1378,32 @@ static int pr1_software_init(struct t1 *wc)
 #endif
 	if (wc->spantype == E1) {
 		wc->span.channels = 31;
-		wc->span.linecompat = ZT_CONFIG_HDB3 | ZT_CONFIG_CCS | ZT_CONFIG_CRC4;
-		wc->span.deflaw = ZT_LAW_ALAW;
+		wc->span.linecompat = DAHDI_CONFIG_HDB3 | DAHDI_CONFIG_CCS | DAHDI_CONFIG_CRC4;
+		wc->span.deflaw = DAHDI_LAW_ALAW;
 		wc->span.spantype = "E1";
 	} else {
 		wc->span.channels = 24;
-		wc->span.linecompat = ZT_CONFIG_AMI | ZT_CONFIG_B8ZS | ZT_CONFIG_D4 | ZT_CONFIG_ESF;
-		wc->span.deflaw = ZT_LAW_MULAW;
+		wc->span.linecompat = DAHDI_CONFIG_AMI | DAHDI_CONFIG_B8ZS | DAHDI_CONFIG_D4 | DAHDI_CONFIG_ESF;
+		wc->span.deflaw = DAHDI_LAW_MULAW;
 		wc->span.spantype = "T1";
 	}
 	wc->span.chans = wc->chans;
-	wc->span.flags = ZT_FLAG_RBS;
+	wc->span.flags = DAHDI_FLAG_RBS;
 	wc->span.ioctl = pr1_ioctl;
 	wc->span.pvt = wc;
 
 	init_waitqueue_head(&wc->span.maintq);
 
 	for (x=0;x<wc->span.channels;x++) {
-		sprintf(wc->chans[x].name, "WCT1/%d/%d", wc->num, x + 1);
-		wc->chans[x].sigcap = ZT_SIG_EM | ZT_SIG_CLEAR | ZT_SIG_EM_E1 | 
-				      ZT_SIG_FXSLS | ZT_SIG_FXSGS | 
-				      ZT_SIG_FXSKS | ZT_SIG_FXOLS | ZT_SIG_DACS_RBS |
-				      ZT_SIG_FXOGS | ZT_SIG_FXOKS | ZT_SIG_CAS | ZT_SIG_SF;
-		wc->chans[x].pvt = wc;
-		wc->chans[x].chanpos = x + 1;
+		sprintf(wc->chans[x]->name, "WCT1/%d/%d", wc->num, x + 1);
+		wc->chans[x]->sigcap = DAHDI_SIG_EM | DAHDI_SIG_CLEAR | DAHDI_SIG_EM_E1 | 
+				      DAHDI_SIG_FXSLS | DAHDI_SIG_FXSGS | 
+				      DAHDI_SIG_FXSKS | DAHDI_SIG_FXOLS | DAHDI_SIG_DACS_RBS |
+				      DAHDI_SIG_FXOGS | DAHDI_SIG_FXOKS | DAHDI_SIG_CAS | DAHDI_SIG_SF;
+		wc->chans[x]->pvt = wc;
+		wc->chans[x]->chanpos = x + 1;
 	}
-	if (zt_register(&wc->span, 0)) {
+	if (dahdi_register(&wc->span, 0)) {
 		printk("Unable to register span with zaptel\n");
 		return -1;
 	}
@@ -1416,7 +1415,7 @@ static inline void __t1_handle_leds(struct t1 *wc)
 	int oldreg;
 
 
-	if (wc->span.alarms & (ZT_ALARM_RED | ZT_ALARM_BLUE)) {
+	if (wc->span.alarms & (DAHDI_ALARM_RED | DAHDI_ALARM_BLUE)) {
 		/* Red/Blue alarm */
 		wc->blinktimer++;
 #ifdef FANCY_ALARM
@@ -1442,7 +1441,7 @@ static inline void __t1_handle_leds(struct t1 *wc)
 			wc->blinktimer = 0;
 		}
 #endif
-	} else if (wc->span.alarms & ZT_ALARM_YELLOW) {
+	} else if (wc->span.alarms & DAHDI_ALARM_YELLOW) {
 		/* Yellow Alarm */
 		if (!(wc->blinktimer % 2)) 
 			wc->ledtestreg = (wc->ledtestreg | BIT_LED1) & ~BIT_LED0;
@@ -1452,11 +1451,11 @@ static inline void __t1_handle_leds(struct t1 *wc)
 	} else {
 		/* No Alarm */
 		oldreg = wc->ledtestreg;
-		if (wc->span.maintstat != ZT_MAINT_NONE)
+		if (wc->span.maintstat != DAHDI_MAINT_NONE)
 			wc->ledtestreg |= BIT_TEST;
 		else
 			wc->ledtestreg &= ~BIT_TEST;
-		if (wc->span.flags & ZT_FLAG_RUNNING)
+		if (wc->span.flags & DAHDI_FLAG_RUNNING)
 			wc->ledtestreg = (wc->ledtestreg | BIT_LED0) & ~BIT_LED1;
 		else
 			wc->ledtestreg = wc->ledtestreg & ~(BIT_LED0 | BIT_LED1);
@@ -1472,13 +1471,13 @@ static void pr1_transmitprep(struct t1 *wc, u8 *pTransmit)
 
 	txbuf = pTransmit;
 
-	zt_transmit(&wc->span);
+	dahdi_transmit(&wc->span);
 
-	for (y=0;y<ZT_CHUNKSIZE;y++) 
+	for (y=0;y<DAHDI_CHUNKSIZE;y++) 
 	{
 		for (x=0;x<wc->span.channels;x++) 
 		{
-			txbuf[((WPR_NBCHAN * y) + (wc->chanmap[x] +  1))]= wc->chans[x].writechunk[y];
+			txbuf[((WPR_NBCHAN * y) + (wc->chanmap[x] +  1))]= wc->chans[x]->writechunk[y];
 		}
 	//*(txbuf+(y*32)+3)=0x04;
 	}
@@ -1493,24 +1492,24 @@ static void pr1_receiveprep(struct t1 *wc, u8 *pReceive)
 
 	rxbuf=pReceive;
 
-	for (y=0;y<ZT_CHUNKSIZE;y++) 
+	for (y=0;y<DAHDI_CHUNKSIZE;y++) 
 	{
 		for (x=0;x<wc->span.channels;x++) 
 		{
 			/* XXX Optimize, remove * and + XXX */
 			/* Must map received channels into appropriate data */
-			wc->chans[x].readchunk[y] = 
+			wc->chans[x]->readchunk[y] = 
 			rxbuf[((WPR_NBCHAN * y) + (wc->chanmap[x] +  1))]; 
 		}
 	}
 
 	for (x=0;x<wc->span.channels;x++) 
 	{
-		zt_ec_chunk(&wc->chans[x], wc->chans[x].readchunk, wc->ec_chunk2[x]);
-		memcpy(wc->ec_chunk2[x],wc->ec_chunk1[x],ZT_CHUNKSIZE);
-		memcpy(wc->ec_chunk1[x],wc->chans[x].writechunk,ZT_CHUNKSIZE);
+		dahdi_ec_chunk(wc->chans[x], wc->chans[x]->readchunk, wc->ec_chunk2[x]);
+		memcpy(wc->ec_chunk2[x],wc->ec_chunk1[x],DAHDI_CHUNKSIZE);
+		memcpy(wc->ec_chunk1[x],wc->chans[x]->writechunk,DAHDI_CHUNKSIZE);
 	}
-	zt_receive(&wc->span);
+	dahdi_receive(&wc->span);
 }
 
 static void __t1_check_alarms(struct t1 *wc)
@@ -1519,7 +1518,7 @@ static void __t1_check_alarms(struct t1 *wc)
 	int alarms;
 	int x,j;
 
-	if (!(wc->span.flags & ZT_FLAG_RUNNING))
+	if (!(wc->span.flags & DAHDI_FLAG_RUNNING))
 		return;
 
 	c = __t1_framer_in8(wc, 0x4c); /* PEF FRS0 Framer Status 0 */
@@ -1529,7 +1528,7 @@ static void __t1_check_alarms(struct t1 *wc)
 	alarms = 0;
 
 	/* And consider only carrier alarms */
-	wc->span.alarms &= (ZT_ALARM_RED | ZT_ALARM_BLUE | ZT_ALARM_NOTOPEN);
+	wc->span.alarms &= (DAHDI_ALARM_RED | DAHDI_ALARM_BLUE | DAHDI_ALARM_NOTOPEN);
 
 	if (wc->spantype == E1) {
 		if (c & 0x04) {
@@ -1555,37 +1554,37 @@ static void __t1_check_alarms(struct t1 *wc)
 		/* Detect loopup code if we're not sending one */
 		if ((!wc->span.mainttimer) && (d & 0x08)) {
 			/* Loop-up code detected */
-			if ((wc->loopupcnt++ > 80)  && (wc->span.maintstat != ZT_MAINT_REMOTELOOP)) {
+			if ((wc->loopupcnt++ > 80)  && (wc->span.maintstat != DAHDI_MAINT_REMOTELOOP)) {
 				__t1_framer_out8(wc, FALC56_LIM0, 0x08);	/* LIM0: Disable any local loop */
 				__t1_framer_out8(wc, FALC56_LIM1, 0xf6 );	/* LIM1: Enable remote loop */
-				wc->span.maintstat = ZT_MAINT_REMOTELOOP;
+				wc->span.maintstat = DAHDI_MAINT_REMOTELOOP;
 			}
 		} else
 			wc->loopupcnt = 0;
 		/* Same for loopdown code */
 		if ((!wc->span.mainttimer) && (d & 0x10)) {
 			/* Loop-down code detected */
-			if ((wc->loopdowncnt++ > 80)  && (wc->span.maintstat == ZT_MAINT_REMOTELOOP)) {
+			if ((wc->loopdowncnt++ > 80)  && (wc->span.maintstat == DAHDI_MAINT_REMOTELOOP)) {
 				__t1_framer_out8(wc, FALC56_LIM0, 0x08);	/* LIM0: Disable any local loop */
 				__t1_framer_out8(wc, FALC56_LIM1, 0xf0 );	/* LIM1: Disable remote loop */
-				wc->span.maintstat = ZT_MAINT_NONE;
+				wc->span.maintstat = DAHDI_MAINT_NONE;
 			}
 		} else
 			wc->loopdowncnt = 0;
 	}
 
-	if (wc->span.lineconfig & ZT_CONFIG_NOTOPEN) {
+	if (wc->span.lineconfig & DAHDI_CONFIG_NOTOPEN) {
 		for (x=0,j=0;x < wc->span.channels;x++)
-			if ((wc->span.chans[x].flags & ZT_FLAG_OPEN) ||
-			    (wc->span.chans[x].flags & ZT_FLAG_NETDEV))
+			if ((wc->chans[x]->flags & DAHDI_FLAG_OPEN) ||
+			    (wc->chans[x]->flags & DAHDI_FLAG_NETDEV))
 				j++;
 		if (!j)
-			alarms |= ZT_ALARM_NOTOPEN;
+			alarms |= DAHDI_ALARM_NOTOPEN;
 	}
 
 	if (c & 0xa0) {
 		if (wc->alarmcount >= alarmdebounce) { 
-			alarms |= ZT_ALARM_RED;
+			alarms |= DAHDI_ALARM_RED;
 			wc->ledtestreg = (wc->ledtestreg | BIT_LED1) & ~BIT_LED0;
                         pr1_set_led(wc);
 		}   else
@@ -1593,7 +1592,7 @@ static void __t1_check_alarms(struct t1 *wc)
 	} else
 		wc->alarmcount = 0;
 	if (c & 0x4) 
-		alarms |= ZT_ALARM_BLUE;
+		alarms |= DAHDI_ALARM_BLUE;
 
 	if (((!wc->span.alarms) && alarms) || 
 	    (wc->span.alarms && (!alarms))) 
@@ -1601,9 +1600,9 @@ static void __t1_check_alarms(struct t1 *wc)
 
 	/* Keep track of recovering */
 	if ((!alarms) && wc->span.alarms) 
-		wc->alarmtimer = ZT_ALARMSETTLE_TIME;
+		wc->alarmtimer = DAHDI_ALARMSETTLE_TIME;
 	if (wc->alarmtimer) {
-		alarms |= ZT_ALARM_RECOVER;
+		alarms |= DAHDI_ALARM_RECOVER;
 		wc->ledtestreg = wc->ledtestreg  | (BIT_LED0 | BIT_LED1);
                 pr1_set_led(wc);
 	}
@@ -1632,11 +1631,11 @@ static void __t1_check_alarms(struct t1 *wc)
 	/* Re-check the timing source when we enter/leave alarm, not withstanding
 	   yellow alarm */
 	if (c & 0x10)
-		alarms |= ZT_ALARM_YELLOW;
+		alarms |= DAHDI_ALARM_YELLOW;
 	if (wc->span.mainttimer || wc->span.maintstat) 
-		alarms |= ZT_ALARM_LOOPBACK;
+		alarms |= DAHDI_ALARM_LOOPBACK;
 	wc->span.alarms = alarms;
-	zt_alarm_notify(&wc->span);
+	dahdi_alarm_notify(&wc->span);
 }
 
 static void __t1_do_counters(struct t1 *wc)
@@ -1645,8 +1644,8 @@ static void __t1_do_counters(struct t1 *wc)
 	{
 		if (!--wc->alarmtimer) 
 		{
-			wc->span.alarms &= ~(ZT_ALARM_RECOVER);
-			zt_alarm_notify(&wc->span);
+			wc->span.alarms &= ~(DAHDI_ALARM_RECOVER);
+			dahdi_alarm_notify(&wc->span);
 		}
 	}
 }
@@ -1698,11 +1697,11 @@ static int pr1_dma_init(struct t1 *wc)
 #endif
   
 #if ((L1_DATA_A_LENGTH != 0) || (L1_DATA_B_LENGTH != 0))
-  iRxBuffer1 = (char*)l1_data_sram_alloc(2*ZT_CHUNKSIZE*WPR_NBCHAN);
+  iRxBuffer1 = (char*)l1_data_sram_alloc(2*DAHDI_CHUNKSIZE*WPR_NBCHAN);
 #else	
   { 
     dma_addr_t addr;
-    iRxBuffer1 = (char*)dma_alloc_coherent(NULL, 2*ZT_CHUNKSIZE*WPR_NBCHAN, &addr, 0);
+    iRxBuffer1 = (char*)dma_alloc_coherent(NULL, 2*DAHDI_CHUNKSIZE*WPR_NBCHAN, &addr, 0);
   }
 #endif
   
@@ -1718,7 +1717,7 @@ static int pr1_dma_init(struct t1 *wc)
 #if (defined(CONFIG_BF532) || defined(CONFIG_BF533))
   bfin_write_DMA1_START_ADDR(iRxBuffer1);
   /* DMA inner loop count */
-  bfin_write_DMA1_X_COUNT(ZT_CHUNKSIZE*WPR_NBCHAN);
+  bfin_write_DMA1_X_COUNT(DAHDI_CHUNKSIZE*WPR_NBCHAN);
 
   /* Inner loop address increment */
   bfin_write_DMA1_X_MODIFY(1);
@@ -1735,7 +1734,7 @@ static int pr1_dma_init(struct t1 *wc)
 #if (defined(CONFIG_BF536) || defined(CONFIG_BF537))
   bfin_write_DMA3_START_ADDR(iRxBuffer1);
   /* DMA inner loop count */
-  bfin_write_DMA3_X_COUNT(ZT_CHUNKSIZE*WPR_NBCHAN);
+  bfin_write_DMA3_X_COUNT(DAHDI_CHUNKSIZE*WPR_NBCHAN);
 
   /* Inner loop address increment */
   bfin_write_DMA3_X_MODIFY(1);
@@ -1751,11 +1750,11 @@ static int pr1_dma_init(struct t1 *wc)
 #endif
 
 #if ((L1_DATA_A_LENGTH != 0) || (L1_DATA_B_LENGTH != 0))
-  iTxBuffer1 = (char*)l1_data_sram_alloc(2*ZT_CHUNKSIZE*WPR_NBCHAN);
+  iTxBuffer1 = (char*)l1_data_sram_alloc(2*DAHDI_CHUNKSIZE*WPR_NBCHAN);
 #else	
   { 
     dma_addr_t addr;
-    iTxBuffer1 = (char*)dma_alloc_coherent(NULL, 2*ZT_CHUNKSIZE*WPR_NBCHAN, &addr, 0);
+    iTxBuffer1 = (char*)dma_alloc_coherent(NULL, 2*DAHDI_CHUNKSIZE*WPR_NBCHAN, &addr, 0);
   }
 #endif
  if (!iTxBuffer1)
@@ -1773,7 +1772,7 @@ static int pr1_dma_init(struct t1 *wc)
   bfin_write_DMA2_START_ADDR(iTxBuffer1);
 
   /* DMA inner loop count */
-  bfin_write_DMA2_X_COUNT(ZT_CHUNKSIZE*WPR_NBCHAN);
+  bfin_write_DMA2_X_COUNT(DAHDI_CHUNKSIZE*WPR_NBCHAN);
 
   /* Inner loop address increment */
   bfin_write_DMA2_X_MODIFY(1);
@@ -1790,7 +1789,7 @@ static int pr1_dma_init(struct t1 *wc)
   bfin_write_DMA4_START_ADDR(iTxBuffer1);
 
   /* DMA inner loop count */
-  bfin_write_DMA4_X_COUNT(ZT_CHUNKSIZE*WPR_NBCHAN);
+  bfin_write_DMA4_X_COUNT(DAHDI_CHUNKSIZE*WPR_NBCHAN);
 
   /* Inner loop address increment */
   bfin_write_DMA4_X_MODIFY(1);
@@ -1814,8 +1813,8 @@ static void pr1_dma_close(void)
   l1_data_sram_free(iTxBuffer1);
   l1_data_sram_free(iRxBuffer1);
 #else
-  dma_free_coherent(NULL, 2*ZT_CHUNKSIZE*WPR_NBCHAN, iTxBuffer1, 0);
-  dma_free_coherent(NULL, 2*ZT_CHUNKSIZE*WPR_NBCHAN, iRxBuffer1, 0);
+  dma_free_coherent(NULL, 2*DAHDI_CHUNKSIZE*WPR_NBCHAN, iTxBuffer1, 0);
+  dma_free_coherent(NULL, 2*DAHDI_CHUNKSIZE*WPR_NBCHAN, iRxBuffer1, 0);
 #endif
 }
 
@@ -2057,7 +2056,7 @@ static void __exit pr1_cleanup(void)
 	}
 }
 
-#ifdef LINUX26
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 module_param(alarmdebounce, int, 0600);
 module_param(loopback, int, 0600);
 module_param(t1e1mode, int, 0600);
@@ -2074,6 +2073,7 @@ MODULE_PARM(debug, "i");
 MODULE_PARM(j1mode, "i");
 MODULE_PARM(fakemode, "i");
 #endif
+
 MODULE_DESCRIPTION("Wildcard PR1-Appliance Zaptel Driver");
 MODULE_AUTHOR("Astfin - Team");
 #ifdef MODULE_LICENSE

@@ -1,0 +1,11 @@
+--- linux/drivers/dahdi/Kconfig	2009-11-29 22:44:33.000000000 +0200
++++ linux/drivers/dahdi/Kconfig	2009-11-29 22:45:25.000000000 +0200
+@@ -72,7 +72,7 @@
+ config DAHDI_WCTDM
+ 	tristate "Digium Wildcard TDM400P Support"
+ 	depends on DAHDI && PCI
+-	default DAHDI
++	default "n"
+ 	---help---
+ 	  This driver provides support for the Digium Wildcard TDM400P.
+ 

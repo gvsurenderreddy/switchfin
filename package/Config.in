@@ -19,8 +19,7 @@ source "package/uClinux-dist/Config.in"
 source "package/uBoot/Config.in"
 
 
-comment "Zaptel/Hardware settings"
-source "package/zaptel/Config.in"
+comment "Hardware settings"
 source "package/lec/Config.in"
 source "package/oslec/Config.in"
 

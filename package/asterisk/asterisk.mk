@@ -10,6 +10,7 @@
 # Copyright @ 2008 Astfin <mark@astfin.org>
 # Primary Authors: mark@astfin.org, pawel@astfin.org, Diego Searfin
 # Primary Authors: David@rowetel.com, Jeff Knighton
+# Dimitar Penev: 3.Dec. 2009  Upgrade to Asterisk 1.4.27 and DAHDI 
 # Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
 #######################################################################
 
@@ -17,7 +18,8 @@
 # Asterisk package for Astfin.org
 ##########################################
 
-ASTERISK_VERSION=1.4.21.2
+#ASTERISK_VERSION=1.4.21.2
+ASTERISK_VERSION=1.4.28
 ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
 ASTERISK_DIR=$(BUILD_DIR)/$(ASTERISK_NAME)
 ASTERISK_DIR_LINK=$(BUILD_DIR)/asterisk
@@ -28,20 +30,25 @@ ASTERISK_UNZIP=zcat
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
 ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
 ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
+ASTERISK_DEP=sqlite3 dahdi
 ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
 ASTERISK_CFLAGS+= -DUSE_SPANDSP_CALLERID
 ASTERISK_LDFLAGS+= -lspandsp -ltiff
+ASTERISK_DEP+= spandsp
+endif
+ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
+ASTERISK_DEP+= libpri
 endif
 ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib
-ASTERISK_CONFIGURE_OPTS+= --without-curl
-ASTERISK_DEP=""
+ASTERISK_CONFIGURE_OPTS+= --without-curl --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux
 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
-ASTERISK_DEP= mISDNuser
-ASTERISK_CFLAGS+= -I$(STAGING_INC)/include
+ASTERISK_DEP+= mISDNuser
 ASTERISK_CONFIGURE_OPTS+= --with-misdn
 endif
 ASTERISK_CONFIGURE_OPTS+= CFLAGS="$(ASTERISK_CFLAGS)" LDFLAGS="$(ASTERISK_LDFLAGS)"
+
+GNU_LD=0
 
 $(DL_DIR)/$(ASTERISK_SOURCE):
 	$(WGET) -P $(DL_DIR) $(ASTERISK_SITE)/$(ASTERISK_SOURCE)
@@ -51,88 +58,39 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	ln -sf $(ASTERISK_DIR) $(ASTERISK_DIR_LINK)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk asterisk.patch
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk cid.patch
-	rm -f $(ASTERISK_DIR)/channels/chan_misdn/channels/chan_misdn.c 
-	rm -f $(ASTERISK_DIR)/channels/chan_misdn/channels/misdn_config.c
-	rm -f $(ASTERISK_DIR)/channels/chan_misdn/channels/misdn/chan_misdn_config.h
-	rm -f $(ASTERISK_DIR)/channels/chan_misdn/channels/misdn/isdn_lib.c
-	rm -f $(ASTERISK_DIR)/channels/chan_misdn/channels/misdn/isdn_lib.h
-	ln -sf $(SOURCES_DIR)/chan_misdn/channels/chan_misdn.c $(ASTERISK_DIR_LINK)/channels/
-	ln -sf $(SOURCES_DIR)/chan_misdn/channels/misdn_config.c $(ASTERISK_DIR_LINK)/channels/
-	ln -sf $(SOURCES_DIR)/chan_misdn/channels/misdn/chan_misdn_config.h $(ASTERISK_DIR_LINK)/channels/misdn/
-	ln -sf $(SOURCES_DIR)/chan_misdn/channels/misdn/isdn_lib.c $(ASTERISK_DIR_LINK)/channels/misdn/
-	ln -sf $(SOURCES_DIR)/chan_misdn/channels/misdn/isdn_lib.h $(ASTERISK_DIR_LINK)/channels/misdn/
+
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 	ln -sf $(SOURCES_DIR)/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(SOURCES_DIR)/g729ab_codec.h $(ASTERISK_DIR)/codecs
 endif   
 	ln -sf $(SOURCES_DIR)/codec_speex.c $(ASTERISK_DIR)/codecs
-#	ln -sf $(SOURCES_DIR)/cdr_sqlite3.c $(ASTERISK_DIR)/cdr
 	touch $(ASTERISK_DIR)/.unpacked
 
 
 $(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
-	cp -v package/asterisk/embedded_template_misdn $(ASTERISK_DIR)/menuselect.makeopts
+	cp -v package/asterisk/asterisk_misdn.makeopts $(ASTERISK_DIR)/menuselect.makeopts
 else
-	cp -v package/asterisk/embedded_template $(ASTERISK_DIR)/menuselect.makeopts
+	cp -v package/asterisk/asterisk.makeopts $(ASTERISK_DIR)/menuselect.makeopts
 endif
-#	ln -sf $(SOURCES_DIR)/res_sqlite3.c $(ASTERISK_DIR)/res/
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
-	sed -i -e "s/^# CONFIG_ZAPTEL is not set/CONFIG_ZAPTEL=$(SF_PACKAGE_ZAPTEL)/" $(ZAPTEL_CONFIG);
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:
-	make -C $(UCLINUX_DIST)/lib/blackfin-gsm \
-	CC=$(TARGET_CC) AR=bfin-linux-uclibc-ar
+	make -C $(UCLINUX_DIST)/lib/blackfin-gsm CC=$(TARGET_CC) AR=bfin-linux-uclibc-ar
 	ln -sf $(UCLINUX_DIST)/lib/blackfin-gsm/gsm/lib/libgsm.a $(STAGING_LIB)
 	ln -sf $(UCLINUX_DIST)/lib/blackfin-gsm/gsm/inc/gsm.h $(STAGING_INC)
 
-
-ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
-asterisk: sqlite3 zaptel spandsp libpri $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-else
-asterisk: sqlite3 zaptel libpri $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-endif
-endif
-ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
-ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
-asterisk: sqlite3 zaptel spandsp mISDNuser $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-else
-asterisk: sqlite3 zaptel mISDNuser $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-endif
-endif
-ifeq ($(strip $(SF_IP04)),y)
-ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
-asterisk: sqlite3 zaptel spandsp $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-else
-asterisk: sqlite3 zaptel $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-endif
-endif
-ifeq ($(strip $(SF_IP01)),y)
-ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
-asterisk: sqlite3 zaptel spandsp $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-else
-asterisk: sqlite3 zaptel $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-endif
-endif
-
-ifeq ($(strip $(SF_FX08)),y)
-ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
-asterisk: sqlite3 zaptel spandsp $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-else
-asterisk: sqlite3 zaptel $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
-endif
-endif
+asterisk: $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_VERBOSE)),y)
-	-$(MAKE1) -C $(ASTERISK_DIR) menuselect
+#	-$(MAKE1) -C $(ASTERISK_DIR) menuselect
 endif
-	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
-	$(MAKE1) -C $(ASTERISK_DIR) codecs NOISY_BUILD=1
+#	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
+#	$(MAKE1) -C $(ASTERISK_DIR) codecs NOISY_BUILD=1 GNU_LD=0
 
-	OPTIMIZE="-Os" ASTCFLAGS="$(ASTERISK_CFLAGS)" ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
-	$(MAKE1) -C $(ASTERISK_DIR) NOISY_BUILD=1
+	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
+	$(MAKE1) -C $(ASTERISK_DIR) NOISY_BUILD=1 GNU_LD=0
 
 	mkdir -p $(TARGET_DIR)/bin/
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk/sounds
@@ -141,13 +99,13 @@ endif
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk/sounds/voicemail
 	mkdir -p $(TARGET_DIR)/var/spool/asterisk
 	mkdir -p $(TARGET_DIR)/usr/lib/asterisk/modules
-	ln -sf /var/lib/asterisk/sounds/moh $(TARGET_DIR)/var/lib/asterisk/
-	ln -sf /var/lib/asterisk/sounds/meetme $(TARGET_DIR)/var/spool/asterisk/
-	ln -sf /var/lib/asterisk/sounds/voicemail $(TARGET_DIR)/var/spool/asterisk/
+#	ln -sf /var/lib/asterisk/sounds/moh $(TARGET_DIR)/var/lib/asterisk/
+#	ln -sf /var/lib/asterisk/sounds/meetme $(TARGET_DIR)/var/spool/asterisk/
+#	ln -sf /var/lib/asterisk/sounds/voicemail $(TARGET_DIR)/var/spool/asterisk/
 	cp -v $(ASTERISK_DIR)/main/asterisk $(TARGET_DIR)/bin/
 	ln -sf /bin/asterisk $(TARGET_DIR)/bin/rasterisk
 	find $(ASTERISK_DIR) -name '*.so' -exec cp -v "{}" $(TARGET_DIR)/usr/lib/asterisk/modules/ \;
-	$(TARGET_STRIP) $(TARGET_DIR)/bin/asterisk
+	$(TARGET_STRIP)  $(TARGET_DIR)/bin/asterisk
 	$(TARGET_STRIP) $(TARGET_DIR)/usr/lib/asterisk/modules/*.so
 
 
