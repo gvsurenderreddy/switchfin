@@ -45,14 +45,14 @@ $(DL_DIR)/$(TOOLCHAIN_BIN_B):
 $(TOOLCHAIN_BUILD)/.unpacked_a: $(DL_DIR)/$(TOOLCHAIN_BIN_A)
 	mkdir -p $(TOOLCHAIN_BUILD)
 	$(TOOLCHAIN_UNZIP) -xjf $(DL_DIR)/$(TOOLCHAIN_BIN_A) -C $(TOOLCHAIN_BUILD)
-	if [ -d $(TOOLS_BIN2) ]; then \
+	if [ -d $(TOOLS_BIN3) ]; then \
 		touch $(TOOLCHAIN_BUILD)/.unpacked_a; \
 	fi
 
 $(TOOLCHAIN_BUILD)/.unpacked_b: $(DL_DIR)/$(TOOLCHAIN_BIN_B)
 	mkdir -p $(TOOLCHAIN_BUILD)
 	$(TOOLCHAIN_UNZIP) -xjf $(DL_DIR)/$(TOOLCHAIN_BIN_B) -C $(TOOLCHAIN_BUILD)
-	if [ -d $(TOOLS_BIN1) ]; then \
+	if [ -d $(TOOLS_BIN2) ]; then \
 		touch $(TOOLCHAIN_BUILD)/.unpacked_b; \
 	fi
 

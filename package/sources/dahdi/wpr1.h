@@ -33,7 +33,7 @@
  * 04/14/08 : Mark @ Astfin . org - Overall code cleanup
  * 12/23/09 : dpn@switchvoice.com - Dimitar Penev, migration to DAHDI
  *
- * Copyright @ 2010 SwitchFin <dpn@switchvoice.com> 
+ * Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
  *****************************************************************/
 #ifndef __F56_H
 #define __F56_H
@@ -322,11 +322,11 @@ struct t1 {
 	unsigned char outbyte;
 	unsigned long ioaddr;
 	/* T1 signalling */
-	unsigned char ec_chunk1[31][ZT_CHUNKSIZE];
-	unsigned char ec_chunk2[31][ZT_CHUNKSIZE];
+	unsigned char ec_chunk1[31][DAHDI_CHUNKSIZE];
+	unsigned char ec_chunk2[31][DAHDI_CHUNKSIZE];
 	unsigned char tempo[32];
-	struct zt_span span;						/* Span */
-	struct zt_chan chans[31];					/* Channels */
+	struct dahdi_span span;						/* Span */
+	struct dahdi_chan *chans[31];					/* Channels */
 };
 
 /* E1 - T1 related functions & PEF 2256 setup */
@@ -338,8 +338,8 @@ static inline void __t1_framer_out8(struct t1 *wc, const unsigned int reg, const
 static inline void t1_framer_out8(struct t1 *wc, const unsigned int addr, const unsigned int value);
 
 static void __t1_set_clear(struct t1 *wc);
-static int __t1_maint(struct zt_span *span, int cmd);
-static int __t1_rbsbits(struct zt_chan *chan, int bits);
+static int __t1_maint(struct dahdi_span *span, int cmd);
+static int __t1_rbsbits(struct dahdi_chan *chan, int bits);
 static void __t1_check_sigbits(struct t1 *wc);
 static void __t1_pef_setup(struct t1 *wc);
 static void __t1_configure_t1(struct t1 *wc, int lineconfig, int txlevel);
@@ -350,8 +350,8 @@ static void __t1_do_counters(struct t1 *wc);
 static inline void start_alarm(struct t1 *wc);
 static inline void stop_alarm(struct t1 *wc);
 
-static int pr1_open(struct zt_chan *chan);
-static int pr1_close(struct zt_chan *chan);
+static int pr1_open(struct dahdi_chan *chan);
+static int pr1_close(struct dahdi_chan *chan);
 
 static void pr1_release(struct t1 *wc);
 
@@ -366,19 +366,20 @@ static void pr1_disable_interrupts(void);
 static u8 *isr_write_processing(void);
 static u8 *isr_read_processing(void);
 
-static irqreturn_t sport_rx_isr(int irq, void *dev_id, struct pt_regs * regs);
+static irqreturn_t sport_rx_isr(int irq, void *dev_id);
+
 
 static void pr1_set_led(struct t1 *wc);
 
-static int pr1_ioctl(struct zt_chan *chan, unsigned int cmd, unsigned long data);
+static int pr1_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long data);
 
 
-static void pr1_framer_start(struct t1 *wc, struct zt_span *span);
-static int pr1_startup(struct zt_span *span);
-static int pr1_shutdown(struct zt_span *span);
+static void pr1_framer_start(struct t1 *wc, struct dahdi_span *span);
+static int pr1_startup(struct dahdi_span *span);
+static int pr1_shutdown(struct dahdi_span *span);
 
-static int pr1_chanconfig(struct zt_chan *chan, int sigtype);
-static int pr1_spanconfig(struct zt_span *span, struct zt_lineconfig *lc);
+static int pr1_chanconfig(struct dahdi_chan *chan, int sigtype);
+static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc);
 
 static inline void __t1_handle_leds(struct t1 *wc);
 

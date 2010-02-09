@@ -77,13 +77,13 @@ dahdi: $(ZARLINK_LEC) $(OSLEC_IN) $(DAHDI_DIR)/.configured
 
 	cd $(DAHDI_DIR)/tools; make all
 
+	cp $(DAHDI_DIR)/tools/tonezone.h $(STAGING_INC)/dahdi
 	cp $(DAHDI_DIR)/tools/libtonezone.so $(STAGING_LIB)
 	cp $(DAHDI_DIR)/tools/libtonezone.so $(TARGET_DIR)/lib
 	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtonezone.so
-ifeq ($(strip $(SF_PACKAGE_DAHDI_PR1)),y)
+ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 
-        cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
-
+	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.ko \
 	$(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 endif

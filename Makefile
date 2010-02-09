@@ -74,6 +74,7 @@ TARGETS_IMAGE:=$(patsubst %,%-image,$(TARGETS))
 #############################################################################
 TOOLS_BIN1=$(BASE_DIR)/toolchain/opt/uClinux/bfin-uclinux/bin
 TOOLS_BIN2=$(BASE_DIR)/toolchain/opt/uClinux/bfin-linux-uclibc/bin
+TOOLS_BIN3=$(BASE_DIR)/toolchain/opt/uClinux/bfin-linux-uclibc/bfin-linux-uclibc/lib/
 PATH:= /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
 PATH:= $(PATH):$(TOOLS_BIN1):$(TOOLS_BIN2)
 

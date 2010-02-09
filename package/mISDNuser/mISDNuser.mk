@@ -23,11 +23,8 @@ mISDNuser_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/mISDNuser
 mISDNuser_CONFIG=$(UCLINUX_KERNEL_SRC)/.config
 
 
-
 mISDNuserCFLAGS += -g -Wall -I $(mISDNuser_DIR)/include -I $(mISDN_DIR)/include -ffast-math -D__FIXED_PT__  -I$(STAGING_INC)
 mISDNuserCFLAGS += -D CLOSE_REPORT=1 -mfdpic -D__BLACKFIN__
-
-
 
 
 $(DL_DIR)/$(mISDNuser_NAME)-$(mISDNuser_REV):

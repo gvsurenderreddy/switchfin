@@ -74,6 +74,8 @@ else
 	cp -v package/asterisk/asterisk.makeopts $(ASTERISK_DIR)/menuselect.makeopts
 endif
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
+	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
+	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:
