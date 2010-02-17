@@ -13,7 +13,7 @@
 #        uClinux 2009R1-RC2 (kernel 2.6.28.10)
 #        blackfin toolchain 2009R1-RC7
 #        Big thanks to Jeff Palmer jpalmer@gsat.us
-# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
 MAKE1=make -j1

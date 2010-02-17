@@ -4,7 +4,7 @@
  *
 * Copyright (c) <2007>, <pawel@astfin.org> & Astfin
 * All rights reserved.
-* Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+* Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 *
 * BSD License:
 * Redistribution and use in source and binary forms, with or without

@@ -12,7 +12,7 @@
 # Update 27 July 2009, Dimitar Penev dpn@ucpbx.com
 #        uClinux 2009R1-RC2 (kernel 2.6.28.10)
 #        blackfin toolchain 2009R1-RC7
-# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
 

@@ -31,9 +31,9 @@
  * 08/12/07 : Mark - adapted for pr1-appliance
  * 16/12/07 : Pawel Pastuszak - added sport0 support for Blackfin BF537
  * 04/14/08 : Mark @ Astfin . org - Overall code cleanup
- * 12/23/09 : dpn@switchvoice.com - Dimitar Penev, migration to DAHDI
+ * 12/23/09 : dpn@switchfin.org - Dimitar Penev, migration to DAHDI
  *
- * Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+ * Copyright @ 2010 SwitchFin <dpn@switchfin.org>
  *****************************************************************/
 #ifndef __F56_H
 #define __F56_H

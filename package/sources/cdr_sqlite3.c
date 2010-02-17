@@ -29,7 +29,7 @@
  * 
  * Creates the database and table on-the-fly
  * \ingroup cdr_drivers
- * Copyright 2010 SwitchFin dpn@switchvoice.com
+ * Copyright 2010 SwitchFin dpn@switchfin.org
  */
 
 #include "asterisk.h"

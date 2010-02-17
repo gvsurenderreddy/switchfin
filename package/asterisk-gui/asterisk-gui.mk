@@ -9,7 +9,7 @@
 # GNU General Public License for more details.
 # Copyright @ 2008 Astfin <mark@astfin.org> and <Li@astfin.org>
 # Primary Authors: mark@astfin.org, li@astfin.org
-# Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
 ##########################################

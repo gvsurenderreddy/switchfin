@@ -38,9 +38,9 @@
  * 10/13/08 : DPN @ uCpbx . com   - Added support for different terminations we need for T1/E1
  * 				    T1: 100 Ohm; E1: 120 Ohm 	
  * 12/16/08 : Mark @ Astfin . org - Added support for Legacy 2.1 version
- * 12/23/09 : dpn@switchvoice.com - Dimitar Penev, migration to DAHDI
+ * 12/23/09 : dpn@switchfin.org - Dimitar Penev, migration to DAHDI
  *
- * Copyright @ 2010 SwitchFin <dpn@switchvoice.com> 
+ * Copyright @ 2010 SwitchFin <dpn@switchfin.org> 
  ******************************************************************************/
 
 #include <linux/kernel.h>

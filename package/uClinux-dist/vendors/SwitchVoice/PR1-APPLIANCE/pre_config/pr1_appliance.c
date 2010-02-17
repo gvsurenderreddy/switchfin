@@ -10,7 +10,7 @@
  *               Copyright 2005 National ICT Australia (NICTA)
  *               Copyright 2004-2006 Analog Devices Inc.
  *               Copyright 2008 Astfin
- *		 Copyright @ 2010 SwitchFin <dpn@switchvoice.com>
+ *		 Copyright @ 2010 SwitchFin <dpn@switchfin.org>
  *
  * Bugs:         Enter bugs at http://blackfin.uclinux.org/
  *

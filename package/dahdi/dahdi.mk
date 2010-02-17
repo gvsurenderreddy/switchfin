@@ -9,7 +9,7 @@
 # GNU General Public License for more details.
 # Copyright @ 2007, 2009 Astfin
 # Primary Authors: Dimitar Penev dpn@ucpbx.com
-# Copyright @ 2010 SwitchFin dpn@switchvoice.com
+# Copyright @ 2010 SwitchFin dpn@switchfin.org
 #########################################################################
 #############################################
 # DAHDI package for SwitchFin.org

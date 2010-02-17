@@ -39,7 +39,7 @@
 */
 
 /*
-  Copyright 2010 SwitchFin dpn@switchvoice.com	
+  Copyright 2010 SwitchFin dpn@switchfin.org	
 */
 
 #include <linux/module.h>
