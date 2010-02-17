@@ -3,6 +3,9 @@
 # Jeff Knighton Feb 2008
 #
 # Inherited from BAPS
+# Updated for spandsp 0.0.6 dpn@switchfin.org
+# 
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################
 
 LIBTIFF_SITE=http://dl.maptools.org/dl/libtiff
@@ -28,6 +31,10 @@ $(LIBTIFF_DIR)/.configured: $(LIBTIFF_DIR)/.unpacked
 libtiff: $(LIBTIFF_DIR)/.configured
 	make -C $(LIBTIFF_DIR)/ STAGEDIR=$(STAGING_DIR)
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff* $(STAGING_DIR)/usr/lib/
+	cp -f $(LIBTIFF_DIR)/libtiff/tiff.h $(STAGING_DIR)/usr/include/     
+	cp -f $(LIBTIFF_DIR)/libtiff/tiffconf.h $(STAGING_DIR)/usr/include/
+	cp -f $(LIBTIFF_DIR)/libtiff/tiffio.h $(STAGING_DIR)/usr/include/
+	cp -f $(LIBTIFF_DIR)/libtiff/tiffvers.h $(STAGING_DIR)/usr/include/
 
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff.so.3 $(TARGET_DIR)/lib
 	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtiff.so.3

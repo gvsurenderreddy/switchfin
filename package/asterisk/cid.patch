@@ -20,29 +20,15 @@
  		break;
  	case AST_FORMAT_G723_1:
                  samples = g723_samples(f->data, f->datalen);
---- asterisk/main/callerid.c	2009-11-22 18:31:26.000000000 +0200
-+++ asterisk/main/callerid.c	2009-11-22 18:46:23.000000000 +0200
-@@ -45,7 +45,31 @@
+--- asterisk/main/callerid.c	2009-07-17 00:24:16.000000000 +0300
++++ asterisk/main/callerid.c	2010-02-17 11:56:08.000000000 +0200
+@@ -45,7 +45,17 @@
  #include "asterisk/options.h"
  #include "asterisk/utils.h"
  
 +#ifdef USE_SPANDSP_CALLERID
-+#include <inttypes.h>
-+#include <assert.h>
-+#include "spandsp/telephony.h"
-+#include "spandsp/logging.h"
-+#include "spandsp/complex.h"
-+#include "spandsp/dds.h"
-+#include "spandsp/power_meter.h"
-+#include "spandsp/async.h"
-+#include "spandsp/crc.h"
-+#include "spandsp/fsk.h"
-+#include "spandsp/tone_detect.h"
-+#include "spandsp/tone_generate.h"
-+#include "spandsp/super_tone_rx.h"
-+#include "spandsp/queue.h"
-+#include "spandsp/dtmf.h"
-+#include "spandsp/adsi.h"
++#define SPANDSP_EXPOSE_INTERNAL_STRUCTURES
++#include <spandsp.h>
 +#endif
 +
  struct callerid_state {
@@ -54,7 +40,7 @@
  	fsk_data fskd;
  	char rawdata[256];
  	short oldstuff[160];
-@@ -61,6 +85,7 @@
+@@ -61,6 +71,7 @@
  
  	int skipflag; 
  	unsigned short crc;
@@ -62,7 +48,7 @@
  };
  
  
-@@ -77,6 +102,29 @@
+@@ -77,6 +88,29 @@
  
  #define AST_CALLERID_UNKNOWN	"<unknown>"
  
@@ -92,7 +78,7 @@
  static inline void gen_tones(unsigned char *buf, int len, int codec, float ddr1, float ddi1, float ddr2, float ddi2, float *cr1, float *ci1, float *cr2, float *ci2)
  {
  	int x;
-@@ -134,6 +182,12 @@
+@@ -134,6 +168,12 @@
  	struct callerid_state *cid;
  
  	if ((cid = ast_calloc(1, sizeof(*cid)))) {
@@ -105,7 +91,7 @@
  		cid->fskd.spb = 7.0;          	/* 1200 baud */
  		/* cid->fskd.hdlc = 0; */     	/* Async */
  		cid->fskd.nbit = 8;           	/* 8 bits */
-@@ -559,7 +613,11 @@
+@@ -559,7 +599,11 @@
  		buf[x+cid->oldlen/2] = AST_XLAW(ubuf[x]);
  	while(mylen >= 160) {
  		olen = mylen;
@@ -117,7 +103,7 @@
  		if (mylen < 0) {
  			ast_log(LOG_ERROR, "No start bit found in fsk data.\n");
  			free(obuf);
-@@ -572,6 +630,13 @@
+@@ -572,6 +616,13 @@
  			return -1;
  		}
  		if (res == 1) {
@@ -131,7 +117,7 @@
  			/* Ignore invalid bytes */
  			if (b > 0xff)
  				continue;
-@@ -606,6 +671,7 @@
+@@ -606,6 +657,7 @@
  				if (!cid->len) {
  					cid->rawdata[cid->pos] = '\0';
  					cid->sawflag = 5;
@@ -139,7 +125,7 @@
  				}
  				break;
  			case 5: /* Check checksum */
-@@ -615,7 +681,7 @@
+@@ -615,7 +667,7 @@
  					cid->sawflag = 0;
  					break;
  				}
@@ -148,7 +134,7 @@
  				cid->number[0] = '\0';
  				cid->name[0] = '\0';
  				/* If we get this far we're fine.  */
-@@ -692,10 +758,16 @@
+@@ -692,10 +744,16 @@
  				}
  				free(obuf);
  				return 1;

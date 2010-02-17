@@ -1,0 +1,88 @@
+--- src/config.h	2010-02-14 21:30:56.000000000 +0200
++++ src/config.h	2010-02-14 21:31:12.000000000 +0200
+@@ -304,10 +304,10 @@
+ #endif
+ 
+ /* Define to rpl_malloc if the replacement function should be used. */
+-#define malloc rpl_malloc
++//#define malloc rpl_malloc
+ 
+ /* Define to rpl_realloc if the replacement function should be used. */
+-#define realloc rpl_realloc
++//#define realloc rpl_realloc
+ 
+ /* Define to empty if the keyword `volatile' does not work. Warning: valid
+    code using `volatile' can become incorrect without. Disable with care. */
+--- src/Makefile	2010-02-14 23:29:38.000000000 +0200
++++ src/Makefile	2010-02-14 23:28:51.000000000 +0200
+@@ -101,6 +101,8 @@
+ am__depfiles_maybe = depfiles
+ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+ 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
++HOST_COMPILE = gcc $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
++        $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+ 	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+ 	$(AM_CFLAGS) $(CFLAGS)
+@@ -615,10 +617,10 @@
+ 	done
+ make_at_dictionary$(EXEEXT): $(make_at_dictionary_OBJECTS) $(make_at_dictionary_DEPENDENCIES) 
+ 	@rm -f make_at_dictionary$(EXEEXT)
+-	$(LINK) $(make_at_dictionary_LDFLAGS) $(make_at_dictionary_OBJECTS) $(make_at_dictionary_LDADD) $(LIBS)
++	gcc $(make_at_dictionary_LDFLAGS) $(make_at_dictionary_OBJECTS) $(make_at_dictionary_LDADD) -o make_at_dictionary$(EXEEXT)
+ make_modem_filter$(EXEEXT): $(make_modem_filter_OBJECTS) $(make_modem_filter_DEPENDENCIES) 
+ 	@rm -f make_modem_filter$(EXEEXT)
+-	$(LINK) $(make_modem_filter_LDFLAGS) $(make_modem_filter_OBJECTS) $(make_modem_filter_LDADD) $(LIBS)
++	gcc $(make_modem_filter_LDFLAGS) $(make_modem_filter_OBJECTS) $(make_modem_filter_LDADD) -o make_modem_filter$(EXEEXT)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+@@ -708,6 +710,19 @@
+ include ./$(DEPDIR)/vector_float.Plo
+ include ./$(DEPDIR)/vector_int.Plo
+ 
++#compile make_at_dictionary and make_modem_filter and filter_tools for the host
++$(make_at_dictionary_OBJECTS): $(make_at_dictionary_SOURCES)
++	if $(HOST_COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
++	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
++
++$(make_modem_filter_OBJECTS): $(make_modem_filter_SOURCES)
++	if $(HOST_COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
++	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
++
++filter_tools.o: filter_tools.c filter_tools.h
++	if $(HOST_COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
++        then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
++
+ .c.o:
+ 	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+ 	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+--- src/filter_tools.c	2009-02-10 19:16:57.000000000 +0200
++++ src/filter_tools.c	2010-02-14 23:28:51.000000000 +0200
+@@ -220,7 +220,7 @@
+ }
+ /*- End of function --------------------------------------------------------*/
+ 
+-void truncate_coeffs(double coeffs[], int len, int bits, int hilbert)
++/*void truncate_coeffs(double coeffs[], int len, int bits, int hilbert)
+ {
+     double x;
+     double fac;
+@@ -231,13 +231,14 @@
+ 
+     fac = pow(2.0, (double) (bits - 1.0));
+     h = (len - 1)/2;
+-    max = (hilbert)  ?  coeffs[h - 1]  :  coeffs[h];	/* Max coeff */
++    max = (hilbert)  ?  coeffs[h - 1]  :  coeffs[h];	// Max coeff 
+     scale = (fac - 1.0)/(fac*max);
+     for (i = 0;  i < len;  i++)
+     {
+-        x = coeffs[i]*scale;           /* Scale coeffs so max is (fac - 1.0)/fac */
+-        coeffs[i] = fix(x*fac)/fac;    /* Truncate */
++        x = coeffs[i]*scale;           // Scale coeffs so max is (fac - 1.0)/fac 
++        coeffs[i] = fix(x*fac)/fac;    // Truncate 
+     }
+ }
++*/
+ /*- End of function --------------------------------------------------------*/
+ /*- End of file ------------------------------------------------------------*/

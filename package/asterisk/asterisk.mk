@@ -10,7 +10,7 @@
 # Copyright @ 2008 Astfin <mark@astfin.org>
 # Primary Authors: mark@astfin.org, pawel@astfin.org, Diego Searfin
 # Primary Authors: David@rowetel.com, Jeff Knighton
-# Dimitar Penev: 3.Dec. 2009  Upgrade to Asterisk 1.4.27 and DAHDI 
+# Dimitar Penev: 3.Dec. 2009  Upgrade to Asterisk 1.4.28 and DAHDI 
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #######################################################################
 
