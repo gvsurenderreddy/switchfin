@@ -11,9 +11,8 @@
 # Primary Authors: mark@astfin.org, pawel@astfin.org
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
-
 config SF_PACKAGE_TFTPD
 	bool "Tftpd"
-	default n
+	default y
 	help
-		Trivial File Transfer Protocol Daemon
+		Trivial File Transfer Protocol Daemon (based on atftp)

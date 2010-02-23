@@ -12,9 +12,6 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #######################################################################
 
-##########################################
-# Tftpd package for Astfin.org
-##########################################
 
 TFTPD_SITE=http://downloads.openwrt.org/sources
 TFTPD_VERSION=0.7

@@ -18,7 +18,6 @@
 # Asterisk package for Astfin.org
 ##########################################
 
-#ASTERISK_VERSION=1.4.21.2
 ASTERISK_VERSION=1.4.28
 ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
 ASTERISK_DIR=$(BUILD_DIR)/$(ASTERISK_NAME)
@@ -76,6 +75,9 @@ endif
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
+	
+	cp package/sources/asterisk/app_rxfax.c $(ASTERISK_DIR)/apps
+#       cp package/sources/asterisk/app_txfax.c $(ASTERISK_DIR)/apps
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:

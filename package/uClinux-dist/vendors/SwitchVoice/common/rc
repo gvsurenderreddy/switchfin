@@ -145,7 +145,7 @@ ifconfig lo 127.0.0.1
 
 # setup persistent for tftpd
 if [ -f /bin/in.tftpd ]; then
-echo "tftp    dgram  udp wait   root /bin/in.tftpd -s /persistent/tftpboot" >> /etc/inetd.conf
+echo "tftp    dgram  udp wait   root /bin/in.tftpd /persistent/tftp" >> /etc/inetd.conf
 fi
 
 # start up services linked to rc.d
