@@ -1,0 +1,25 @@
+Subject: Fax image name_of_the_file
+From: "IP02" <ip02@switchvoice.com>
+Content-Type: multipart/mixed;
+ boundary="------------060502030501040302050009"
+ 
+This is a multi-part message in MIME format.
+--------------060502030501040302050009
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+ 
+Hello,
+ 
+The received FAX file is attached.
+ 
+ 
+Best Regards
+IP02
+ 
+--------------060502030501040302050009
+Content-Type: image/tiff;
+ name="name_of_the_file"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="name_of_the_file"
+   

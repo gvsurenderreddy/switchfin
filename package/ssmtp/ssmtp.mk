@@ -35,6 +35,7 @@ SSMTP_CFLAGS+=-DREWRITE_DOMAIN=1  $(EXTRADEFS) -g
 SSMTP_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl
 SSMTP_DEP=""
 SSMTPCONFDIR=/etc/ssmtp
+MAILFILE_SOURCES=$(SOURCES_DIR)/mailfile
 
 # Configuration files
 CONFIGURATION_FILE=$(SSMTPCONFDIR)/ssmtp.conf
@@ -78,6 +79,12 @@ ssmtp: $(SSMTP_DIR)/.configured xgethostname.o ssmtp.o arpadate.o base64.o
 	mkdir -p $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
 	cp -v $(SSMTP_DIR)/ssmtp $(TARGET_DIR)/bin/
+	
+	#add mailfile support (requires uuencode from the busybox)
+	cp -v $(MAILFILE_SOURCES)/mailfile.sh $(TARGET_DIR)/bin/
+	chmod 777 $(TARGET_DIR)/bin/mailfile.sh
+	cp -v $(MAILFILE_SOURCES)/mailfile_header_template $(TARGET_DIR)/bin/
+	cp -v $(MAILFILE_SOURCES)/mailfile_footer_template $(TARGET_DIR)/bin/	
 
 ssmtp-clean:
 	rm -f $(SSMTP_DIR)/.configured
