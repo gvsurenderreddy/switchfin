@@ -34,5 +34,6 @@ source "package/ssmtp/Config.in"
 source "package/n2n/Config.in"
 source "package/rsync/Config.in"
 source "package/cgic/Config.in"
+source "package/vim/Config.in"
 endmenu
 

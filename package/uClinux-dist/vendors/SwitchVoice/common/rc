@@ -2,7 +2,7 @@
 #
 #/etc/rc
 #
-## The astfin main rc file - PR1-APPLIANCE version
+## The Switchfin main rc file
 
 mount /proc
 mount /sys

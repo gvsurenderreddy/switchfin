@@ -7,15 +7,12 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# Copyright @ 2008 Astfin <mark@astfin.org>
-# Primary Author: mark@astfin.org
-# Copyright @ 2010 Switchfin <dpn@switchfin.org>
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
-config SF_PACKAGE_SSMTP
-	bool "ssmtp"
-	default y if (SF_PACKAGE_ASTERISKGUI)
-	default n
+config SF_PACKAGE_VIM
+	bool "vim"
+	default y
 	help
-		Small SMTP mailer package for Switchfin
+		VIM editor for Switchfin 
 
