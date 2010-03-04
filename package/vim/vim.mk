@@ -36,7 +36,6 @@ $(VIM_DIR)/.configured: $(VIM_DIR)/.unpacked
 
 vim: $(VIM_DIR)/.configured
 	make -C $(VIM_DIR)/ STAGEDIR=$(STAGING_DIR)
-	rm -Rf $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin	
 	mkdir -p $(TARGET_DIR)/usr/share/vim
 	cp -f $(VIM_DIR)/src/vim $(TARGET_DIR)/bin/vim

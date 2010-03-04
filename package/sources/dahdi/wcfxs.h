@@ -45,7 +45,7 @@ struct wcfxs_regop {
 	unsigned short val;
 };
 
-#define WCFXS_GET_STATS	_IOR (ZT_CODE, 60, struct wcfxs_stats)
-#define WCFXS_GET_REGS	_IOR (ZT_CODE, 61, struct wcfxs_regs)
-#define WCFXS_SET_REG	_IOW (ZT_CODE, 62, struct wcfxs_regop)
+#define WCFXS_GET_STATS	_IOR (DAHDI_CODE, 60, struct wcfxs_stats)
+#define WCFXS_GET_REGS	_IOR (DAHDI_CODE, 61, struct wcfxs_regs)
+#define WCFXS_SET_REG	_IOW (DAHDI_CODE, 62, struct wcfxs_regop)
 

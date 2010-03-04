@@ -1,18 +1,18 @@
 #!/bin/hush
-# Start up file for Zaptel
+# Start up file for DAHDI
 
 case $1 in
-	start) modprobe wcfxs;
-	       zapscan;
-	       ztcfg;;
+#	start) modprobe wcfxs;
+        start)	dahdi_scan;
+		dahdi_cfg;;
 	stop) modprobe -r wcfxs;;
 	restart) modprobe -r wcfxs;
 		modprobe wcfxs;
-		ztcfg;;
-	enable) rm -f /persistent/etc/rc.d/S40zaptel; 
-	        ln -s /persistent/etc/init.d/zaptel /persistent/etc/rc.d/S40zaptel;;
-	disable) rm -f /persistent/etc/rc.d/S40zaptel;;
-        *) echo 'Syntax: /etc/init.d/zaptel [command]'
+		dahdi_cfg;;
+	enable) rm -f /persistent/etc/rc.d/S40dahdi; 
+	        ln -s /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
+	disable) rm -f /persistent/etc/rc.d/S40dahdi;;
+        *) echo 'Syntax: /etc/init.d/dahdi [command]'
            echo ''
            echo '       Available commands:'
            echo '               start   Start the service'

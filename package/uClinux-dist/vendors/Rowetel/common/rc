@@ -2,11 +2,25 @@
 #
 #/etc/rc
 #
-## The astfin main rc file - PR1-APPLIANCE version
+## The Switchfin main rc file
 
-mount -a
+mount /proc
+mount /sys
+mount /dev/pts
 mount -t ramfs ramfs /var/log
 mount -t ramfs ramfs /var/tmp
+
+#mount ubifs on /persistent
+mknod /dev/ubi_ctrl c 10 63
+ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0
+mknod /dev/ubi0 c 253 0
+ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
+if [ -z "$ubivol" ]; then
+	/bin/flash_eraseall /dev/mtd3			#clean flash
+	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0	#attach it
+	ubimkvol /dev/ubi0 -m -N persistent		#make volume	
+fi
+mount /persistent
 
 ##### Following looks for an image to burn into FLASH before starting asterisk.
 echo "Checking for upload image to program"
@@ -131,7 +145,7 @@ ifconfig lo 127.0.0.1
 
 # setup persistent for tftpd
 if [ -f /bin/in.tftpd ]; then
-echo "tftp    dgram  udp wait   root /bin/in.tftpd -s /persistent/tftpboot" >> /etc/inetd.conf
+echo "tftp    dgram  udp wait   root /bin/in.tftpd /persistent/tftp" >> /etc/inetd.conf
 fi
 
 # start up services linked to rc.d

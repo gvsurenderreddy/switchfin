@@ -31,8 +31,6 @@ choice
         help
           Stuff
 
-config SF_STAMP537
-	bool "Blackfin STAMP 537"
 config SF_PR1_APPLIANCE
 	bool "PR1 Appliance"
 config SF_BR4_APPLIANCE

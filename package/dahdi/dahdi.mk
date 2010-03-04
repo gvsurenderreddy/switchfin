@@ -33,7 +33,10 @@ ZARLINK_LEC=lec
 ZAPTEL_EXTRA_CFLAGS+= -DECHO_CAN_FROMENV -DECHO_CAN_ZARLINK
 endif
 endif
-
+ifeq ($(strip $(SF_IP04)),y)
+DAHDI_MODULES_EXTRA+= wcfxs bfsi sport_interface
+DAHDI_EXTRA_CFLAGS+= -DCONFIG_4FX_SPORT_INTERFACE
+endif
 
 $(DL_DIR)/$(DAHDI_SOURCE):
 	mkdir -p $(TOPDIR)/$(DL_DIR)
@@ -43,6 +46,15 @@ $(DAHDI_DIR)/.unpacked: $(DL_DIR)/$(DAHDI_SOURCE) $(BASE_DIR)/.config
 	$(DAHDI_UNZIP) $(DL_DIR)/$(DAHDI_SOURCE) | \
 	tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	cd $(DAHDI_DIR); patch -p0 < $(BASE_DIR)/package/dahdi/dahdi.patch
+ifeq ($(strip $(SF_IP04)),y)
+	ln -sf $(DAHDI_SOURCES)/sport_interface.h $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.h
+	ln -sf $(DAHDI_SOURCES)/wcfxs.h $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.h
+	ln -sf $(DAHDI_SOURCES)/bfsi.h $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.h
+	ln -sf $(DAHDI_SOURCES)/sport_interface.c $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.c
+	ln -sf $(DAHDI_SOURCES)/wcfxs.c $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.c
+	ln -sf $(DAHDI_SOURCES)/fx.c $(DAHDI_DIR)/linux/drivers/dahdi/fx.c
+	ln -sf $(DAHDI_SOURCES)/bfsi.c $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.c
+endif
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	ln -sf $(LEC_SOURCES)/zl_wrap.h $(DAHDI_DIR)/linux/drivers/dahdi/zl_wrap.h	
 	ln -sf $(DAHDI_SOURCES)/wpr1.c $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.c
@@ -94,7 +106,11 @@ endif
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 endif
-	
+ifeq ($(strip $(SF_IP04)),y)
+	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko \
+	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+endif	
 
 dahdi-clean:
 	make -C $(DAHDI_DIR) clean

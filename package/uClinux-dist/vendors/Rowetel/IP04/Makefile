@@ -6,12 +6,14 @@
 include $(LINUX_CONFIG)
 include $(CONFIG_CONFIG)
 
+VERSIONSTR=UI2.10
+
 ROMFS_DIRS-y = bin etc etc/dhcpc home lib mnt mnt/mmc proc sys usr var root home tmp var/run var/lib/misc persistent
 ROMFS_DIRS-y += var/run/asterisk var/log var/lock var/lib var/lib/asterisk/sounds var/tmp
 ROMFS_DIRS-y +=  var/lib/asterisk/static-http var/spool var/spool/asterisk var/spool/asterisk/outgoing
 
 ETC_FILES-y = \
-	filesystems group  mime.types modprobe.conf motd \
+	filesystems group mime.types modprobe.conf motd \
 	rc rpc TZ tux-bf.gif fstab  mime.types
 WEB_FILES-y =
 

@@ -1186,8 +1186,6 @@ CONFIG_SECURITY_CAPABILITIES=m
 # Library routines
 #
 CONFIG_BITREVERSE=y
-CONFIG_CRC_CCITT=y
-# CONFIG_CRC16 is not set
 # CONFIG_CRC_ITU_T is not set
 CONFIG_CRC32=y
 # CONFIG_LIBCRC32C is not set
@@ -1241,7 +1239,6 @@ CONFIG_APP_STACK_L1=y
 # Speed Optimizations
 #
 CONFIG_BFIN_INS_LOWOVERHEAD=y
-CONFIG_DMA_UNCACHED_1M=y
 
 #
 # Networking options
@@ -1343,7 +1340,6 @@ CONFIG_BFIN_DMA_INTERFACE=m
 # Special HID drivers
 #
 # CONFIG_USB_SUPPORT is not set
-# CONFIG_MMC is not set
 # CONFIG_MEMSTICK is not set
 # CONFIG_ACCESSIBILITY is not set
 

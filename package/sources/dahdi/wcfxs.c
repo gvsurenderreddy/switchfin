@@ -38,6 +38,10 @@
  * debug=2 increases the latency of the ISR, for example the ISR may
  * take longer than one interrupt to execute, which will upset timing
  * measurements in the /proc/bfsi.
+ *
+ * 5 Mar. 2010 Dimitar Penev Modified for DAHDI
+ *	
+ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
  */
 
 #include <linux/delay.h>
@@ -219,11 +223,7 @@ static struct fxo_mode {
 	{ "YEMEN", 0, 0, 0, 0, 0, 0x3, 0, 0 },
 };
 
-#ifdef STANDALONE_ZAPATA
-#include "zaptel.h"
-#else
-#include "zaptel.h"
-#endif
+#include <dahdi/kernel.h>
 
 #ifdef LINUX26
 #include <linux/moduleparam.h>
@@ -346,7 +346,7 @@ struct calregs {
 struct wcfxs {
 	int   irq;
 	char *variety;
-	struct zt_span span;
+	struct dahdi_span span;
 	unsigned char ios;
 	int usecount;
 	unsigned int intcount;
@@ -401,7 +401,7 @@ struct wcfxs {
 	dma_addr_t	writedma;
 	volatile int *writechunk;					/* Double-word aligned write memory */
 	volatile int *readchunk;					/* Double-word aligned read memory */
-	struct zt_chan chans[NUM_CARDS];
+	struct dahdi_chan chans[NUM_CARDS];
 };
 
 
@@ -454,10 +454,10 @@ static inline void ring_check(struct wcfxs *wc, int card)
 	short sample;
 	if (wc->modtype[card] != MOD_TYPE_FXO)
 		return;
-	wc->mod.fxo.pegtimer[card] += ZT_CHUNKSIZE;
-	for (x=0;x<ZT_CHUNKSIZE;x++) {
+	wc->mod.fxo.pegtimer[card] += DAHDI_CHUNKSIZE;
+	for (x=0;x<DAHDI_CHUNKSIZE;x++) {
 		/* Look for pegging to indicate ringing */
-		sample = ZT_XLAW(wc->chans[card].readchunk[x], (&(wc->chans[card])));
+		sample = DAHDI_XLAW(wc->chans[card].readchunk[x], (&(wc->chans[card])));
 		if ((sample > 10000) && (wc->mod.fxo.peg[card] != 1)) {
 			if (debug > 1) printk("High peg!\n");
 			if ((wc->mod.fxo.pegtimer[card] < PEGTIME) && (wc->mod.fxo.pegtimer[card] > MINPEGTIME))
@@ -485,14 +485,14 @@ static inline void ring_check(struct wcfxs *wc, int card)
 			if (debug)
 				printk("RING on %d/%d!\n", wc->span.spanno, card + 1);
 			if (!wc->mod.fxo.offhook[card])
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_RING);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
 			wc->mod.fxo.ring[card] = 1;
 		}
 		if (wc->mod.fxo.ring[card] && !wc->mod.fxo.pegcount[card]) {
 			/* No more ring */
 			if (debug)
 				printk("NO RING on %d/%d!\n", wc->span.spanno, card + 1);
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 			wc->mod.fxo.ring[card] = 0;
 		}
 	}
@@ -516,9 +516,9 @@ static inline void wcfxs_transmitprep(struct wcfxs *wc, u8 *writechunk)
 	int x;
 
 	/* Calculate Transmission */
-	zt_transmit(&wc->span);
+	dahdi_transmit(&wc->span);
 
-	for (x=0;x<ZT_CHUNKSIZE;x++) {
+	for (x=0;x<DAHDI_CHUNKSIZE;x++) {
 		if (wc->cardflag & (1 << 7))
 			writechunk[8*x+7] = wc->chans[7].writechunk[x];
 		if (wc->cardflag & (1 << 6))
@@ -536,7 +536,7 @@ static inline void wcfxs_transmitprep(struct wcfxs *wc, u8 *writechunk)
 			writechunk[8*x+1] = wc->chans[1].writechunk[x];
 		if (wc->cardflag & (1 << 0)) {
 			writechunk[8*x+0] = wc->chans[0].writechunk[x];
-			//writechunk[8*x+0] = ZT_LIN2MU(sw[swi++]);
+			//writechunk[8*x+0] = DAHDI_LIN2MU(sw[swi++]);
 			//if (swi == 6) swi = 0;
 		}
 	}
@@ -548,7 +548,7 @@ static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 	//int echo_before;
 
 	//memset(readchunk, 0, 64);
-	for (x=0;x<ZT_CHUNKSIZE;x++) {
+	for (x=0;x<DAHDI_CHUNKSIZE;x++) {
 		if (wc->cardflag & (1 << 7))
 			wc->chans[7].readchunk[x] = readchunk[8*x+7];
 		if (wc->cardflag & (1 << 6))
@@ -575,11 +575,11 @@ static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 	//echo_before = cycles();
 	for (x=0;x<wc->cards;x++) {
 		if (wc->cardflag & (1 << x))
-			zt_ec_chunk(&wc->chans[x], wc->chans[x].readchunk, wc->chans[x].writechunk);
+			dahdi_ec_chunk(&wc->chans[x], wc->chans[x].readchunk, wc->chans[x].writechunk);
 	}
 
 	//echo_sams = cycles() - echo_before;
-	zt_receive(&wc->span);
+	dahdi_receive(&wc->span);
 }
 
 /* we have only one card at the moment */
@@ -826,24 +826,24 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 	if (!wc->mod.fxo.offhook[card]) {
 		res = wcfxs_getreg(wc, card, 5);
 		if ((res & 0x60) && wc->mod.fxo.battery[card]) {
-			wc->mod.fxo.ringdebounce[card] += (ZT_CHUNKSIZE * NUM_CARDS);
-			if (wc->mod.fxo.ringdebounce[card] >= ZT_CHUNKSIZE * 64) {
+			wc->mod.fxo.ringdebounce[card] += (DAHDI_CHUNKSIZE * NUM_CARDS);
+			if (wc->mod.fxo.ringdebounce[card] >= DAHDI_CHUNKSIZE * 64) {
 				if (!wc->mod.fxo.wasringing[card]) {
 					wc->mod.fxo.wasringing[card] = 1;
-					zt_hooksig(&wc->chans[card], ZT_RXSIG_RING);
+					dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
 					wcfxs_set_led(wc, card+1, FX_LED_GREEN);
 					if (debug>=2)
 						printk("RING on %d/%d!\n", wc->span.spanno, card + 1);
 				}
-				wc->mod.fxo.ringdebounce[card] = ZT_CHUNKSIZE * 64;
+				wc->mod.fxo.ringdebounce[card] = DAHDI_CHUNKSIZE * 64;
 			}
 		} else {
 
-			wc->mod.fxo.ringdebounce[card] -= ZT_CHUNKSIZE;
+			wc->mod.fxo.ringdebounce[card] -= DAHDI_CHUNKSIZE;
 			if (wc->mod.fxo.ringdebounce[card] <= 0) {
 				if (wc->mod.fxo.wasringing[card]) {
 					wc->mod.fxo.wasringing[card] =0;
-					zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+					dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 					wcfxs_set_led(wc, card+1, FX_LED_RED);
 					/* leds mess up current card setting */
 					wc->curcard = -1;
@@ -878,7 +878,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 			wc->mod.fxo.battery[card] =  0;
 #ifdef	JAPAN
 			if ((!wc->ohdebounce) && wc->offhook) {
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 				if (debug)
 					printk("Signalled On Hook\n");
 #ifdef	ZERO_BATT_RING
@@ -886,7 +886,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 #endif
 			}
 #else
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 #endif
 			wc->mod.fxo.battdebounce[card] = BATT_DEBOUNCE;
 		} else if (!wc->mod.fxo.battery[card])
@@ -899,12 +899,12 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 #ifdef	ZERO_BATT_RING
 			if (wc->onhook) {
 				wc->onhook = 0;
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 				if (debug)
 					printk("Signalled Off Hook\n");
 			}
 #else
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 #endif
 			wc->mod.fxo.battery[card] = 1;
 			wc->mod.fxo.nobatttimer[card] = 0;
@@ -939,7 +939,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 			       wc->mod.fxo.polarity[card], 
 			       wc->mod.fxo.lastpol[card]);
 			if (wc->mod.fxo.polarity[card])
-			    zt_qevent_lock(&wc->chans[card], ZT_EVENT_POLARITY);
+			    dahdi_qevent_lock(&wc->chans[card], DAHDI_EVENT_POLARITY);
 			wc->mod.fxo.polarity[card] = wc->mod.fxo.lastpol[card];
 		    }
 		}
@@ -961,7 +961,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 		wc->mod.fxs.debounce[card] = 8 * (4 * 8);
 	} else {
 		if (wc->mod.fxs.debounce[card] > 0) {
-			wc->mod.fxs.debounce[card]-= 4 * ZT_CHUNKSIZE;
+			wc->mod.fxs.debounce[card]-= 4 * DAHDI_CHUNKSIZE;
 			if (!wc->mod.fxs.debounce[card]) {
 				wc->mod.fxs.debouncehook[card] = hook;
 			}
@@ -969,7 +969,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 				/* Off hook */
 				if (debug>=2)
 					printk("wcfxs: Card %d Going off hook\n", card);
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 				if (robust)
 					wcfxs_init_proslic(wc, card, 1, 0, 1);
 				wc->mod.fxs.oldrxhook[card] = 1;
@@ -978,7 +978,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 				/* On hook */
 				if (debug>=2)
 					printk("wcfxs: Card %d Going on hook\n", card);
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 				wc->mod.fxs.oldrxhook[card] = 0;
 			}
 		}
@@ -1013,7 +1013,7 @@ static inline void wcfxs_proslic_recheck_sanity(struct wcfxs *wc, int card)
 }
 
 /* handles regular interrupt processing, called every time we get a DMA
-   interrupt which is every 1ms with ZT_CHUNKSIZE == 8 */
+   interrupt which is every 1ms with DAHDI_CHUNKSIZE == 8 */
 
 void regular_interrupt_processing(u8 *read_samples, u8 *write_samples) {
   struct wcfxs *wc = devs;
@@ -1083,12 +1083,12 @@ static int wcfxs_voicedaa_insane(struct wcfxs *wc, int card)
 
 static int wcfxs_proslic_insane(struct wcfxs *wc, int card)
 {
-	int blah,insane_report,blah1;
+	int blah,insane_report;
 	insane_report=0;
 
 	blah = wcfxs_getreg(wc, card, 0);
 	if (debug) {
-		printk("Testing for ProSLIC card = %d blah = 0x%x blah1 = 0x%x\n", card, blah, blah1);
+		printk("Testing for ProSLIC card = %d blah = 0x%x\n", card, blah);
 	}
 
 #if 0
@@ -1656,7 +1656,7 @@ static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast, int manual, 
 	return 0;
 }
 
-static int wcfxs_ioctl(struct zt_chan *chan, unsigned int cmd, unsigned long data)
+static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long data)
 {
 	struct wcfxs_stats stats;
 	struct wcfxs_regs regs;
@@ -1665,9 +1665,9 @@ static int wcfxs_ioctl(struct zt_chan *chan, unsigned int cmd, unsigned long dat
 	int x;
 
 	switch (cmd) {
-	case ZT_ONHOOKTRANSFER:
+	case DAHDI_ONHOOKTRANSFER:
 	        if (debug)
-		    printk("wcfxs_ioctl, ZT_ONHOOKTRANSFER %d\n", chan->chanpos - 1);
+		    printk("wcfxs_ioctl, DAHDI_ONHOOKTRANSFER %d\n", chan->chanpos - 1);
 		if (wc->modtype[chan->chanpos - 1] != MOD_TYPE_FXS)
 			return -EINVAL;
 		if (get_user(x, (int *)data))
@@ -1748,7 +1748,7 @@ static int wcfxs_ioctl(struct zt_chan *chan, unsigned int cmd, unsigned long dat
 
 }
 
-static int wcfxs_open(struct zt_chan *chan)
+static int wcfxs_open(struct dahdi_chan *chan)
 {
 	struct wcfxs *wc = chan->pvt;
 	if (!(wc->cardflag & (1 << (chan->chanpos - 1))))
@@ -1757,14 +1757,14 @@ static int wcfxs_open(struct zt_chan *chan)
 		return -ENODEV;
 	wc->usecount++;
 #ifndef LINUX26
-	MOD_INC_USE_COUNT;
+//	MOD_INC_USE_COUNT;
 #else
 	try_module_get(THIS_MODULE);
 #endif	
 	return 0;
 }
 
-static int wcfxs_watchdog(struct zt_span *span, int event)
+static int wcfxs_watchdog(struct dahdi_span *span, int event)
 {
 	printk("TDM: Restarting DMA\n");
 #ifdef NOT_NEEDED_YET
@@ -1773,12 +1773,12 @@ static int wcfxs_watchdog(struct zt_span *span, int event)
 	return 0;
 }
 
-static int wcfxs_close(struct zt_chan *chan)
+static int wcfxs_close(struct dahdi_chan *chan)
 {
 	struct wcfxs *wc = chan->pvt;
 	wc->usecount--;
 #ifndef LINUX26
-	MOD_DEC_USE_COUNT;
+//	MOD_DEC_USE_COUNT;
 #else
 	module_put(THIS_MODULE);
 #endif
@@ -1791,53 +1791,53 @@ static int wcfxs_close(struct zt_chan *chan)
 	return 0;
 }
 
-static int wcfxs_hooksig(struct zt_chan *chan, zt_txsig_t txsig)
+static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 {
 	struct wcfxs *wc = chan->pvt;
 	int reg=0;
 	if (wc->modtype[chan->chanpos - 1] == MOD_TYPE_FXO) {
 		/* XXX Enable hooksig for FXO XXX */
 		switch(txsig) {
-		case ZT_TXSIG_START:
-		case ZT_TXSIG_OFFHOOK:
+		case DAHDI_TXSIG_START:
+		case DAHDI_TXSIG_OFFHOOK:
 			wc->mod.fxo.offhook[chan->chanpos - 1] = 1;
 			wcfxs_setreg(wc, chan->chanpos - 1, 5, 0x9);
 			if (debug)
-			    printk("ZT_TXSIG_OFFHOOK FXO %d\n", chan->chanpos - 1);
+			    printk("DAHDI_TXSIG_OFFHOOK FXO %d\n", chan->chanpos - 1);
 			break;
-		case ZT_TXSIG_ONHOOK:
+		case DAHDI_TXSIG_ONHOOK:
 			wc->mod.fxo.offhook[chan->chanpos - 1] = 0;
 			wcfxs_setreg(wc, chan->chanpos - 1, 5, 0x8);
 			if (debug)
-			    printk("ZT_TXSIG_ONHOOK FXO %d\n", chan->chanpos - 1);
+			    printk("DAHDI_TXSIG_ONHOOK FXO %d\n", chan->chanpos - 1);
 			break;
 		default:
 			printk("wcfxo: Can't set tx state to %d\n", txsig);
 		}
 	} else {
 		switch(txsig) {
-		case ZT_TXSIG_ONHOOK:
+		case DAHDI_TXSIG_ONHOOK:
 			wcfxs_set_led(wc, chan->chanpos, FX_LED_GREEN);
 			if (debug)
-			    printk("ZT_TXSIG_ONHOOK FXS %d\n", chan->chanpos - 1);
+			    printk("DAHDI_TXSIG_ONHOOK FXS %d\n", chan->chanpos - 1);
 			switch(chan->sig) {
-			case ZT_SIG_EM:
-			case ZT_SIG_FXOKS:
-			case ZT_SIG_FXOLS:
+			case DAHDI_SIG_EM:
+			case DAHDI_SIG_FXOKS:
+			case DAHDI_SIG_FXOLS:
 			        //wc->mod.fxs.lasttxhook[chan->chanpos-1] = 1; /* power off audio paths */
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = wc->mod.fxs.idletxhookstate[chan->chanpos-1];
 				break;
-			case ZT_SIG_FXOGS:
+			case DAHDI_SIG_FXOGS:
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = 3;
 				break;
 			}
 			break;
-		case ZT_TXSIG_OFFHOOK:
+		case DAHDI_TXSIG_OFFHOOK:
 			wcfxs_set_led(wc, chan->chanpos, FX_LED_GREEN);
 			if (debug)
-			    printk("ZT_TXSIG_OFFHOOK FXS %d\n", chan->chanpos - 1);
+			    printk("DAHDI_TXSIG_OFFHOOK FXS %d\n", chan->chanpos - 1);
 			switch(chan->sig) {
-			case ZT_SIG_EM:
+			case DAHDI_SIG_EM:
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = 5;
 				break;
 			default:
@@ -1845,15 +1845,15 @@ static int wcfxs_hooksig(struct zt_chan *chan, zt_txsig_t txsig)
 				break;
 			}
 			break;
-		case ZT_TXSIG_START:
+		case DAHDI_TXSIG_START:
 			wcfxs_set_led(wc, chan->chanpos, FX_LED_RED);
 			if (debug)
-			    printk("ZT_TXSIG_START FXS %d\n", chan->chanpos - 1);
+			    printk("DAHDI_TXSIG_START FXS %d\n", chan->chanpos - 1);
 			wc->mod.fxs.lasttxhook[chan->chanpos-1] = 4;
 			break;
-		case ZT_TXSIG_KEWL:
+		case DAHDI_TXSIG_KEWL:
 			if (debug)
-			    printk("ZT_TXSIG_KEWL FXS %d\n", chan->chanpos - 1);
+			    printk("DAHDI_TXSIG_KEWL FXS %d\n", chan->chanpos - 1);
 			wc->mod.fxs.lasttxhook[chan->chanpos-1] = 0;
 			break;
 		default:
@@ -1880,29 +1880,29 @@ static int wcfxs_initialize(struct wcfxs *wc)
 	/* Zapata stuff */
 	sprintf(wc->span.name, "WCTDM/%d", wc->pos);
 	sprintf(wc->span.desc, "%s Board %d", wc->variety, wc->pos + 1);
-	wc->span.deflaw = ZT_LAW_MULAW;
+	wc->span.deflaw = DAHDI_LAW_MULAW;
 	for (x=0;x<wc->cards;x++) {
 		sprintf(wc->chans[x].name, "WCTDM/%d/%d", wc->pos, x);
-		wc->chans[x].sigcap = ZT_SIG_FXOKS | ZT_SIG_FXOLS | ZT_SIG_FXOGS | ZT_SIG_SF | ZT_SIG_EM | ZT_SIG_CLEAR;
-		wc->chans[x].sigcap |= ZT_SIG_FXSKS | ZT_SIG_FXSLS | ZT_SIG_SF | ZT_SIG_CLEAR;
+		wc->chans[x].sigcap = DAHDI_SIG_FXOKS | DAHDI_SIG_FXOLS | DAHDI_SIG_FXOGS | DAHDI_SIG_SF | DAHDI_SIG_EM | DAHDI_SIG_CLEAR;
+		wc->chans[x].sigcap |= DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS | DAHDI_SIG_SF | DAHDI_SIG_CLEAR;
 		wc->chans[x].chanpos = x+1;
 		wc->chans[x].pvt = wc;
 	}
 	wc->span.manufacturer   = "Rowetel";
         strncpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
-	wc->span.chans = wc->chans;
+	*(wc->span.chans) = wc->chans; //Penev ??? 
 	wc->span.channels = wc->cards;
 	wc->span.hooksig = wcfxs_hooksig;
 	wc->span.open = wcfxs_open;
 	wc->span.close = wcfxs_close;
-	wc->span.flags = ZT_FLAG_RBS;
+	wc->span.flags = DAHDI_FLAG_RBS;
 	wc->span.ioctl = wcfxs_ioctl;
 	wc->span.watchdog = wcfxs_watchdog;
 	init_waitqueue_head(&wc->span.maintq);
 
 	wc->span.pvt = wc;
-	if (zt_register(&wc->span, 0)) {
-		printk("Unable to register span with zaptel\n");
+	if (dahdi_register(&wc->span, 0)) {
+		printk("Unable to register span with DAHDI\n");
 		return -1;
 	}
 	return 0;
@@ -1915,9 +1915,9 @@ static void wcfxs_post_initialize(struct wcfxs *wc)
 	for (x=0;x<wc->cards;x++) {
 		if (wc->cardflag & (1 << x)) {
 			if (wc->modtype[x] == MOD_TYPE_FXO)
-				wc->chans[x].sigcap = ZT_SIG_FXSKS | ZT_SIG_FXSLS | ZT_SIG_SF | ZT_SIG_CLEAR;
+				wc->chans[x].sigcap = DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS | DAHDI_SIG_SF | DAHDI_SIG_CLEAR;
 			else
-				wc->chans[x].sigcap = ZT_SIG_FXOKS | ZT_SIG_FXOLS | ZT_SIG_FXOGS | ZT_SIG_SF | ZT_SIG_EM | ZT_SIG_CLEAR;
+				wc->chans[x].sigcap = DAHDI_SIG_FXOKS | DAHDI_SIG_FXOLS | DAHDI_SIG_FXOGS | DAHDI_SIG_SF | DAHDI_SIG_EM | DAHDI_SIG_CLEAR;
 		}
 	}
 }
@@ -1969,7 +1969,7 @@ static int wcfxs_hardware_init(struct wcfxs *wc)
 	//bfsi_spi_write_8_bits(2, 2);
     create_proc_read_entry("wcfxs", 0, NULL, wcfxs_proc_read, NULL);
 
-	printk("bfsi_sport_init res: %d\n",bfsi_sport_init(regular_interrupt_processing, ZT_CHUNKSIZE, debug));
+	printk("bfsi_sport_init res: %d\n",bfsi_sport_init(regular_interrupt_processing, DAHDI_CHUNKSIZE, debug));
 #ifdef MULTI_SPI_FRAMEWORK
 	multi_spi_reset();
 #else
@@ -2106,7 +2106,7 @@ static int wcfxs_init_one(struct wcfxs_desc *d)
 		}
 
 		if (wcfxs_hardware_init(wc)) {
-			zt_unregister(&wc->span);
+			dahdi_unregister(&wc->span);
 			printk("wcfxs_hardware_init() failed...\n");
 			kfree(wc);
 			return -EIO;
@@ -2131,7 +2131,7 @@ static void wcfxs_release(struct wcfxs *wc)
 	if (wcfxs_init_ok) {
 	  /* disable serial port, this will stop DMA and interrupts */
 	  bfsi_sport_close();
-	  zt_unregister(&wc->span);
+	  dahdi_unregister(&wc->span);
 	  kfree(wc);
 	}
         remove_proc_entry("wcfxs", NULL);
@@ -2141,7 +2141,7 @@ static void wcfxs_release(struct wcfxs *wc)
 static int __init wcfxs_init(void)
 {
 	int x;
-        printk(KERN_ALERT "Code test: code function addr = 0x%p\n", zt_ec_chunk);
+        printk(KERN_ALERT "Code test: code function addr = 0x%p\n", dahdi_ec_chunk);
 	for (x=0;x<(sizeof(fxo_modes) / sizeof(fxo_modes[0])); x++) {
 		if (!strcmp(fxo_modes[x].name, opermode))
 			break;
@@ -2170,7 +2170,7 @@ static void __exit wcfxs_cleanup(void)
 
 	#ifdef OLD_DR
 	if (loopback) {
-		for(r=0; r<ZT_CHUNKSIZE*2; r++) {
+		for(r=0; r<DAHDI_CHUNKSIZE*2; r++) {
 			printk("[%03d] ", r*8);
 			for(c=0; c<8; c++) {
 				printk("0x%02x 0x%02x  ", 
