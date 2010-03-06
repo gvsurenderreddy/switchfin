@@ -402,6 +402,7 @@ struct wcfxs {
 	volatile int *writechunk;					/* Double-word aligned write memory */
 	volatile int *readchunk;					/* Double-word aligned read memory */
 	struct dahdi_chan chans[NUM_CARDS];
+	struct dahdi_chan *_chans[NUM_CARDS];
 };
 
 
@@ -1485,7 +1486,6 @@ static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast, int manual, 
 	int fxsmode=0;
 
 	manual = 1;
-
 	/* By default, don't send on hook */
 	wc->mod.fxs.idletxhookstate [card] = 1;
 
@@ -1876,7 +1876,6 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 static int wcfxs_initialize(struct wcfxs *wc)
 {
 	int x;
-
 	/* Zapata stuff */
 	sprintf(wc->span.name, "WCTDM/%d", wc->pos);
 	sprintf(wc->span.desc, "%s Board %d", wc->variety, wc->pos + 1);
@@ -1884,13 +1883,14 @@ static int wcfxs_initialize(struct wcfxs *wc)
 	for (x=0;x<wc->cards;x++) {
 		sprintf(wc->chans[x].name, "WCTDM/%d/%d", wc->pos, x);
 		wc->chans[x].sigcap = DAHDI_SIG_FXOKS | DAHDI_SIG_FXOLS | DAHDI_SIG_FXOGS | DAHDI_SIG_SF | DAHDI_SIG_EM | DAHDI_SIG_CLEAR;
-		wc->chans[x].sigcap |= DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS | DAHDI_SIG_SF | DAHDI_SIG_CLEAR;
+		wc->chans[x].sigcap |= DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS;
 		wc->chans[x].chanpos = x+1;
 		wc->chans[x].pvt = wc;
+		wc->_chans[x]=&(wc->chans[x]);
 	}
 	wc->span.manufacturer   = "Rowetel";
-        strncpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
-	*(wc->span.chans) = wc->chans; //Penev ??? 
+	dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
+	wc->span.chans = wc->_chans;
 	wc->span.channels = wc->cards;
 	wc->span.hooksig = wcfxs_hooksig;
 	wc->span.open = wcfxs_open;
@@ -1899,8 +1899,8 @@ static int wcfxs_initialize(struct wcfxs *wc)
 	wc->span.ioctl = wcfxs_ioctl;
 	wc->span.watchdog = wcfxs_watchdog;
 	init_waitqueue_head(&wc->span.maintq);
-
 	wc->span.pvt = wc;
+	
 	if (dahdi_register(&wc->span, 0)) {
 		printk("Unable to register span with DAHDI\n");
 		return -1;

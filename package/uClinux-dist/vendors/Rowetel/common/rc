@@ -167,7 +167,7 @@ else
 sleep 3
 if test `ping -c 1 downloads.digium.com |grep "ttl" |wc -l` -gt 0
 then
-/bin/create_sounds
+#/bin/create_sounds
 fi
 fi
 ln -sf /persistent/sounds/moh /var/lib/asterisk/

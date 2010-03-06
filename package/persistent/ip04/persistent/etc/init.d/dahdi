@@ -2,8 +2,8 @@
 # Start up file for DAHDI
 
 case $1 in
-#	start) modprobe wcfxs;
-        start)	dahdi_scan;
+	start) 	modprobe wcfxs;
+        	dahdi_scan;
 		dahdi_cfg;;
 	stop) modprobe -r wcfxs;;
 	restart) modprobe -r wcfxs;

@@ -42,9 +42,7 @@ vim: $(VIM_DIR)/.configured
 	echo set nocompatible > $(TARGET_DIR)/usr/share/vim/vimrc
 	touch $(PKG_BUILD_DIR)/.built
 
-all: vim
-
-dirclean:
+vim-dirclean:
 	rm -rf $(VIM_DIR)
 
 ################################################

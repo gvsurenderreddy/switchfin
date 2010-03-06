@@ -9,3 +9,14 @@
  	---help---
  	  This driver provides support for the Digium Wildcard TDM400P.
  
+--- linux/Makefile	2010-03-05 15:47:32.000000000 +0200
++++ linux/Makefile	2010-03-05 15:47:59.000000000 +0200
+@@ -88,7 +88,7 @@
+ 	fi
+ 	@rm -f $@.tmp
+ 
+-prereq: include/dahdi/version.h firmware-loaders
++prereq: include/dahdi/version.h
+ 
+ stackcheck: checkstack modules
+ 	./checkstack kernel/*.ko kernel/*/*.ko
