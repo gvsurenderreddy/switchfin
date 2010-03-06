@@ -24,7 +24,7 @@ globals {
 	//CONSOLE=Phone/phone0
 	IAXINFO=guest;				// IAXtel username/password
 	//IAXINFO="myuser:mypass";
-	TRUNK="Zap/g2";					// Trunk interface
+	TRUNK="DAHDI/g2";					// Trunk interface
 	//
 	// Note the 'g2' in the TRUNK variable above. It specifies which group (defined
 	// in zapata.conf) to dial, i.e. group 2, and how to choose a channel to use in

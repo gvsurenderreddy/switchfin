@@ -16,7 +16,8 @@ ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0
 mknod /dev/ubi0 c 253 0
 ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
 if [ -z "$ubivol" ]; then
-	/bin/flash_eraseall /dev/mtd3			#clean flash
+	ubidetach /dev/ubi_ctrl --mtdn=3
+	ubiformat /dev/mtd3				#format
 	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0	#attach it
 	ubimkvol /dev/ubi0 -m -N persistent		#make volume	
 fi
@@ -167,7 +168,7 @@ else
 sleep 3
 if test `ping -c 1 downloads.digium.com |grep "ttl" |wc -l` -gt 0
 then
-#/bin/create_sounds
+/bin/create_sounds
 fi
 fi
 ln -sf /persistent/sounds/moh /var/lib/asterisk/
