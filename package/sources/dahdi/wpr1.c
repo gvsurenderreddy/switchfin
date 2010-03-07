@@ -38,7 +38,7 @@
  * 10/13/08 : DPN @ uCpbx . com   - Added support for different terminations we need for T1/E1
  * 				    T1: 100 Ohm; E1: 120 Ohm 	
  * 12/16/08 : Mark @ Astfin . org - Added support for Legacy 2.1 version
- * 12/23/09 : dpn@switchfin.org - Dimitar Penev, migration to DAHDI
+ * 12/23/09 : dpn@switchfin.org   - Dimitar Penev, migration to DAHDI
  *
  * Copyright @ 2010 SwitchFin <dpn@switchfin.org> 
  ******************************************************************************/
@@ -731,7 +731,7 @@ static void __t1_set_clear(struct t1 *wc)
 	unsigned short val=0;
 	for (i=0;i<24;i++) {
 		j = (i/8);
-		if (wc->chans[i]->flags & DAHDI_FLAG_CLEAR) 
+		if (wc->chans[i].flags & DAHDI_FLAG_CLEAR) 
 			val |= 1 << (7 - (i % 8));
 		if ((i % 8)==7) {
 			if (debug)
@@ -891,14 +891,14 @@ static void __t1_check_sigbits(struct t1 *wc)
 			a = __t1_framer_in8(wc, 0x71 + i); /* XS1 + i Tx CAS Register */
 			/* Get high channel in low bits */
 			rxs = (a & 0xf);
-			if (!(wc->chans[i+16]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i+16]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i+16], rxs);
+			if (!(wc->chans[i+16].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+16].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i+16]), rxs);
 			}
 			rxs = (a >> 4) & 0xf;
-			if (!(wc->chans[i]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i], rxs);
+			if (!(wc->chans[i].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i]), rxs);
 			}
 		}
 	} else if (wc->span.lineconfig & DAHDI_CONFIG_D4) {
@@ -906,24 +906,24 @@ static void __t1_check_sigbits(struct t1 *wc)
 			a = __t1_framer_in8(wc, 0x70 + (i>>2)); /* RS1 + x */
 			/* Get high channel in low bits */
 			rxs = (a & 0x3) << 2;
-			if (!(wc->chans[i+3]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i+3]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i+3], rxs);
+			if (!(wc->chans[i+3].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+3].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i+3]), rxs);
 			}
 			rxs = (a & 0xc);
-			if (!(wc->chans[i+2]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i+2]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i+2], rxs);
+			if (!(wc->chans[i+2].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+2].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i+2]), rxs);
 			}
 			rxs = (a >> 2) & 0xc;
-			if (!(wc->chans[i+1]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i+1]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i+1], rxs);
+			if (!(wc->chans[i+1].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+1].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i+1]), rxs);
 			}
 			rxs = (a >> 4) & 0xc;
-			if (!(wc->chans[i]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i], rxs);
+			if (!(wc->chans[i].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i]), rxs);
 			}
 		}
 	} else {
@@ -931,14 +931,14 @@ static void __t1_check_sigbits(struct t1 *wc)
 			a = __t1_framer_in8(wc, 0x70 + (i>>1));/* PEF RS1 + x */
 			/* Get high channel in low bits */
 			rxs = (a & 0xf);
-			if (!(wc->chans[i+1]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i+1]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i+1], rxs);
+			if (!(wc->chans[i+1].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i+1].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i+1]), rxs);
 			}
 			rxs = (a >> 4) & 0xf;
-			if (!(wc->chans[i]->sig & DAHDI_SIG_CLEAR)) {
-				if (wc->chans[i]->rxsig != rxs)
-					dahdi_rbsbits(wc->chans[i], rxs);
+			if (!(wc->chans[i].sig & DAHDI_SIG_CLEAR)) {
+				if (wc->chans[i].rxsig != rxs)
+					dahdi_rbsbits(&(wc->chans[i]), rxs);
 			}
 		}
 	}
@@ -1387,7 +1387,6 @@ static int pr1_software_init(struct t1 *wc)
 		wc->span.deflaw = DAHDI_LAW_MULAW;
 		wc->span.spantype = "T1";
 	}
-	wc->span.chans = wc->chans;
 	wc->span.flags = DAHDI_FLAG_RBS;
 	wc->span.ioctl = pr1_ioctl;
 	wc->span.pvt = wc;
@@ -1395,14 +1394,16 @@ static int pr1_software_init(struct t1 *wc)
 	init_waitqueue_head(&wc->span.maintq);
 
 	for (x=0;x<wc->span.channels;x++) {
-		sprintf(wc->chans[x]->name, "WCT1/%d/%d", wc->num, x + 1);
-		wc->chans[x]->sigcap = DAHDI_SIG_EM | DAHDI_SIG_CLEAR | DAHDI_SIG_EM_E1 | 
+		sprintf(wc->chans[x].name, "WCT1/%d/%d", wc->num, x + 1);
+		wc->chans[x].sigcap = DAHDI_SIG_EM | DAHDI_SIG_CLEAR | DAHDI_SIG_EM_E1 | 
 				      DAHDI_SIG_FXSLS | DAHDI_SIG_FXSGS | 
 				      DAHDI_SIG_FXSKS | DAHDI_SIG_FXOLS | DAHDI_SIG_DACS_RBS |
 				      DAHDI_SIG_FXOGS | DAHDI_SIG_FXOKS | DAHDI_SIG_CAS | DAHDI_SIG_SF;
-		wc->chans[x]->pvt = wc;
-		wc->chans[x]->chanpos = x + 1;
+		wc->chans[x].pvt = wc;
+		wc->chans[x].chanpos = x + 1;
+		wc->_chans[x]=&(wc->chans[x]);
 	}
+	wc->span.chans = wc->_chans;
 	if (dahdi_register(&wc->span, 0)) {
 		printk("Unable to register span with zaptel\n");
 		return -1;
@@ -1477,7 +1478,7 @@ static void pr1_transmitprep(struct t1 *wc, u8 *pTransmit)
 	{
 		for (x=0;x<wc->span.channels;x++) 
 		{
-			txbuf[((WPR_NBCHAN * y) + (wc->chanmap[x] +  1))]= wc->chans[x]->writechunk[y];
+			txbuf[((WPR_NBCHAN * y) + (wc->chanmap[x] +  1))]= wc->chans[x].writechunk[y];
 		}
 	//*(txbuf+(y*32)+3)=0x04;
 	}
@@ -1498,16 +1499,16 @@ static void pr1_receiveprep(struct t1 *wc, u8 *pReceive)
 		{
 			/* XXX Optimize, remove * and + XXX */
 			/* Must map received channels into appropriate data */
-			wc->chans[x]->readchunk[y] = 
+			wc->chans[x].readchunk[y] = 
 			rxbuf[((WPR_NBCHAN * y) + (wc->chanmap[x] +  1))]; 
 		}
 	}
 
 	for (x=0;x<wc->span.channels;x++) 
 	{
-		dahdi_ec_chunk(wc->chans[x], wc->chans[x]->readchunk, wc->ec_chunk2[x]);
+		dahdi_ec_chunk(&(wc->chans[x]), wc->chans[x].readchunk, wc->ec_chunk2[x]);
 		memcpy(wc->ec_chunk2[x],wc->ec_chunk1[x],DAHDI_CHUNKSIZE);
-		memcpy(wc->ec_chunk1[x],wc->chans[x]->writechunk,DAHDI_CHUNKSIZE);
+		memcpy(wc->ec_chunk1[x],wc->chans[x].writechunk,DAHDI_CHUNKSIZE);
 	}
 	dahdi_receive(&wc->span);
 }
@@ -1575,8 +1576,8 @@ static void __t1_check_alarms(struct t1 *wc)
 
 	if (wc->span.lineconfig & DAHDI_CONFIG_NOTOPEN) {
 		for (x=0,j=0;x < wc->span.channels;x++)
-			if ((wc->chans[x]->flags & DAHDI_FLAG_OPEN) ||
-			    (wc->chans[x]->flags & DAHDI_FLAG_NETDEV))
+			if ((wc->chans[x].flags & DAHDI_FLAG_OPEN) ||
+			    (wc->chans[x].flags & DAHDI_FLAG_NETDEV))
 				j++;
 		if (!j)
 			alarms |= DAHDI_ALARM_NOTOPEN;

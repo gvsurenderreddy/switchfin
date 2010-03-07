@@ -326,7 +326,8 @@ struct t1 {
 	unsigned char ec_chunk2[31][DAHDI_CHUNKSIZE];
 	unsigned char tempo[32];
 	struct dahdi_span span;						/* Span */
-	struct dahdi_chan *chans[31];					/* Channels */
+	struct dahdi_chan chans[31];					/* Channels */
+	struct dahdi_chan *_chans[31];
 };
 
 /* E1 - T1 related functions & PEF 2256 setup */
