@@ -1,0 +1,154 @@
+--- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2009-02-04 16:23:50.000000000 +0200
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile_	2009-09-07 15:36:32.000000000 +0300
+@@ -5,5 +5,6 @@
+ obj-$(CONFIG_BFIN537_STAMP)            += stamp.o
+ obj-$(CONFIG_BFIN537_BLUETECHNIX_CM)   += cm_bf537.o
+ obj-$(CONFIG_BFIN537_BLUETECHNIX_TCM)  += tcm_bf537.o
++obj-$(CONFIG_BFIN532_IP0X)	       += ip0x.o	
+ obj-$(CONFIG_PNAV10)                   += pnav10.o
+ obj-$(CONFIG_CAMSIG_MINOTAUR)          += minotaur.o
+--- uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2009-08-12 00:28:53.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig_	2009-09-07 17:18:03.000000000 +0300
+@@ -387,6 +387,27 @@
+ 	  to the kernel, you may specify one here. As a minimum, you should specify
+ 	  the memory size and the root device (e.g., mem=8M, root=/dev/nfs).
+ 
++comment "Hardware addresses"
++
++config IP0X_NET1
++       hex "DM9000 eth0 hardware address"
++       default 0x20100000
++       help
++         Base address of DM9000A Ethernet chip used for eth0
++
++config IP0X_NET2
++       hex "DM9000 eth1 hardware address"
++       default 0x20200000
++       help
++         Base address of DM9000A Ethernet chip used for eth1
++
++config IP0X_USB
++       hex "ISP1362 address"
++       default 0x20300000
++       help
++         Base address of ISP1362 USB controller
++
++
+ config BOOT_LOAD
+ 	hex "Kernel load address for booting"
+ 	default "0x1000"
+@@ -456,6 +477,7 @@
+ 	default "20" if (BFIN537_BLUETECHNIX_CM || BFIN527_BLUETECHNIX_CM || BFIN561_BLUETECHNIX_CM)
+ 	default "20" if BFIN561_EZKIT
+ 	default "16" if (H8606_HVSISTEMAS || BLACKSTAMP || BFIN526_EZBRD || BFIN518F_EZBRD)
++	default "64" if BFIN532_IP0X
+ 	help
+ 	  This controls the frequency of the on-chip PLL. This can be between 1 and 64.
+ 	  PLL Frequency = (Crystal Frequency) * (this setting)
+--- uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig_orig	2009-09-07 16:36:40.000000000 +0300
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2009-09-07 16:45:12.000000000 +0300
+@@ -37,11 +37,11 @@
+ 	  of these chips were reused by later, larger chips.
+ 
+ config MTD_NAND_BFIN
+-	tristate "NAND Flash device for BF537 STAMP board (DEPRECATED)"
++	tristate "NAND Flash device for Blackfin"
+ 	depends on BLACKFIN && MTD_NAND && MTD_PARTITIONS
+ 	help
+-	  This enables the driver for the NAND flash ST-NAND123W3A 
+-	  for Blackfin Processors
++	  This enables the driver for the Blackfin 
++	  Processors
+ 
+ 	  This is deprecated.  Please use the generic platform NAND
+ 	  driver instead.
+@@ -49,10 +49,21 @@
+ config BFIN_NAND_BASE
+ 	hex "NAND Flash Base Address"
+ 	depends on MTD_NAND_BFIN
+-	default 0x20212000
++	default 0x20000000
+ 	help
+ 	  NAND Flash Base Address
+ 
++config BFIN_NAND_SIZE
++       hex "NAND Flash Size"
++       depends on MTD_NAND_BFIN
++       default 0x10000000
++       help
++         NAND Flash size, for example 0x10000000 for 256Mbyte, or
++          0x02000000 for 32MByte.  The NAND will be divided into
++         two partitions.  The first partition is 4M (kernel), the
++         second partition the remaining space (e.g. yaffs).
++
++
+ config BFIN_NAND_CLE
+ 	int "NAND Flash Command Latch Enable (CLE) Address strobe A[x]"
+ 	depends on MTD_NAND_BFIN
+@@ -75,7 +86,7 @@
+ 	range 0 15 if (BF533 || BF532 || BF531) 
+ 	range 0 47 if (BF534 || BF536 || BF537)
+ 	range 0 47 if BF561
+-	default 3
++	default 10
+ 	help
+ 	  NAND Flash Ready Strobe PF[x]
+ 
+--- uClinux-dist/linux-2.6.x/drivers/serial/bfin_5xx.c	2009-08-13 08:23:31.000000000 +0300
++++ uClinux-dist/linux-2.6.x/drivers/serial/bfin_5xx_.c	2009-09-07 16:16:49.000000000 +0300
+@@ -1194,7 +1194,7 @@
+ bfin_serial_console_setup(struct console *co, char *options)
+ {
+ 	struct bfin_serial_port *uart;
+-	int baud = 57600;
++	int baud = 115200;
+ 	int bits = 8;
+ 	int parity = 'n';
+ # if defined(CONFIG_SERIAL_BFIN_CTSRTS) || \
+--- uClinux-dist/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2010-03-04 12:58:01.000000000 +0200
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/bfin_nand.c	2010-03-04 13:01:19.000000000 +0200
+@@ -52,21 +52,26 @@
+  */
+ const static struct mtd_partition partition_info[] = {
+ 	{
+-		.name = "linux kernel",
++		.name = "uImage",
+ 		.offset = 0,
+-		.size = 4 *1024*1024,
++		.size = 10 *1024*1024,
++	},
++	{
++		.name = "uImage backup",
++		.offset = 10 * 1024 * 1024,
++		.size = 10 *1024*1024,
+ 	},
+ #ifdef CONFIG_PNAV10 /* 1G x 8 NAND Flash */
+ 	{
+ 		.name = "file system",
+-		.offset = 4 *1024*1024,
+-		.size = (1024-4) *1024*1024,
++		.offset = 20 *1024*1024,
++		.size = (1024-20) *1024*1024,
+ 	}
+ #else
+ 	{
+-		.name = "file system",
+-		.offset = 4 *1024*1024,
+-		.size = (128-4) *1024*1024,
++		.name = "persistent file system",
++		.offset = 20 *1024*1024,
++		.size = (CONFIG_BFIN_NAND_SIZE-(20 *1024*1024)),
+ 	}
+ #endif
+ };
+--- uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig_orig	2010-03-04 18:37:10.000000000 +0200
++++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2010-03-04 18:35:42.000000000 +0200
+@@ -158,7 +158,7 @@
+ 
+ config MTD_NAND_BF5XX_HWECC
+ 	bool "BF5XX NAND Hardware ECC"
+-	default y
++	default n
+ 	depends on MTD_NAND_BF5XX
+ 	help
+ 	  Enable the use of the BF5XX's internal ECC generator when
