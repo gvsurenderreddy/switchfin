@@ -1,2 +1,0 @@
-#!/bin/hush
-cat /etc/asterisk/rc_org.conf | sed 's/\[network\]/\;\[network\]/g' | tr \; \# | sed '/#!/d' | tr -d ' ' > /etc/network.conf
