@@ -7,8 +7,10 @@ if [ "$1" = "" ]; then
         exit 1
 fi
 
+tmp=`echo $1 | grep tftp`
+
 # Get the image from the source
-if [ "$1" = "tftp" ]; then
+if [ ! -z "$tmp" ]; then
     $@
         if [ "$?" != "0" ]; then 
                 echo "Downloading firmware via TFTP failed!"

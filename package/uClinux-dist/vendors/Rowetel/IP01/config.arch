@@ -4,7 +4,7 @@
 # Vendor specific settings
 #
 
-CONSOLE_BAUD_RATE = 57600
+CONSOLE_BAUD_RATE = 115200
 
 ############################################################################
 #
@@ -15,6 +15,5 @@ CONSOLE_BAUD_RATE = 57600
 #
 
 # ARCH = kernel,  TARGET_ARCH = uClibc
-
 
 include $(ROOTDIR)/vendors/config/bfin/config.arch

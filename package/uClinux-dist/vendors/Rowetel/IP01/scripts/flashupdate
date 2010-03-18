@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/hush
 # Script for reflashing uClinux or u-boot image to SPI flash
 SCRIPTNAME=`basename $0`
 case ${SCRIPTNAME} in
@@ -117,8 +117,13 @@ fi
 echo "Downloaded firmware ${SAVEDFILENAME} program size is ${FILESIZE}"
 	
 echo "Writing firmware to FLASH -- DO NOT REBOOT!!!!..."
-/bin/eraseall ${MTDPART}
+OFFSET=`/bin/fw_printenv offset | grep -v 'Error'|sed  's/offset=//'`
+/bin/flash_eraseall ${MTDPART}
+if [ ${OFFSET} ]; then
+/bin/nandwrite -s ${OFFSET} ${MTDPART} ${IMAGEFILENAME}
+else
 /bin/nandwrite ${MTDPART} ${IMAGEFILENAME}
+fi
 #/bin/cp ${IMAGEFILENAME} ${MTDPART}
 echo "Verifying FLASH..."
 if cmp ${IMAGEFILENAME} ${MTDPART} 2>&1 | grep -q -i EOF; then

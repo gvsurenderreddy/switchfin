@@ -39,8 +39,15 @@
  * take longer than one interrupt to execute, which will upset timing
  * measurements in the /proc/bfsi.
  *
- * 5 Mar. 2010 Dimitar Penev Modified for DAHDI
- *	
+ * The SPI can be driven by the hardware SPI or by the SPORT
+ * Hardware SPI is used if macro CONFIG_4FX_SPI_INTERFACE is defined, 
+ * otherwise SPORT is used 
+ * MULTI_SPI_FRAMEWORK is not defined for IP0x
+ *
+ *  5 Mar. 2010 Dimitar Penev Modified for DAHDI
+ * 18 Mar. 2010 Dimitar Penev included IP01 support 
+ * for use in Switchfin, based on the previous work done by Atcom
+ * 	
  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
  */
 
@@ -56,7 +63,10 @@
 #include "proslic.h"
 #include "wcfxs.h"
 #include "bfsi.h"
+
+#ifndef SF_IP01
 #include "sport_interface.h"		//Added by Alex Tao
+#endif
 
 /*
  *  Define for audio vs. register based ring detection
@@ -283,13 +293,10 @@ static struct fxo_mode {
 #endif
 
 #ifdef MULTI_SPI_FRAMEWORK
-
-#define FX_LED_RED     1
-#define FX_LED_GREEN   2
-
+	#define FX_LED_RED     1
+	#define FX_LED_GREEN   2
 #endif
 
-//wc->curcard
 #ifdef CONFIG_4FX_SPI_INTERFACE
 	#ifdef MULTI_SPI_FRAMEWORK
 		#define __write_8bits(X, Y) multi_spi_write_8_bits(X->curcard, Y)
@@ -313,7 +320,6 @@ static struct fxo_mode {
 #define FLAG_READ	2
 
 #define RING_DEBOUNCE	64		/* Ringer Debounce (in ms) */
-//#define BATT_DEBOUNCE	192		/* Battery debounce (in ms) */
 #define BATT_DEBOUNCE	64		/* Battery debounce (in ms) */
 #define POLARITY_DEBOUNCE 64           /* Polarity debounce (in ms) */
 #define BATT_THRESH	3		/* Anything under this is "no battery" */
@@ -322,10 +328,10 @@ static struct fxo_mode {
 
 #define FLAG_3215	(1 << 0)
 
-#ifdef MULTI_SPI_FRAMEWORK
-#define NUM_CARDS 2
+#ifdef SF_IP01
+	#define NUM_CARDS 1
 #else
-#define NUM_CARDS 8
+	#define NUM_CARDS 8
 #endif
 
 #define MAX_ALARMS 10
@@ -588,8 +594,8 @@ static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 static inline void __wcfxs_setcard(struct wcfxs *wc, int card)
 {
 	if (wc->curcard != card) {
-
-           #ifdef NOT_NEEDED
+#ifndef SF_IP01
+           #ifdef DR_DONT_NEED
 	   __wcfxs_setcreg(wc, WC_CS, (1 << card));
            #endif
 	   if (card < 4) {
@@ -610,6 +616,7 @@ static inline void __wcfxs_setcard(struct wcfxs *wc, int card)
 	     sport_tx_byte(SPI_NCSB, 0x40 + (card-4) + 1);
 	     #endif
 	   }
+#endif
 	   wc->curcard = card;
 	}
 }
@@ -644,7 +651,10 @@ static inline void wcfxs_set_led(struct wcfxs *wc, int port, int colour)
 	spin_lock_irqsave(&wc->lock, flags);
 #ifndef MULTI_SPI_FRAMEWORK
 	fx_set_led(port, colour);
+#ifndef SF_IP01
+	//IP01 need not set wc->curcard to -1, using directly PFx
 	wc->curcard = -1;                         /* leds mess up current card setting */	
+#endif
 #endif
 	spin_unlock_irqrestore(&wc->lock, flags);
 }
@@ -1200,14 +1210,17 @@ static int wcfxs_powerup_proslic(struct wcfxs *wc, int card, int fast)
 		}
 	}
 
-	printk("reg 0: 0x%x \n", wcfxs_getreg(wc, card, 0));
-	printk("reg 14: 0x%x \n", wcfxs_getreg(wc, card, 14));
-	printk("reg 74: 0x%x \n", wcfxs_getreg(wc, card, 74));
-	printk("reg 80: 0x%x \n", wcfxs_getreg(wc, card, 80));
-	printk("reg 81: 0x%x \n", wcfxs_getreg(wc, card, 81));
-	printk("reg 92: 0x%x \n", wcfxs_getreg(wc, card, 92));
-	printk("reg 82: 0x%x \n", wcfxs_getreg(wc, card, 82));
-	printk("reg 83: 0x%x \n", wcfxs_getreg(wc, card, 83));
+	if (debug)
+	{
+		printk("reg 0: 0x%x \n", wcfxs_getreg(wc, card, 0));
+		printk("reg 14: 0x%x \n", wcfxs_getreg(wc, card, 14));
+		printk("reg 74: 0x%x \n", wcfxs_getreg(wc, card, 74));
+		printk("reg 80: 0x%x \n", wcfxs_getreg(wc, card, 80));
+		printk("reg 81: 0x%x \n", wcfxs_getreg(wc, card, 81));
+		printk("reg 92: 0x%x \n", wcfxs_getreg(wc, card, 92));
+		printk("reg 82: 0x%x \n", wcfxs_getreg(wc, card, 82));
+		printk("reg 83: 0x%x \n", wcfxs_getreg(wc, card, 83));
+	}
         //return -1;
 
 	if (vbat < 0xc0) {
@@ -1486,6 +1499,7 @@ static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast, int manual, 
 	int fxsmode=0;
 
 	manual = 1;
+
 	/* By default, don't send on hook */
 	wc->mod.fxs.idletxhookstate [card] = 1;
 
@@ -1674,6 +1688,7 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 			return -EFAULT;
 		wc->mod.fxs.ohttimer[chan->chanpos - 1] = x << 3;
 
+#ifdef DR_DONT_NEED
 		if (lowpower < 2) {
 		    /* DR: Set lowpower=2 to disable this code and run
 		       FXS ports at minimum power.  Unfortunately, this
@@ -1693,6 +1708,8 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
 		    }
 		}
+
+#endif
 
 		break;
 	case WCFXS_GET_STATS:
@@ -1876,6 +1893,7 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 static int wcfxs_initialize(struct wcfxs *wc)
 {
 	int x;
+
 	/* Zapata stuff */
 	sprintf(wc->span.name, "WCTDM/%d", wc->pos);
 	sprintf(wc->span.desc, "%s Board %d", wc->variety, wc->pos + 1);
@@ -2133,6 +2151,10 @@ static void wcfxs_release(struct wcfxs *wc)
 	  bfsi_sport_close();
 	  dahdi_unregister(&wc->span);
 	  kfree(wc);
+
+      #ifdef SF_IP01
+      	fx_set_led(1, LED_OFF);
+      #endif
 	}
         remove_proc_entry("wcfxs", NULL);
 	printk("Freed a Wildcard\n");
@@ -2141,7 +2163,11 @@ static void wcfxs_release(struct wcfxs *wc)
 static int __init wcfxs_init(void)
 {
 	int x;
-        printk(KERN_ALERT "Code test: code function addr = 0x%p\n", dahdi_ec_chunk);
+	if(debug)
+	{
+		printk(KERN_ALERT "Code test: code function addr = 0x%p\n", dahdi_ec_chunk);
+	}
+
 	for (x=0;x<(sizeof(fxo_modes) / sizeof(fxo_modes[0])); x++) {
 		if (!strcmp(fxo_modes[x].name, opermode))
 			break;

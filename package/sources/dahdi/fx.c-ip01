@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define FX_LED_GREEN   1
 
 /* Keep these obsolete macros */
-#ifndef BFIN_IP01
+#ifndef SF_IP01
 #define FX_MAX_PORTS   8  // max number of ports in system
 #else
 #define FX_MAX_PORTS   1

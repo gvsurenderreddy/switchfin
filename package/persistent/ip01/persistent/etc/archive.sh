@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/hush 
 
 src=$1
 dst=$2

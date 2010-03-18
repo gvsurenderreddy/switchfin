@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/hush
 
 case $1 in
         start) sh /persistent/etc/vlan.sh start;;
@@ -8,14 +8,12 @@ case $1 in
         enable) rm -f /persistent/etc/rc.d/S11vlan;
                 ln -s /persistent/etc/init.d/vlan /persistent/etc/rc.d/S11vlan;;
         disable) rm -f /persistent/etc/rc.d/S11vlan;;
-        *) cat <<EOF;;
-Syntax: /etc/init.d/vlan [command]
-
-Available commands:
-        start   Start the service
-        stop    Stop the service
-        restart Restart the service
-        enable  Enable service autostart
-        disable Disable service autostart
-EOF
+        *) echo 'Syntax: /etc/init.d/vlan [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
 esac

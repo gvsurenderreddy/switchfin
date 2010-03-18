@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/hush 
 export MMC=`cat /etc/mmc`
 if [ $MMC == 1 ]
 then

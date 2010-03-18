@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/hush
 option=$1
 if [ $option == "toauto" ]
 then

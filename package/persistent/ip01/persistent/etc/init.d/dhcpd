@@ -1,4 +1,4 @@
-#!/bin/sh                                                                       
+#!/bin/hush                                                                       
 # Start up file for dhcpd                                                       
                                                                                 
 case $1 in                                                                      
@@ -9,14 +9,12 @@ case $1 in
         enable) rm -f /persistent/etc/rc.d/S85dhcpd;                            
                 ln -s /persistent/etc/init.d/dhcpd /persistent/etc/rc.d/S85dhcpd
         disable) rm -f /persistent/etc/rc.d/S85dhcpd;;                          
-        *) cat <<EOF;;                                                          
-Syntax: /etc/init.d/dhcpd [command]                                             
-                                                                                
-Available commands:                                                             
-        start   Start the service                                               
-        stop    Stop the service                                                
-        restart Restart the service                                             
-        enable  Enable service autostart                                        
-        disable Disable service autostart                                       
-EOF                                                                             
+        *) echo 'Syntax: /etc/init.d/dhcpd [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
 esac 

@@ -1,6 +1,7 @@
-#!/bin/sh 
+#!/bin/hush 
 
 exec_option=$1
+
 /bin/fixrc
 
 if [ -f /persistent/etc/network.conf ]

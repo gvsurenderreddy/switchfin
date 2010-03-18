@@ -12,14 +12,12 @@ case $1 in
         enable) rm -f /persistent/etc/rc.d/S12pppoe;
                 ln -s /persistent/etc/init.d/pppoe /persistent/etc/rc.d/S12pppoe;;
         disable) rm -f /persistent/etc/rc.d/S12pppoe;;
-        *) cat <<EOF;;
-Syntax: /etc/init.d/pppoe [command]
-
-Available commands:
-        start   Start the service
-        stop    Stop the service
-        restart Restart the service
-        enable  Enable service autostart
-        disable Disable service autostart
-EOF
+        *) echo 'Syntax: /etc/init.d/pppoe [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
 esac

@@ -171,7 +171,6 @@ ifeq ($(strip $(SF_IP04)),y)
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip0x.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf537/boards
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
-
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 	if egrep "^CONFIG_BF532=y" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig > /dev/null; then \
 		echo "Compiling with G729 support,  ADSP-BF533 will be set..."; \
@@ -186,11 +185,22 @@ endif
 
 ifeq ($(strip $(SF_IP01)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/Rowetel/IP01/
+	mkdir -p $(UCLINUX_DIR)/vendors/Rowetel/common/
+	cp -af package/uClinux-dist/vendors/Rowetel/common/* $(UCLINUX_DIR)/vendors/Rowetel/common
+	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/* $(UCLINUX_DIR)/vendors/Rowetel/IP01
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip0x.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards
-	cp -af package/uClinux-dist/vendors/Rowetel/IP01/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP01_defconfig
-	cp -af package/uClinux-dist/common/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel
-	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP01_config
+	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP01_defconfig
+ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
+	if egrep "^CONFIG_BF532=y" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig > /dev/null; then \
+		echo "Compiling with G729 support,  ADSP-BF533 will be set..."; \
+		sed -i -e "s/^CONFIG_BF532=y/CONFIG_BF533=y/" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig; \
+		sed -i -e "s/^# CONFIG_BF533 is not set/# CONFIG_BF532 is not set/" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig; \
+		sed -i -e "s/^CONFIG_BF532=y/CONFIG_BF533=y/" $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x; \
+		sed -i -e "s/^# CONFIG_BF533 is not set/# CONFIG_BF532 is not set/" $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x; \
+	fi
+endif
+	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP01_defconfig
 endif
 
 ifeq ($(strip $(SF_FX08)),y)

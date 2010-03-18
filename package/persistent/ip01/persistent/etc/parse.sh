@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/hush
 filename=$1
 year=$2
 month=$3

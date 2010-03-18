@@ -2,8 +2,6 @@
 # vim  for uClinux
 # Mark Hindess Feb 2008
 #
-# usage: make -f vim.mk vim-package
-#
 # 1.Mar. 2010 adopted from BAPS 
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################
@@ -40,7 +38,6 @@ vim: $(VIM_DIR)/.configured
 	mkdir -p $(TARGET_DIR)/usr/share/vim
 	cp -f $(VIM_DIR)/src/vim $(TARGET_DIR)/bin/vim
 	echo set nocompatible > $(TARGET_DIR)/usr/share/vim/vimrc
-	touch $(PKG_BUILD_DIR)/.built
 
 vim-dirclean:
 	rm -rf $(VIM_DIR)

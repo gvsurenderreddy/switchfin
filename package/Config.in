@@ -35,5 +35,6 @@ source "package/n2n/Config.in"
 source "package/rsync/Config.in"
 source "package/cgic/Config.in"
 source "package/vim/Config.in"
+source "package/bonjour/Config.in"
 endmenu
 

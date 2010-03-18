@@ -6,6 +6,6 @@
 # start a shell script to handle anything fancy.
 
 #* * * * * root /bin/touch /etc/config/crontab
-0 * * * * root /bin/sh /etc/rotatecdr.sh
-1 * * * * root /bin/sh /etc/cleanps.sh
+0 * * * * root /bin/hush /etc/rotatecdr.sh
+1 * * * * root /bin/hush /etc/cleanps.sh
 

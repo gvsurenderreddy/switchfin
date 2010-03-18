@@ -6,7 +6,7 @@
  *               Modified for IP0X David Rowe
  *
  * Created:      2007
- * Description:  Board info file for the IP04/IP08 boards, which
+ * Description:  Board info file for the IP01 boards, which
  *               are derived from the BlackfinOne V2.0 boards.
  *
  * Modified:
@@ -50,7 +50,7 @@
  * Name the Board for the /proc/cpuinfo
  */
 #if defined (CONFIG_BFIN532_IP0X)
-const char bfin_board_name[] = "IP04/IP08";
+const char bfin_board_name[] = "IP01";
 #else
 #error Unknown board
 #endif

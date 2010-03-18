@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/hush
 if [ "$1" = "" ]; then
         echo "FAIL: input error" > /var/lib/asterisk/static-http/voiceresult
         exit 1

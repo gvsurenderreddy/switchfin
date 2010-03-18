@@ -71,7 +71,7 @@ image.rootfs.cramfs: image.rootfs.cramfs.force
 endif
 
 .PHONY: image.rootfs.ext2 image.rootfs.ext2.force
-EXT2_BLOCKS ?= 20480 # Blocks must be a multiple of 1024
+EXT2_BLOCKS ?= 22528 # Blocks must be a multiple of 1024
 EXT2_INODES ?= 1024
 MKFS_EXT2_FLAGS ?= -m 0 -i $(EXT2_INODES) -b $(EXT2_BLOCKS)
 image.rootfs.ext2.force:

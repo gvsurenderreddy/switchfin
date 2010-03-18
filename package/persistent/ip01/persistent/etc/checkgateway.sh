@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/hush 
 
 gate=`asterisk -rx "sip show peers" | grep $1 | grep OK` 
 gatecheck=`echo -n $gate` 

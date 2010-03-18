@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/hush 
 
 exec_option=$1
 

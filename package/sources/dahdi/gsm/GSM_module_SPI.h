@@ -9,13 +9,11 @@
 #define SPI_NCSA    3  /* nCS bit for SPI data                */
 #define SPI_NCSB    12 /* nCS bit for SPI mux                 */
 #else
-#ifdef CONFIG_4FX_SPORT_INTERFACE
 #define SPI_BAUDS   49  /* 13.4 MHz for 133MHz system clock    */
 #define SPI_BAUDS_GSM 49 //1.33MHz for 133Mhz system clock; 4 MHz allowed //YN
 /* Use other PF signals */
 #define SPI_NCSA    8    /* Simulate SPORT interface as SPI */
 #define SPI_NCSB    9
-#endif
 #endif
 
 #define RESET_BIT   4  /* GPIO bit tied to nRESET on Si chips */

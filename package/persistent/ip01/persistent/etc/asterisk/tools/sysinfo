@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/hush
 echo "[uname]" > /etc/asterisk/gui_sysinfo.conf
 UNAME="`uname -srmp`"
 echo "output =  $UNAME" >> /etc/asterisk/gui_sysinfo.conf

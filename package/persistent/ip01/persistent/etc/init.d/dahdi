@@ -1,17 +1,18 @@
 #!/bin/hush
-# Start up file for cron
-# David Rowe 8 Feb 2008
+# Start up file for DAHDI
 
 case $1 in
-	start) /bin/cron&;;
-	stop) killall -9 cron;;
-	restart) killall -9 cron;
-		/bin/cron&;;
-	enable) rm -f /persistent/etc/rc.d/S35cron; 
-		ln -s /persistent/etc/crontab /etc/config/;
-	        ln -s /persistent/etc/init.d/cron /persistent/etc/rc.d/S35cron;;
-	disable) rm -f /persistent/etc/rc.d/S35cron;;
-        *) echo 'Syntax: /etc/init.d/cron [command]'
+	start) 	modprobe wcfxs;
+        	dahdi_scan;
+		dahdi_cfg;;
+	stop) modprobe -r wcfxs;;
+	restart) modprobe -r wcfxs;
+		modprobe wcfxs;
+		dahdi_cfg;;
+	enable) rm -f /persistent/etc/rc.d/S40dahdi; 
+	        ln -s /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
+	disable) rm -f /persistent/etc/rc.d/S40dahdi;;
+        *) echo 'Syntax: /etc/init.d/dahdi [command]'
            echo ''
            echo '       Available commands:'
            echo '               start   Start the service'
@@ -20,4 +21,3 @@ case $1 in
            echo '               enable  Enable service autostart'
            echo '               disable Disable service autostart'
 esac
-

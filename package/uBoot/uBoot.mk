@@ -38,7 +38,6 @@ PATCHNAME=uBoot-ip04
 UCONFIG=ip04
 endif
 
-
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 UBOOT_DIRNAME=u-boot-1.1.6
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
