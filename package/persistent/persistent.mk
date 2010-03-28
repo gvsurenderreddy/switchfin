@@ -34,7 +34,7 @@ endif
 	cd package/persistent/pr1; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/pr1/persistent/etc/rc.d; \
-	rm -f S39lec
+	rm -f S39lec S45mdnsd
 endif
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
@@ -49,7 +49,7 @@ endif
 	cd package/persistent/br4; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/br4/persistent/etc/rc.d; \
-	rm -f S39lec
+	rm -f S39lec S45mdnsd
 endif
 ifeq ($(strip $(SF_IP04)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
@@ -58,6 +58,8 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 endif
 	cd package/persistent/ip04; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	cd package/persistent/ip04/persistent/etc/rc.d; \
+	rm -f S45mdnsd
 endif
 ifeq ($(strip $(SF_IP01)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
@@ -66,6 +68,8 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 endif
 	cd package/persistent/ip01; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	cd package/persistent/ip01/persistent/etc/rc.d; \
+	rm -f S45mdnsd
 endif
 
 ifeq ($(strip $(SF_FX08)),y)
@@ -75,6 +79,8 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 endif
 	cd package/persistent/fx08; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	cd package/persistent/fx08/persistent/etc/rc.d; \
+	rm -f S45mdnsd
 endif
 
 

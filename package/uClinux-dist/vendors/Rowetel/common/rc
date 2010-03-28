@@ -154,6 +154,11 @@ for i in /persistent/etc/rc.d/S*; do
         $i start
 done
 
+if [ ! -f /etc/dahdi/system.conf ]; then
+dahdi_update.sh
+dahdi_cfg
+fi
+
 inetd &
 
 # setting up localtime for asterisk timezone
