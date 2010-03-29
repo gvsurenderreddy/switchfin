@@ -82,7 +82,7 @@ ifeq ($(strip $(SF_IP04)),y)
 endif
 
 ifeq ($(strip $(SF_IP01)),y)
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip01.patch
 endif
 
 
@@ -169,7 +169,7 @@ ifeq ($(strip $(SF_IP04)),y)
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/* $(UCLINUX_DIR)/vendors/Rowetel/IP04/
 	cp -af package/uClinux-dist/vendors/Rowetel/common/* $(UCLINUX_DIR)/vendors/Rowetel/common
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
-	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip0x.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf537/boards
+	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip0x.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 	if egrep "^CONFIG_BF532=y" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig > /dev/null; then \

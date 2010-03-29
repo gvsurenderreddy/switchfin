@@ -1,14 +1,5 @@
---- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2009-02-04 16:23:50.000000000 +0200
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile_	2009-09-07 15:36:32.000000000 +0300
-@@ -5,5 +5,6 @@
- obj-$(CONFIG_BFIN537_STAMP)            += stamp.o
- obj-$(CONFIG_BFIN537_BLUETECHNIX_CM)   += cm_bf537.o
- obj-$(CONFIG_BFIN537_BLUETECHNIX_TCM)  += tcm_bf537.o
-+obj-$(CONFIG_BFIN532_IP0X)	       += ip0x.o	
- obj-$(CONFIG_PNAV10)                   += pnav10.o
- obj-$(CONFIG_CAMSIG_MINOTAUR)          += minotaur.o
 --- uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2009-08-12 00:28:53.000000000 +0300
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig_	2009-09-07 17:18:03.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch/blackfin/Kconfig	2009-09-07 17:18:03.000000000 +0300
 @@ -387,6 +387,27 @@
  	  to the kernel, you may specify one here. As a minimum, you should specify
  	  the memory size and the root device (e.g., mem=8M, root=/dev/nfs).
@@ -45,7 +36,7 @@
  	help
  	  This controls the frequency of the on-chip PLL. This can be between 1 and 64.
  	  PLL Frequency = (Crystal Frequency) * (this setting)
---- uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig_orig	2009-09-07 16:36:40.000000000 +0300
+--- uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2009-09-07 16:36:40.000000000 +0300
 +++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2009-09-07 16:45:12.000000000 +0300
 @@ -37,11 +37,11 @@
  	  of these chips were reused by later, larger chips.
@@ -141,7 +132,7 @@
  	}
  #endif
  };
---- uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig_orig	2010-03-04 18:37:10.000000000 +0200
+--- uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2010-03-04 18:37:10.000000000 +0200
 +++ uClinux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2010-03-04 18:35:42.000000000 +0200
 @@ -158,7 +158,7 @@
  
@@ -152,3 +143,58 @@
  	depends on MTD_NAND_BF5XX
  	help
  	  Enable the use of the BF5XX's internal ECC generator when
+--- uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2010-03-29 16:26:08.000000000 +0300
++++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2010-03-29 17:45:58.000000000 +0300
+@@ -33,6 +33,7 @@
+ #include <linux/delay.h>
+ #include <linux/platform_device.h>
+ #include <linux/irq.h>
++#include <linux/string.h>
+ 
+ #include <asm/delay.h>
+ #include <asm/irq.h>
+@@ -1184,6 +1185,9 @@
+ 	int iosize;
+ 	int i;
+ 	u32 id_val;
++	char *ptr = NULL;
++	char *ptr_end;
++	char ethaddr[17];
+ 
+ 	/* Init network device */
+ 	ndev = alloc_etherdev(sizeof(struct board_info));
+@@ -1296,7 +1300,7 @@
+ #endif
+ 
+ 	dm9000_reset(db);
+-
++	
+ 	/* try multiple times, DM9000 sometimes gets the read wrong */
+ 	for (i = 0; i < 8; i++) {
+ 		id_val  = ior(db, DM9000_VIDL);
+@@ -1378,6 +1382,25 @@
+ 			ndev->dev_addr[i] = ior(db, i+DM9000_PAR);
+ 	}
+ 
++
++        if (!is_valid_ether_addr(ndev->dev_addr)) {
++                /* try reading from boot command line */
++		
++                mac_src = "command line";
++		
++		ptr = strstr(boot_command_line, "ethaddr=");
++		if(ptr){	
++			memcpy(ethaddr, ptr + 8, 17 * sizeof(char));
++               		printk(KERN_INFO "ethaddr parsed from commandline: %s\n", ethaddr);
++               		ptr_end = ethaddr;
++               		for (i = 0; i < 6; i++) {
++                       		ndev->dev_addr[i] = simple_strtol(ptr_end, &ptr_end, 16) |  
++					  simple_strtol(ptr_end, &ptr_end, 16) <<4;
++				ptr_end++; /* skip ":" in  ethaddr */
++			}
++        	}
++	}
++
+ 	if (!is_valid_ether_addr(ndev->dev_addr))
+ 		dev_warn(db->dev, "%s: Invalid ethernet MAC address. Please "
+ 			 "set using ifconfig\n", ndev->name);
