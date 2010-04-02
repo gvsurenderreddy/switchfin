@@ -26,6 +26,9 @@ ASTERISK_SOURCE=$(ASTERISK_NAME).tar.gz
 ASTERISK_SITE=http://downloads.digium.com/pub/asterisk/releases
 ASTERISK_UNZIP=zcat
 
+APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
+APP_FAX_REV=69
+
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
 ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
 ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
@@ -76,8 +79,10 @@ endif
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
 	
-#	cp package/sources/asterisk/app_rxfax.c $(ASTERISK_DIR)/apps
-#       cp package/sources/asterisk/app_txfax.c $(ASTERISK_DIR)/apps
+ifneq ($(strip $(SF_IP01)),y)
+	cd $(ASTERISK_DIR)/apps/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/app-spandsp/app_fax.c 
+	cd $(ASTERISK_DIR)/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/addon_version.h
+endif
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:

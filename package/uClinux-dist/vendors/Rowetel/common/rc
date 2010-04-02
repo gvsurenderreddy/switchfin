@@ -93,7 +93,7 @@ for dirname in `ls /persistent/var/lib/asterisk/`; do
 done
 
 # write the log files to sd/mmc card
-modprobe spi_mmc
+modprobe spi_mmc > /dev/null
 sleep 2
 [ ! -d /mnt/sd ] && mkdir /mnt/sd
 mount -t vfat /dev/mmc /mnt/sd

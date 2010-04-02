@@ -10,7 +10,7 @@
 
 SPANDSP_SITE=http://www.soft-switch.org/downloads/spandsp/
 SPANDSP_VERSION=0.0.6
-SPANDSP_SOURCE=spandsp-0.0.6pre12.tgz
+SPANDSP_SOURCE=spandsp-0.0.6pre17.tgz
 TIFF_VERSION=3.8.2
 SPANDSP_UNZIP=zcat
 SPANDSP_DIR=$(BUILD_DIR)/spandsp-$(SPANDSP_VERSION)
