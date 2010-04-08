@@ -1,19 +1,17 @@
 #!/bin/hush
 #
-#/etc/ast
-#
-## Check the used memory and restart Asterisk if too much memory is used
+#The current BR4 Appliance is using about 21MB rootfs there are about 4MB 
+#other stuff as you can check in the memory map in the boot log. So we 
+#have around 40MB in total for RAM. In case the used memory become more 
+#than 35MB the OS is in a shortage of free RAM, so we restart asterisk.    
 
-#Clear the cache
-sync;echo 3 > /proc/sys/vm/drop_caches
+#get the used memory
+usedmem=`top -n 1| head -n 1| sed  's/.*Mem: \([0-9]*\).*/\1/'`
 
-#get the free memory
-freemem=`top -n 1| head -n 1| sed  's/.*used, \([0-9]*\).*/\1/'`
-
-#restart asterisk if mem is too low
-if [ $freemem -lt 2000 ]; then
+#restart asterisk if free mem is too low
+if [ $usedmem -gt 35000 ]; then
         datestr=`date`
-	echo "Restart Asterisk: $datestr : freemem=$freemem" >> /tmp/mem.sh.log
+	echo "Restart Asterisk: $datestr : usedmem=$usedmem" >> /tmp/mem.sh.log
 	/etc/init.d/asterisk restart
 fi
 
