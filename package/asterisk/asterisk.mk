@@ -17,8 +17,7 @@
 ##########################################
 # Asterisk package for Astfin.org
 ##########################################
-
-ASTERISK_VERSION=1.4.28
+ASTERISK_VERSION=1.4.30
 ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
 ASTERISK_DIR=$(BUILD_DIR)/$(ASTERISK_NAME)
 ASTERISK_DIR_LINK=$(BUILD_DIR)/asterisk

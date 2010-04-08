@@ -9,7 +9,8 @@ case $1 in
 	start)  export TZ=`cat /etc/TZ`; 
 		asterisk -f >/dev/null 2>/dev/null & ;;
 	stop) killall -9 asterisk;;
-	restart) killall -9 asterisk;
+	restart) asterisk -rx "stop now";
+                sleep 3;
 		export TZ=`cat /etc/TZ`;
 		asterisk -f >/dev/null 2>/dev/null & ;;
 	enable) rm -f /persistent/etc/rc.d/S50asterisk; 

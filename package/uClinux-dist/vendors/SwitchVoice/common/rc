@@ -12,14 +12,14 @@ mount -t ramfs ramfs /var/tmp
 
 #mount ubifs on /persistent
 mknod /dev/ubi_ctrl c 10 63
-ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0
+ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=2048
 mknod /dev/ubi0 c 253 0
 ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
 if [ -z "$ubivol" ]; then
 	ubidetach /dev/ubi_ctrl --mtdn=3
-	ubiformat -y /dev/mtd3				#format
-	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0	#attach it
-	ubimkvol /dev/ubi0 -m -N persistent		#make volume	
+	ubiformat /dev/mtd3 --vid-hdr-offset=2048			#format
+	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=2048	#attach it
+	ubimkvol /dev/ubi0 -m -N persistent				#make volume	
 fi
 mount /persistent
 

@@ -19,10 +19,9 @@
 ##########################################
 # uClinux-dist package for Astfin.org
 ##########################################
-
 UCLINUX_KERNEL_SRC=$(BUILD_DIR)/uClinux-dist/linux-2.6.x
-UCLINUX_SOURCE=uClinux-dist-2009R1-RC6.tar.bz2
-UCLINUX_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/451/6808
+UCLINUX_SOURCE=uClinux-dist-2009R1.1-RC4.tar.bz2
+UCLINUX_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/473/7285/
 UCLINUX_UNZIP=bzcat
 UCLINUX_HOME=$(BUILD_DIR)/uClinux-dist
 TOOLCHAIN_BUILD=$(BASE_DIR)/toolchain

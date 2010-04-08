@@ -1,10 +1,7 @@
---- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2009-02-04 16:23:50.000000000 +0200
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile_	2009-07-14 12:45:03.000000000 +0300
-@@ -3,6 +3,7 @@
- #
- 
- obj-$(CONFIG_BFIN537_STAMP)            += stamp.o
-+obj-$(CONFIG_BR4_APPLIANCE)            += br4_appliance.o
- obj-$(CONFIG_BFIN537_BLUETECHNIX_CM)   += cm_bf537.o
+--- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2010-04-08 10:16:25.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2010-04-08 10:17:00.000000000 +0300
+@@ -8,3 +8,4 @@
  obj-$(CONFIG_BFIN537_BLUETECHNIX_TCM)  += tcm_bf537.o
  obj-$(CONFIG_PNAV10)                   += pnav10.o
+ obj-$(CONFIG_CAMSIG_MINOTAUR)          += minotaur.o
++obj-$(CONFIG_BR4_APPLIANCE)	       += br4_appliance.o
