@@ -56,17 +56,11 @@ uClinux-source: $(DL_DIR)/$(UCLINUX_SOURCE) $(UCLINUX_CONFIG_FILE)
 $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR);
 
-#	Penev not sure why this is necesery
-	ln -sf $(UCLINUX_DIR)/autoconf.h $(UCLINUX_DIR)/config/                  
-
-#	rm -rf $(UCLINUX_HOME)/user/mtd-utils/Makefile                              
-#	ln -sf $(SOURCES_DIR)/mtd-utils/Makefile $(UCLINUX_HOME)/user/mtd-utils/
-#	ln -sf $(SOURCES_DIR)/mtd-utils/flashcp.c $(UCLINUX_HOME)/user/mtd-utils/
-#	ln -sf $(SOURCES_DIR)/mtd-utils/flash_erase.c $(UCLINUX_HOME)/user/mtd-utils/
-#	ln -sf $(SOURCES_DIR)/mtd-utils/nanddump.c $(UCLINUX_HOME)/user/mtd-utils/
-#	ln -sf $(SOURCES_DIR)/mtd-utils/nandwrite.c $(UCLINUX_HOME)/user/mtd-utils/
-	
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/ncpu.patch
+
+ifeq ($(strip $(SF_PACKAGE_CURL)),y)
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/curl.patch
+endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/mem.patch
@@ -233,6 +227,12 @@ ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 else
 	sed -i -e "s/^CONFIG_LIB_LIBBFGDOTS_FORCE=y/# CONFIG_LIB_LIBBFGDOTS_FORCE is not set/" $(LIBS_CONFIG)
 endif
+
+ifeq ($(strip $(SF_PACKAGE_CURL)),y)
+	sed -i -e "s/^# CONFIG_USER_CURL_CURL is not set/CONFIG_USER_CURL_CURL=y/" $(LIBS_CONFIG)
+	sed -i -e "s/^# CONFIG_LIB_LIBCURL is not set/CONFIG_LIB_LIBCURL=y/" $(LIBS_CONFIG)
+endif
+
 	touch $(UCLINUX_DIR)/.configured
 
 #---------------------------------------------------------------------------
