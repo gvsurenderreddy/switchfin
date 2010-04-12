@@ -12,13 +12,13 @@ mount -t ramfs ramfs /var/tmp
 
 #mount ubifs on /persistent
 mknod /dev/ubi_ctrl c 10 63
-ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=2048
+ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=512
 mknod /dev/ubi0 c 253 0
 ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
 if [ -z "$ubivol" ]; then
 	ubidetach /dev/ubi_ctrl --mtdn=3
-	ubiformat /dev/mtd3 --vid-hdr-offset=2048			#format
-	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=2048	#attach it
+	ubiformat /dev/mtd3 --vid-hdr-offset=512			#format
+	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=512	#attach it
 	ubimkvol /dev/ubi0 -m -N persistent				#make volume	
 fi
 mount /persistent
@@ -93,7 +93,7 @@ for dirname in `ls /persistent/var/lib/asterisk/`; do
 done
 
 # write the log files to sd/mmc card
-modprobe spi_mmc
+modprobe spi_mmc > /dev/null
 sleep 2
 [ ! -d /mnt/sd ] && mkdir /mnt/sd
 mount -t vfat /dev/mmc /mnt/sd
