@@ -70,6 +70,8 @@
 /dev/ram0	b	777	0	0	1	0	0	0	-
 /dev/ram1	b	644	0	0	1	1	0	0	-
 /dev/nfs	b	777	0	0	0	255	0	0	-
+/dev/net        d       755     0       0       -       -       -	-       -
+/dev/net/tun    c       640     0       0       10      200	0       0       -
 #/dev/ram	b	640	0	0	1	1	0	0	-
 #/dev/ram	b	640	0	0	1	0	0	1	-
 #/dev/loop	b	640	0	0	7	0	0	1	-
