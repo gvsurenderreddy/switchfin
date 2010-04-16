@@ -3,11 +3,8 @@
 
 . /persistent/etc/network.conf
 case $1 in
-	start) ntpdate -4 $NTPserver &
-	       date;
-               echo "export TZ=$TIMEZONE" >> /etc/profile;
-		sleep 5;
-		ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
+	start) echo "export TZ=$TIMEZONE" >> /etc/profile;
+	       ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
 	stop) killall -9 ntpd;;
 	restart) killall -9 ntpd; 
 		ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;

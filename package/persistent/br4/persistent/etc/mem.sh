@@ -6,6 +6,7 @@
 #than 35MB the OS is in a shortage of free RAM, so we restart asterisk.    
 
 #get the used memory
+sync; echo 3 > /proc/sys/vm/drop_caches
 usedmem=`top -n 1| head -n 1| sed  's/.*Mem: \([0-9]*\).*/\1/'`
 
 #restart asterisk if free mem is too low
