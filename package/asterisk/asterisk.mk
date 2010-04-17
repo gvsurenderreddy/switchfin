@@ -11,6 +11,9 @@
 # Primary Authors: mark@astfin.org, pawel@astfin.org, Diego Searfin
 # Primary Authors: David@rowetel.com, Jeff Knighton
 # Dimitar Penev: 3.Dec. 2009  Upgrade to Asterisk 1.4.28 and DAHDI 
+# Dimitar Penev: 18.Apr. 2010  Asterisk 1.6 support is added. (Some work 
+# taken from BAPS, thank you David!)
+#
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #######################################################################
 
@@ -51,7 +54,7 @@ endif
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 ASTERISK_DEP+= libpri
 endif
-ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib
+ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl
 ASTERISK_CONFIGURE_OPTS+= --without-curl --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux
 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
@@ -74,8 +77,11 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 	ln -sf $(SOURCES_DIR)/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(SOURCES_DIR)/g729ab_codec.h $(ASTERISK_DIR)/codecs
-endif   
+endif
+  
+ifeq ($(strip $(SF_ASTERISK_1_4)),y) 
 	ln -sf $(SOURCES_DIR)/codec_speex.c $(ASTERISK_DIR)/codecs
+endif
 	touch $(ASTERISK_DIR)/.unpacked
 
 
@@ -88,10 +94,12 @@ endif
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
-	
+
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)	
 ifneq ($(strip $(SF_IP01)),y)
 	cd $(ASTERISK_DIR)/apps/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/app-spandsp/app_fax.c 
 	cd $(ASTERISK_DIR)/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/addon_version.h
+endif
 endif
 	touch $(ASTERISK_DIR)/.configured
 

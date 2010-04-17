@@ -29,10 +29,10 @@ config SF_ASTERISK_1_4
           Asterisk 1.4 recommend for production boxes 
 
 config SF_ASTERISK_1_6
-        bool "Asterisk 1.6"
+        bool "Asterisk 1.6 (Experimental)"
         depends on SF_PACKAGE_ASTERISK
         help
-          Asterisk 1.6 bringing up new features. Still not recomend for production boxes.
+          Asterisk 1.6 bringing up new features. Experimental, still not recommend for production boxes.
 
 endchoice
 
