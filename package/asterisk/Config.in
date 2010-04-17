@@ -17,6 +17,24 @@ config SF_PACKAGE_ASTERISK
 	default y
 	help
 		Open source PBX
+choice
+        prompt "Asterisk version"
+        default SF_ASTERISK_1_4
+        depends on SF_PACKAGE_ASTERISK
+
+config SF_ASTERISK_1_4
+        bool "Asterisk 1.4"
+        depends on SF_PACKAGE_ASTERISK
+        help
+          Asterisk 1.4 recommend for production boxes 
+
+config SF_ASTERISK_1_6
+        bool "Asterisk 1.6"
+        depends on SF_PACKAGE_ASTERISK
+        help
+          Asterisk 1.6 bringing up new features. Still not recomend for production boxes.
+
+endchoice
 
 config SF_PACKAGE_ASTERISK_VERBOSE
 	bool "Asterisk custom setting"

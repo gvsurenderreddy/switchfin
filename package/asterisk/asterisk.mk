@@ -17,7 +17,18 @@
 ##########################################
 # Asterisk package for Astfin.org
 ##########################################
-ASTERISK_VERSION=1.4.30
+
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+	ASTERISK_VERSION=1.4.30
+	ASTERISK_PATCH=asterisk-1.4.patch
+	CID_PATCH=cid-1.4.patch
+	ASTERISK_MAKEOPTS=asterisk-1.4
+else
+	ASTERISK_VERSION=1.6.2.7-rc2
+	ASTERISK_PATCH=asterisk-1.6.patch
+	CID_PATCH=cid-1.6.patch
+	ASTERISK_MAKEOPTS=asterisk-1.6
+endif
 ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
 ASTERISK_DIR=$(BUILD_DIR)/$(ASTERISK_NAME)
 ASTERISK_DIR_LINK=$(BUILD_DIR)/asterisk
@@ -57,8 +68,8 @@ $(DL_DIR)/$(ASTERISK_SOURCE):
 $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(ASTERISK_UNZIP) $(DL_DIR)/$(ASTERISK_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	ln -sf $(ASTERISK_DIR) $(ASTERISK_DIR_LINK)
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk asterisk.patch
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk cid.patch
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(ASTERISK_PATCH)
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 	ln -sf $(SOURCES_DIR)/codec_g729.c $(ASTERISK_DIR)/codecs
@@ -70,9 +81,9 @@ endif
 
 $(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
-	cp -v package/asterisk/asterisk_misdn.makeopts $(ASTERISK_DIR)/menuselect.makeopts
+	cp -v package/asterisk/$(ASTERISK_MAKEOPTS)_misdn.makeopts $(ASTERISK_DIR)/menuselect.makeopts
 else
-	cp -v package/asterisk/asterisk.makeopts $(ASTERISK_DIR)/menuselect.makeopts
+	cp -v package/asterisk/$(ASTERISK_MAKEOPTS).makeopts $(ASTERISK_DIR)/menuselect.makeopts
 endif
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux

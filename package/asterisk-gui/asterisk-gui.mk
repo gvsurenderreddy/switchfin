@@ -16,13 +16,9 @@
 # Asterisk GUI package for Astfin.org
 ##########################################
 
-ASTERISKGUI_TAG=3.0
-ASTERISKGUI_DIR=$(BUILD_DIR)/asterisk-gui-$(ASTERISKGUI_TAG)
-#ASTERISKGUI_DIR=$(BUILD_DIR)/asterisk-gui-trunk
-ASTERISKGUI_UNPACKED=asterisk-gui-$(ASTERISKGUI_TAG)
-#ASTERISKGUI_UNPACKED=asterisk-gui-trunk
-ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asterisk-gui/tags/$(ASTERISKGUI_TAG)
-#ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asterisk-gui/trunk/
+ASTERISKGUI_DIR=$(BUILD_DIR)/asterisk-gui-trunk
+ASTERISKGUI_UNPACKED=asterisk-gui-trunk
+ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asterisk-gui/trunk/
 
 #
 # Target not currently used as statically keeping the code locally in svn
