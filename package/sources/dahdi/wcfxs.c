@@ -688,7 +688,7 @@ static unsigned char wcfxs_getreg(struct wcfxs *wc, int card, unsigned char reg)
 {
 	unsigned long flags;
 	unsigned char res;
-	spin_lock_irqsave(&wc->lock, flags);
+	spin_lock_irqsave(&wc->lock, flags); 
 	res = __wcfxs_getreg(wc, card, reg);
 	spin_unlock_irqrestore(&wc->lock, flags);
 	return res;
@@ -1023,56 +1023,68 @@ static inline void wcfxs_proslic_recheck_sanity(struct wcfxs *wc, int card)
 	}
 }
 
+static void work_interrupt_processing(struct work_struct *test);
+static DECLARE_WORK(work_interrupt, work_interrupt_processing);
+
 /* handles regular interrupt processing, called every time we get a DMA
    interrupt which is every 1ms with DAHDI_CHUNKSIZE == 8 */
-
 void regular_interrupt_processing(u8 *read_samples, u8 *write_samples) {
   struct wcfxs *wc = devs;
 
-	int x;
+        /* handle speech samples */
+        wcfxs_transmitprep(wc, write_samples);
+        wcfxs_receiveprep(wc, read_samples);
 
-	wc->intcount++;
-	x = wc->intcount % NUM_CARDS;
+        schedule_work(&work_interrupt);
+}
 
-	/* as ISR is started before chips initialised we need this test
+/* The work interrupt is a soft IRQ that can properly communicate with
+ * the SPI kernel drivers and sleep without crashing the kernel */
+static void work_interrupt_processing(struct work_struct *test) {
+  struct wcfxs *wc = devs;
+
+        int x;
+
+        wc->intcount++;
+        x = wc->intcount % NUM_CARDS;
+
+
+        /* as ISR is started before chips initialised we need this test
            to ensure we don't test the hook switch and ring detect
            before chips initialised */
 
-	if (wcfxs_init_ok) {
+        if (wcfxs_init_ok) {
 
-	  /* check hook switch (FXS) and ringing (FXO) */
+          /* check hook switch (FXS) and ringing (FXO) */
 
-	  if ((x < wc->cards) && (wc->cardflag & (1 << x))) {
-	    if (wc->modtype[x] == MOD_TYPE_FXS) {
-	      wcfxs_proslic_check_hook(wc, x);
+          if ((x < wc->cards) && (wc->cardflag & (1 << x))) {
+            if (wc->modtype[x] == MOD_TYPE_FXS) {
+            	wcfxs_proslic_check_hook(wc, x);
 //#define DR_DONT_NEED
 #ifdef DR_DONT_NEED
-	      if (!(wc->intcount & 0xfc))
-		wcfxs_proslic_recheck_sanity(wc, x);
+              if (!(wc->intcount & 0xfc))
+                wcfxs_proslic_recheck_sanity(wc, x);
 #endif
-	    } else if (wc->modtype[x] == MOD_TYPE_FXO) {
-	      /* ring detection, despite name */
-	      wcfxs_voicedaa_check_hook(wc, x); 
-	    }
-	  }
+            } else if (wc->modtype[x] == MOD_TYPE_FXO) {
+              /* ring detection, despite name */
+              wcfxs_voicedaa_check_hook(wc, x);
+            }
+          }
 
 #ifdef DR_DONT_NEED
-	  if (!(wc->intcount % 10000)) {
-	    /* Accept an alarm once per 10 seconds */
-	    for (x=0;x<4;x++) 
-	      if (wc->modtype[x] == MOD_TYPE_FXS) {
-		if (wc->mod.fxs.palarms[x])
-		  wc->mod.fxs.palarms[x]--;
-	      }
-	  }
+          if (!(wc->intcount % 10000)) {
+            /* Accept an alarm once per 10 seconds */
+            for (x=0;x<4;x++)
+              if (wc->modtype[x] == MOD_TYPE_FXS) {
+                if (wc->mod.fxs.palarms[x])
+                  wc->mod.fxs.palarms[x]--;
+              }
+          }
 #endif
-	}
-
-
-	/* handle speech samples */
-	wcfxs_transmitprep(wc, write_samples);
-	wcfxs_receiveprep(wc, read_samples);
+        }
 }
+
+
 
 static int wcfxs_voicedaa_insane(struct wcfxs *wc, int card)
 {

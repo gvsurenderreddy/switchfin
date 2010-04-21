@@ -149,6 +149,8 @@ if [ -f /bin/in.tftpd ]; then
 echo "tftp    dgram  udp wait   root /bin/in.tftpd /persistent/tftp" >> /etc/inetd.conf
 fi
 
+sync; echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
+
 # start up services linked to rc.d
 for i in /persistent/etc/rc.d/S*; do
         $i start

@@ -10,7 +10,9 @@
  * Created:	Jun 3, 2007
  * Description: This device driver enables SPORT1 on Blackfin532 interfacing 
  *              to Silicon Labs chips.
- */
+ * Dimitar Penev 21.04.2010 Improved sport_tx_byte so no udelay necesery.
+ *		Long term we need to move to bfin_sport_spi_	   
+*/
 
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -131,6 +133,11 @@ static int sport_configure(int baud)
 void sport_tx_byte(u16 chip_select, u8 bits)
 {
 	u16 tmp;
+	u8 dummy;
+
+        // Enable the receive operation so we can use RXNE to monitor the transmit status  
+        sport1_write_RCR1( sport1_read_RCR1() | RSPEN );
+        while (!(sport1_read_RCR1() & RSPEN));
 
 	/* drop chip select */
 	if ( chip_select >7 )
@@ -143,16 +150,20 @@ void sport_tx_byte(u16 chip_select, u8 bits)
         bfin_write_PORTFIO_CLEAR((1<<chip_select));
 #endif
 		__builtin_bfin_ssync();
-		ndelay(25);	//tsu1 - Setup Time, /CS to SCLK fall
+//		ndelay(25);	//tsu1 - Setup Time, /CS to SCLK fall
 	}
 	
+	dummy = (u8)bfin_read_SPORT1_RX16(); //Clear the receiving FIFO buffer
+
 	tmp = bits & 0x0ff;
 	bfin_write_SPORT1_TX16(tmp);
 
-	while (!(sport1_read_STAT() & TXHRE));
+//	timeout_cntr=0;
+//	while (!(sport1_read_STAT() & TXHRE) && timeout_cntr<200){ndelay(25);timeout_cntr++;}; 
+	while (!(sport1_read_STAT() & RXNE)); //If we have data in the RX FIFO it means we have transmited out the byte 
 
 	/*  Wait for the last byte sent out  */
-	udelay(2);
+//	udelay(2);
 
 	/* Raise chip select */
 	if ( chip_select >7 )
@@ -171,6 +182,11 @@ void sport_tx_byte(u16 chip_select, u8 bits)
 	txCnt++;
 	PRINTK("Send the %d byte OK!\n", txCnt);
 #endif
+	//Disable the receiving
+        sport1_write_RCR1( sport1_read_RCR1() & ~(RSPEN) );
+//        ndelay(200);
+        __builtin_bfin_ssync();
+
 	return;
 }
 
@@ -199,7 +215,7 @@ u8 sport_rx_byte(u16 chip_select)
 	/* Write a dummy byte to generate a FSYNC */
 	bfin_write_SPORT1_TX16(0x00ff);
 
-	while (!(sport1_read_STAT() & RXNE))
+	while (!(sport1_read_STAT() & RXNE)) 
 	{
 		PRINTK("%s Line%d:status:%x  %d \n", __FUNCTION__, __LINE__, sport1_read_STAT(), txCnt);
 	}
@@ -223,7 +239,7 @@ u8 sport_rx_byte(u16 chip_select)
 	}
 
 	sport1_write_RCR1( sport1_read_RCR1() & ~(RSPEN) ); 
-	ndelay(200);
+//	ndelay(200);
 	__builtin_bfin_ssync();
 
 	PRINTK("%s Line%d receive byte OK!\n",__FUNCTION__, __LINE__ );

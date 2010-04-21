@@ -1,5 +1,5 @@
 config SF_PACKAGE_N2N
 	bool "n2n"
-	default y
+	default n
 	help
 		n2n is an open source VPN application which utilizes a Peer-to-peer architecture for network membership and routing, it is small but very powerful.
