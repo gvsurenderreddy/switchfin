@@ -14,5 +14,4 @@ mkdir -p moh
 cd moh
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-freeplay-alaw.tar.gz -O - | gzip -dc | tar xvf -
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-freeplay-ulaw.tar.gz -O - | gzip -dc | tar xvf -
-echo "Please restart now...."
-reboot
+echo "Sound prompts have been downloaded."
