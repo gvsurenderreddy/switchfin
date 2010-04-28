@@ -12,9 +12,35 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 config SF_PACKAGE_ASTERISKGUI
-        bool "AsteriskNow - Astfin GUI"
-        default n
+        bool "Asterisk - Switchfin GUI"
+        default y
 	depends SF_PACKAGE_ASTERISK
         help
                 Disturbition of AsteriskNow for Astfin, if you select this option 
 		please deselect php and lighttpd
+
+choice
+        prompt "Asterisk GUI"
+        default SF_ASTERISK_GUI_3_0 if (SF_IP04 || SF_PR1_APPLIANCE || SF_BR4_APPLIANCE || SF_FX08)
+        depends on SF_PACKAGE_ASTERISK
+
+config SF_PACKAGE_NOGUI
+        bool "Asterisk without GUI"
+        depends on (SF_PACKAGE_ASTERISK)
+        help
+          Asterisk without web based GUI.
+
+config SF_ASTERISK_GUI_3_0
+        bool "Asterisk GUI 3.0"
+        depends on SF_PACKAGE_ASTERISK
+        help
+          Asterisk GUI 3.0 currently recommend for production boxes
+
+config SF_ASTERISK_GUI_4_0
+        bool "Asterisk GUI 4.0"
+        depends on SF_PACKAGE_ASTERISK
+        help
+          New Asterisk GUI. Still not recommend for production boxes.
+
+endchoice
+

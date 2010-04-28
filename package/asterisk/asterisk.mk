@@ -42,7 +42,7 @@ ASTERISK_UNZIP=zcat
 APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
 APP_FAX_REV=69
 
-ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
+ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__ -save-temps
 ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
 ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
 ASTERISK_DEP=sqlite3 dahdi
@@ -83,6 +83,11 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ln -sf $(SOURCES_DIR)/codec_speex.c $(ASTERISK_DIR)/codecs
 endif
 	touch $(ASTERISK_DIR)/.unpacked
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+	touch $(ASTERISK_DIR)/.asterisk.1.4
+else
+	touch $(ASTERISK_DIR)/.asterisk.1.6
+endif
 
 
 $(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked
@@ -108,7 +113,26 @@ $(STAGING_LIB)/libgsm.a:
 	ln -sf $(UCLINUX_DIST)/lib/blackfin-gsm/gsm/lib/libgsm.a $(STAGING_LIB)
 	ln -sf $(UCLINUX_DIST)/lib/blackfin-gsm/gsm/inc/gsm.h $(STAGING_INC)
 
-asterisk: $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
+
+check_prev_ver:
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.6; then \
+		rm -rf $(BUILD_DIR)/asterisk-1.6*; \
+		rm -rf $(ASTERISK_DIR_LINK); \
+		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
+		rm -rf $(TARGET_DIR)/bin/asterisk; \
+	fi
+endif
+ifeq ($(strip $(SF_ASTERISK_1_6)),y)
+	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.4; then \
+		rm -rf $(BUILD_DIR)/asterisk-1.4*; \
+		rm -rf $(ASTERISK_DIR_LINK); \
+		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
+		rm -rf $(TARGET_DIR)/bin/asterisk; \
+	fi
+endif
+
+asterisk: check_prev_ver $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_VERBOSE)),y)
 #	-$(MAKE1) -C $(ASTERISK_DIR) menuselect
@@ -132,7 +156,7 @@ endif
 	cp -v $(ASTERISK_DIR)/main/asterisk $(TARGET_DIR)/bin/
 	ln -sf /bin/asterisk $(TARGET_DIR)/bin/rasterisk
 	find $(ASTERISK_DIR) -name '*.so' -exec cp -v "{}" $(TARGET_DIR)/usr/lib/asterisk/modules/ \;
-	$(TARGET_STRIP)  $(TARGET_DIR)/bin/asterisk
+	$(TARGET_STRIP)  $(TARGET_DIR)/bin/asterisk --keep-symbol=_ast_register_application
 	$(TARGET_STRIP) $(TARGET_DIR)/usr/lib/asterisk/modules/*.so
 
 

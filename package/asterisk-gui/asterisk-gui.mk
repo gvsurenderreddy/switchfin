@@ -16,10 +16,16 @@
 # Asterisk GUI package for Astfin.org
 ##########################################
 
-ASTERISKGUI_DIR=$(BUILD_DIR)/asterisk-gui-trunk
-ASTERISKGUI_UNPACKED=asterisk-gui-trunk
-ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asterisk-gui/trunk/
 
+ifeq ($(strip $(SF_ASTERISK_GUI_3_0)),y)
+ASTERISKGUI_DIR=$(BUILD_DIR)/asterisk-gui-3.0
+ASTERISKGUI_UNPACKED=asterisk-gui-3.0
+ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asterisk-gui/tags/3.0/
+else
+ASTERISKGUI_DIR=$(BUILD_DIR)/asterisk-gui-4.0
+ASTERISKGUI_UNPACKED=asterisk-gui-4.0
+ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asterisk-gui/trunk/
+endif
 #
 # Target not currently used as statically keeping the code locally in svn
 # in the dl directory
@@ -28,10 +34,11 @@ ASTERISKGUI_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/asteris
 $(DL_DIR)/$(ASTERISKGUI_UNPACKED):
 	$(SVN)  $(ASTERISKGUI_SITE) $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 
-asterisk-gui-source: $(DL_DIR)/asterisk-gui
+asterisk-gui-source: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 
 
 $(ASTERISKGUI_DIR)/.unpacked: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
+	rm -rf $(ASTERISKGUI_DIR)
 	cp -R $(DL_DIR)/$(ASTERISKGUI_UNPACKED) $(ASTERISKGUI_DIR)
 	touch $(ASTERISKGUI_DIR)/.unpacked
 
@@ -39,7 +46,21 @@ $(ASTERISKGUI_DIR)/.unpacked: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 $(ASTERISKGUI_DIR)/.configured: $(ASTERISKGUI_DIR)/.unpacked
 	touch $(ASTERISKGUI_DIR)/.configured
 
-asterisk-gui:  $(ASTERISKGUI_DIR)/.configured
+check_prev_ver:
+ifeq ($(strip $(SF_ASTERISK_GUI_3_0)),y)
+	if test -d $(BUILD_DIR)/asterisk-gui-4.0; then \
+		rm -rf $(BUILD_DIR)/asterisk-gui-4.0/; \
+		rm -rf $(TARGET_DIR)/var/lib/asterisk/; \
+	fi
+endif
+ifeq ($(strip $(SF_ASTERISK_GUI_4_0)),y)
+	if test -d $(BUILD_DIR)/asterisk-gui-3.0; then \
+		rm -rf $(BUILD_DIR)/asterisk-gui-3.0/; \
+		rm -rf $(TARGET_DIR)/var/lib/asterisk/; \
+	fi
+endif
+
+asterisk-gui: check_prev_ver $(ASTERISKGUI_DIR)/.configured
 	-find $(ASTERISKGUI_DIR) -type d -name .svn | xargs rm -rf
 	#mkdir -p $(TARGET_DIR)/etc/scripts
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk
@@ -71,6 +92,6 @@ asterisk-gui-dirclean:
 # Toplevel Makefile options
 #
 #################################################
-#ifeq ($(strip $(SF_PACKAGE_ASTERISKGUI)),y)
+ifeq ($(strip $(SF_PACKAGE_ASTERISKGUI)),y)
 TARGETS+=asterisk-gui
-#endif
+endif

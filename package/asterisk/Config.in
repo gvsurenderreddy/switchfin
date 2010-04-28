@@ -57,25 +57,6 @@ config SF_PACKAGE_ASTERISK-H323
         help
                 h.323 support for Asterisk, experimental
 
-choice
-        prompt "Asterisk GUI"
-        depends on (SF_PACKAGE_ASTERISK)
-        default SF_PACKAGE_ASTERISKGUI if (SF_IP04 || SF_PR1_APPLIANCE || SF_BR4_APPLIANCE || SF_FX08)
-
-config SF_PACKAGE_ASTERISKGUI
-        bool "Asterisk GUI ver. 2"
-        depends on (SF_PACKAGE_ASTERISK)
-        help
-          Digium's Asterisk GUI ver. 2.
-
-
-config SF_PACKAGE_NOGUI
-        bool "Asterisk without GUI"
-        depends on (SF_PACKAGE_ASTERISK)
-        help
-          Asterisk without web based GUI.
-endchoice
-
 config SF_PACKAGE_ASTERISK_G729
         bool "g.729 codec EVALUATION ONLY, READ HELP!!!!"
         default n
