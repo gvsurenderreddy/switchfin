@@ -46,7 +46,7 @@ $(ASTERISKGUI_DIR)/.unpacked: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 $(ASTERISKGUI_DIR)/.configured: $(ASTERISKGUI_DIR)/.unpacked
 	touch $(ASTERISKGUI_DIR)/.configured
 
-check_prev_ver:
+gui_check_prev_ver:
 ifeq ($(strip $(SF_ASTERISK_GUI_3_0)),y)
 	if test -d $(BUILD_DIR)/asterisk-gui-4.0; then \
 		rm -rf $(BUILD_DIR)/asterisk-gui-4.0/; \
@@ -60,7 +60,7 @@ ifeq ($(strip $(SF_ASTERISK_GUI_4_0)),y)
 	fi
 endif
 
-asterisk-gui: check_prev_ver $(ASTERISKGUI_DIR)/.configured
+asterisk-gui: gui_check_prev_ver $(ASTERISKGUI_DIR)/.configured
 	-find $(ASTERISKGUI_DIR) -type d -name .svn | xargs rm -rf
 	#mkdir -p $(TARGET_DIR)/etc/scripts
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk
