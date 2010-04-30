@@ -53,3 +53,58 @@
  		break;
  	case AST_FORMAT_G723_1:
  		samples = g723_samples(f->data.ptr, f->datalen);
+--- asterisk/apps/app_voicemail.c	2010-04-30 22:41:57.000000000 +0300
++++ asterisk/apps/app_voicemail.c	2010-04-30 22:42:59.000000000 +0300
+@@ -3128,7 +3128,7 @@
+ 					}
+ 					/* Read out in small chunks */
+ 					for (offset = 0; offset < colsize2; offset += CHUNKSIZE) {
+-						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset)) == MAP_FAILED) {
++						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, offset)) == MAP_FAILED) {
+ 							ast_log(AST_LOG_WARNING, "Could not mmap the output file: %s (%d)\n", strerror(errno), errno);
+ 							SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+ 							ast_odbc_release_obj(obj);
+@@ -3513,7 +3513,7 @@
+ 		fdlen = lseek(fd, 0, SEEK_END);
+ 		lseek(fd, 0, SEEK_SET);
+ 		printf("Length is %zd\n", fdlen);
+-		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_SHARED,fd, 0);
++		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE,fd, 0);
+ 		if (fdm == MAP_FAILED) {
+ 			ast_log(AST_LOG_WARNING, "Memory map failed!\n");
+ 			res = -1;
+--- asterisk/main/manager.c	2010-04-30 22:45:08.000000000 +0300
++++ asterisk/main/manager.c	2010-04-30 22:45:35.000000000 +0300
+@@ -3936,7 +3936,7 @@
+ 		fprintf(s.f, "%c", 0);
+ 
+ 		if ((l = ftell(s.f))) {
+-			if ((buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_SHARED, s.fd, 0))) {
++			if ((buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_PRIVATE, s.fd, 0))) {
+ 				if (format == FORMAT_XML || format == FORMAT_HTML)
+ 					xml_translate(&out, buf, params, format);
+ 				else
+--- asterisk/main/http.c	2010-04-30 22:59:50.000000000 +0300
++++ asterisk/main/http.c	2010-04-30 23:01:13.000000000 +0300
+@@ -208,7 +208,9 @@
+ 		goto out403;
+ 	}
+ 
+-	ast_strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S %Z", ast_localtime(&now, &tm, "GMT"));
++	//ast_strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S %Z", ast_localtime(&now, &tm, "GMT"));
++	buf[0]=0; //Neds to be revised!!!
++
+ 	fprintf(ser->f, "HTTP/1.1 200 OK\r\n"
+ 		"Server: Asterisk/%s\r\n"
+ 		"Date: %s\r\n"
+@@ -741,7 +743,9 @@
+ 		char timebuf[256];
+ 		struct ast_tm tm;
+ 
+-		ast_strftime(timebuf, sizeof(timebuf), "%a, %d %b %Y %H:%M:%S %Z", ast_localtime(&now, &tm, "GMT"));
++		//ast_strftime(timebuf, sizeof(timebuf), "%a, %d %b %Y %H:%M:%S %Z", ast_localtime(&now, &tm, "GMT"));
++		timebuf[0]=0; //Needs to be revised!!!
++	
+ 		fprintf(ser->f,
+ 			"HTTP/1.1 %d %s\r\n"
+ 			"Server: Asterisk/%s\r\n"

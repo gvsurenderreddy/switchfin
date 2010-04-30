@@ -27,7 +27,7 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	CID_PATCH=cid-1.4.patch
 	ASTERISK_MAKEOPTS=asterisk-1.4
 else
-	ASTERISK_VERSION=1.6.2.7-rc2
+	ASTERISK_VERSION=1.6.2.6
 	ASTERISK_PATCH=asterisk-1.6.patch
 	CID_PATCH=cid-1.6.patch
 	ASTERISK_MAKEOPTS=asterisk-1.6
@@ -42,7 +42,7 @@ ASTERISK_UNZIP=zcat
 APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
 APP_FAX_REV=69
 
-ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__ -save-temps
+ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
 ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
 ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
 ASTERISK_DEP=sqlite3 dahdi
@@ -150,9 +150,6 @@ endif
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk/sounds/voicemail
 	mkdir -p $(TARGET_DIR)/var/spool/asterisk
 	mkdir -p $(TARGET_DIR)/usr/lib/asterisk/modules
-#	ln -sf /var/lib/asterisk/sounds/moh $(TARGET_DIR)/var/lib/asterisk/
-#	ln -sf /var/lib/asterisk/sounds/meetme $(TARGET_DIR)/var/spool/asterisk/
-#	ln -sf /var/lib/asterisk/sounds/voicemail $(TARGET_DIR)/var/spool/asterisk/
 	cp -v $(ASTERISK_DIR)/main/asterisk $(TARGET_DIR)/bin/
 	ln -sf /bin/asterisk $(TARGET_DIR)/bin/rasterisk
 	find $(ASTERISK_DIR) -name '*.so' -exec cp -v "{}" $(TARGET_DIR)/usr/lib/asterisk/modules/ \;

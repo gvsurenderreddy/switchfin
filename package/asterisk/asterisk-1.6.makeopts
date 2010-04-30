@@ -1,0 +1,15 @@
+MENUSELECT_APPS=app_alarmreceiver app_externalivr app_festival app_ices app_ivrdemo app_morsecode app_mp3 app_nbscat app_osplookup app_rpt app_sms app_speech_utils app_amd app_adsiprog app_controlplayback app_sayunixtime app_page app_test app_mixmonitor app_image app_skel app_dahdiras app_jack app_disa.so app_milliwatt app_zapateller app_minivm 
+MENUSELECT_CDR=cdr_odbc cdr_pgsql cdr_radius cdr_sqlite cdr_tds cdr_adaptive_odbc cdr_sqlite3_custom
+MENUSELECT_CHANNELS=chan_alsa chan_gtalk chan_h323 chan_mgcp chan_nbs chan_oss chan_phone chan_skinny chan_vpb  chan_console chan_jingle chan_usbradio chan_misdn chan_unistim
+MENUSELECT_CODECS=codec_adpcm codec_lpc10 codec_ilbc codec_resample codec_g722 codec_g726 
+MENUSELECT_FORMATS=format_ogg_vorbis format_jpeg format_h263 format_vox format_g722 format_g726 format_g723 format_g729 format_h264 format_siren14 
+MENUSELECT_FUNCS=func_curl func_odbc func_iconv
+MENUSELECT_PBX=pbx_dundi pbx_gtkconsole pbx_ael pbx_lua
+MENUSELECT_RES=res_config_odbc res_config_pgsql res_jabber res_odbc res_snmp res_speech res_agi res_ais res_config_curl res_config_ldap res_config_sqlite res_curl res_timing_timerfd res_crypto res_http_post
+MENUSELECT_OPTS_app_voicemail=
+MENUSELECT_CFLAGS=LOW_MEMORY LOADABLE_MODULES
+MENUSELECT_EMBED=
+MENUSELECT_CORE_SOUNDS=CORE-SOUNDS-EN-GSM
+MENUSELECT_MOH=
+MENUSELECT_EXTRA_SOUNDS=
+
