@@ -202,3 +202,72 @@
  	if (!is_valid_ether_addr(ndev->dev_addr))
  		dev_warn(db->dev, "%s: Invalid ethernet MAC address. Please "
  			 "set using ifconfig\n", ndev->name);
+--- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2010-05-03 23:48:48.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2010-05-04 00:22:10.000000000 +0300
+@@ -1,37 +1,37 @@
+ choice
+ 	prompt "System type"
+-	default BFIN533_STAMP
++	default BFIN532_IP0X
+ 	help
+ 	  Select your board!
+ 
+-config BFIN533_EZKIT
+-	bool "BF533-EZKIT"
+-	help
+-	  BF533-EZKIT-LITE board support.
+-
+-config BFIN533_STAMP
+-	bool "BF533-STAMP"
+-	help
+-	  BF533-STAMP board support.
+-
+-config BLACKSTAMP
+-	bool "BlackStamp"
+-	help
+-	  Support for the BlackStamp board.  Hardware info available at
+-	  http://blackfin.uclinux.org/gf/project/blackstamp/
+-
+-config BFIN533_BLUETECHNIX_CM
+-	bool "Bluetechnix CM-BF533"
+-	depends on (BF533)
+-	help
+-	  CM-BF533 support for EVAL- and DEV-Board.
+-
+-config H8606_HVSISTEMAS
+-	bool "HV Sistemas H8606"
+-	depends on (BF532)
+-	help
+-	  HV Sistemas H8606 board support.
+-
++#config BFIN533_EZKIT
++#	bool "BF533-EZKIT"
++#	help
++#	  BF533-EZKIT-LITE board support.
++#
++#config BFIN533_STAMP
++#	bool "BF533-STAMP"
++#	help
++#	  BF533-STAMP board support.
++#
++#config BLACKSTAMP
++#	bool "BlackStamp"
++#	help
++#	  Support for the BlackStamp board.  Hardware info available at
++#	  http://blackfin.uclinux.org/gf/project/blackstamp/
++#
++#config BFIN533_BLUETECHNIX_CM
++#	bool "Bluetechnix CM-BF533"
++#	depends on (BF533)
++#	help
++#	  CM-BF533 support for EVAL- and DEV-Board.
++#
++#config H8606_HVSISTEMAS
++#	bool "HV Sistemas H8606"
++#	depends on (BF532)
++#	help
++#	  HV Sistemas H8606 board support.
++#
+ config BFIN532_IP0X
+ 	bool "IP04/IP08 IP-PBX"
+ 	depends on (BF532)

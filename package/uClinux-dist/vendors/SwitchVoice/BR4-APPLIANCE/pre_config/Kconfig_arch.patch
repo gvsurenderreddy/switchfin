@@ -19,3 +19,82 @@
 +         BR4_APPLIANCE board Support
 +
  endchoice
+--- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-04 00:31:39.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-04 00:32:22.000000000 +0300
+@@ -4,41 +4,41 @@
+ 	help
+ 	  Select your board!
+ 
+-config BFIN537_STAMP
+-	bool "BF537-STAMP"
+-	help
+-	  BF537-STAMP board support.
+-
+-config BFIN537_BLUETECHNIX_CM_E
+-	bool "Bluetechnix CM-BF537E"
+-	depends on (BF537)
+-	help
+-	  CM-BF537E support for EVAL- and DEV-Board.
+-
+-config BFIN537_BLUETECHNIX_CM_U
+-	bool "Bluetechnix CM-BF537U"
+-	depends on (BF537)
+-	help
+-	  CM-BF537U support for EVAL- and DEV-Board.
+-
+-config BFIN537_BLUETECHNIX_TCM
+-	bool "Bluetechnix TCM-BF537"
+-	depends on (BF537)
+-	help
+-	  TCM-BF537 support for EVAL- and DEV-Board.
+-
+-config PNAV10
+-	bool "PNAV board"
+-	depends on (BF537)
+-	help
+-	  PNAV board support.
+-
+-config CAMSIG_MINOTAUR
+-	bool "Cambridge Signal Processing LTD Minotaur"
+-	depends on (BF537)
+-	help
+-	  Board supply package for CSP Minotaur
+-
++#config BFIN537_STAMP
++#	bool "BF537-STAMP"
++#	help
++#	  BF537-STAMP board support.
++#
++#config BFIN537_BLUETECHNIX_CM_E
++#	bool "Bluetechnix CM-BF537E"
++#	depends on (BF537)
++#	help
++#	  CM-BF537E support for EVAL- and DEV-Board.
++#
++#config BFIN537_BLUETECHNIX_CM_U
++#	bool "Bluetechnix CM-BF537U"
++#	depends on (BF537)
++#	help
++#	  CM-BF537U support for EVAL- and DEV-Board.
++#
++#config BFIN537_BLUETECHNIX_TCM
++#	bool "Bluetechnix TCM-BF537"
++#	depends on (BF537)
++#	help
++#	  TCM-BF537 support for EVAL- and DEV-Board.
++#
++#config PNAV10
++#	bool "PNAV board"
++#	depends on (BF537)
++#	help
++#	  PNAV board support.
++#
++#config CAMSIG_MINOTAUR
++#	bool "Cambridge Signal Processing LTD Minotaur"
++#	depends on (BF537)
++#	help
++#	  Board supply package for CSP Minotaur
++#
+ config BR4_APPLIANCE
+        bool "BR4_APPLIANCE"
+        depends on (BF537)
