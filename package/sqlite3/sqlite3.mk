@@ -13,7 +13,7 @@
 #########################################################################
 
 ##############################################
-# sqlite3 package for Astfin.org based on BAPS
+# sqlite3 package for Switchfin based on BAPS
 ##############################################
 
 SQLITE3_VERSION=3.6.11

@@ -12,7 +12,7 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #######################################################################
 #########################################################
-# Persistent file system for Astfin
+# Persistent file system for Switchfin
 #########################################################
 
 PERSISTENT_DIST=defaults.tgz

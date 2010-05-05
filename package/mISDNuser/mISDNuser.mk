@@ -12,10 +12,6 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
-##########################################
-# mISDNuser package for Astfin.org
-##########################################
-
 mISDNuser_REV=4
 mISDNuser_NAME=mISDNuser
 mISDNuser_DIR=$(BUILD_DIR)/$(mISDNuser_NAME)-$(mISDN_REV)

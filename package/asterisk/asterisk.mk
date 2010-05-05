@@ -101,10 +101,10 @@ endif
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)	
-ifneq ($(strip $(SF_IP01)),y)
+#ifneq ($(strip $(SF_IP01)),y)
 	cd $(ASTERISK_DIR)/apps/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/app-spandsp/app_fax.c 
 	cd $(ASTERISK_DIR)/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/addon_version.h
-endif
+#endif
 endif
 	touch $(ASTERISK_DIR)/.configured
 

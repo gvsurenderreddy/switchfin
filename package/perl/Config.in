@@ -13,7 +13,7 @@
 #########################################################################
 
 config SF_PACKAGE_PERL
-        bool "Astfin Perl"
+        bool "Switchfin Perl"
         default n
         help
-                Disturbition of Perl for Astfin
+                Disturbition of Perl for Switchfin

@@ -12,7 +12,7 @@
 
 config SF_PACKAGE_VIM
 	bool "vim"
-	default y
+	default n
 	help
 		VIM editor for Switchfin 
 
