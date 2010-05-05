@@ -75,7 +75,11 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ln -sf $(SOURCES_DIR)/codec_g729.c $(ASTERISK_DIR)/codecs
+else
+	ln -sf $(SOURCES_DIR)/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
+endif
 	ln -sf $(SOURCES_DIR)/g729ab_codec.h $(ASTERISK_DIR)/codecs
 endif
   
