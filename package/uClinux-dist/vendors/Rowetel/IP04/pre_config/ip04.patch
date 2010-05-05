@@ -202,13 +202,9 @@
  	if (!is_valid_ether_addr(ndev->dev_addr))
  		dev_warn(db->dev, "%s: Invalid ethernet MAC address. Please "
  			 "set using ifconfig\n", ndev->name);
---- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2010-05-03 23:48:48.000000000 +0300
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf533/boards/Kconfig	2010-05-04 00:22:10.000000000 +0300
-@@ -1,37 +1,37 @@
- choice
- 	prompt "System type"
--	default BFIN533_STAMP
-+	default BFIN532_IP0X
+--- uClinux-dist/linux-2.6.x/arch//blackfin/mach-bf533/boards/Kconfig_orig	2010-05-05 13:05:41.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch//blackfin/mach-bf533/boards/Kconfig	2010-05-05 13:06:23.000000000 +0300
+@@ -4,37 +4,37 @@
  	help
  	  Select your board!
  
@@ -239,7 +235,6 @@
 -	depends on (BF532)
 -	help
 -	  HV Sistemas H8606 board support.
--
 +#config BFIN533_EZKIT
 +#	bool "BF533-EZKIT"
 +#	help
@@ -267,7 +262,11 @@
 +#	depends on (BF532)
 +#	help
 +#	  HV Sistemas H8606 board support.
-+#
+ 
  config BFIN532_IP0X
  	bool "IP04/IP08 IP-PBX"
- 	depends on (BF532)
+-	depends on (BF532)
++#	depends on (BF532)
+ 	help
+ 	  Core support for IP04/IP04 open hardware IP-PBX.
+ 
