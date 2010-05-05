@@ -36,7 +36,7 @@ ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
 ASTERISK_DIR=$(BUILD_DIR)/$(ASTERISK_NAME)
 ASTERISK_DIR_LINK=$(BUILD_DIR)/asterisk
 ASTERISK_SOURCE=$(ASTERISK_NAME).tar.gz
-ASTERISK_SITE=http://downloads.digium.com/pub/asterisk/releases
+ASTERISK_SITE=http://downloads.asterisk.org/pub/telephony/asterisk/releases
 ASTERISK_UNZIP=zcat
 
 APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
