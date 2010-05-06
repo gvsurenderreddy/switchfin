@@ -462,7 +462,7 @@ static int load_module(void) {
 
 	/* Set up function ptrs to g729 .so library functions */
 
-	handle = dlopen ("libg729ab.so", RTLD_LAZY);
+	handle = dlopen ("libg729ab.so", RTLD_NOW);
 	if (!handle) {
 		ast_log(LOG_ERROR, "Error opening libg729ab.so : %s\n", dlerror());
 		return 1;

@@ -57,6 +57,9 @@ $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR);
 
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/ncpu.patch
+	
+	#Ugly hack to make g729 loadin. Needs to be investigate. 
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/mmap.patch
 
 ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/curl.patch
@@ -220,12 +223,12 @@ endif
 
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
-	if egrep "^# CONFIG_LIB_LIBBFGDOTS_FORCE is not set" $(LIBS_CONFIG) > /dev/null; then \
+	if egrep "^# CONFIG_LIB_LIBBFGDOTS is not set" $(LIBS_CONFIG) > /dev/null; then \
         	echo "LIBBFGDOTS has been enabled..."; \
-                sed -i -e "s/^# CONFIG_LIB_LIBBFGDOTS_FORCE is not set/CONFIG_LIB_LIBBFGDOTS_FORCE=y/" $(LIBS_CONFIG); \
+                sed -i -e "s/^# CONFIG_LIB_LIBBFGDOTS is not set/CONFIG_LIB_LIBBFGDOTS=y/" $(LIBS_CONFIG); \
 	fi
 else
-	sed -i -e "s/^CONFIG_LIB_LIBBFGDOTS_FORCE=y/# CONFIG_LIB_LIBBFGDOTS_FORCE is not set/" $(LIBS_CONFIG)
+	sed -i -e "s/^CONFIG_LIB_LIBBFGDOTS=y/# CONFIG_LIB_LIBBFGDOTS is not set/" $(LIBS_CONFIG)
 endif
 
 ifeq ($(strip $(SF_PACKAGE_CURL)),y)

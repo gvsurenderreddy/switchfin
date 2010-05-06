@@ -1,0 +1,12 @@
+--- uClinux-dist/linux-2.6.x/mm/nommu.c	2010-05-06 15:48:58.000000000 +0300
++++ uClinux-dist/linux-2.6.x/mm/nommu.c	2010-05-06 15:50:31.000000000 +0300
+@@ -896,6 +896,9 @@
+ 	if ((flags & MAP_PRIVATE) && tracehook_expect_breakpoints(current))
+ 		vm_flags &= ~VM_MAYSHARE;
+ 
++	//Penev ugly hack to make g729 loading! We need to revise  !!!
++	vm_flags &= ~VM_MAYSHARE;
++	
+ 	return vm_flags;
+ }
+ 

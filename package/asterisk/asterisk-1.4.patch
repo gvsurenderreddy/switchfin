@@ -443,3 +443,34 @@
  	}
  
  	ch->need_queue_hangup = 0;
+--- asterisk/apps/app_directory.c	2010-05-06 13:00:52.000000000 +0300
++++ asterisk/apps/app_directory.c	2010-05-06 13:01:26.000000000 +0300
+@@ -179,7 +179,7 @@
+ 					break;
+ 				}
+ 				if (fd > -1)
+-					fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++					fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE , fd, 0);
+ 			}
+ 			if (fdm != MAP_FAILED) {
+ 				memset(fdm, 0, fdlen);
+--- asterisk/apps/app_voicemail.c	2010-05-06 13:02:26.000000000 +0300
++++ asterisk/apps/app_voicemail.c	2010-05-06 13:03:07.000000000 +0300
+@@ -2413,7 +2413,7 @@
+ 					}
+ 					/* Read out in small chunks */
+ 					for (offset = 0; offset < colsize2; offset += CHUNKSIZE) {
+-						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset)) == MAP_FAILED) {
++						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, offset)) == MAP_FAILED) {
+ 							ast_log(LOG_WARNING, "Could not mmap the output file: %s (%d)\n", strerror(errno), errno);
+ 							SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+ 							ast_odbc_release_obj(obj);
+@@ -2731,7 +2731,7 @@
+ 		fdlen = lseek(fd, 0, SEEK_END);
+ 		lseek(fd, 0, SEEK_SET);
+ 		printf("Length is %zd\n", fdlen);
+-		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
++		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+ 		if (fdm == MAP_FAILED) {
+ 			ast_log(LOG_WARNING, "Memory map failed!\n");
+ 			ast_odbc_release_obj(obj);
