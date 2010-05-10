@@ -12,6 +12,6 @@ wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-a
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
 mkdir -p moh
 cd moh
-wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-freeplay-alaw.tar.gz -O - | gzip -dc | tar xvf -
-wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-freeplay-ulaw.tar.gz -O - | gzip -dc | tar xvf -
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
+wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
 echo "Sound prompts have been downloaded."
