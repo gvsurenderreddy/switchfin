@@ -938,7 +938,7 @@ int main(int ac, char **av)
 	conf_parse(av[1]);
 	conf_read(NULL);
 
-	snprintf(menu_backtitle, 128, "Astfin Configuration");
+	snprintf(menu_backtitle, 128, "Switchfin Configuration");
 
 	mode = getenv("MENUCONFIG_MODE");
 	if (mode) {
@@ -958,17 +958,17 @@ int main(int ac, char **av)
 	init_dialog();
 	do {
 		stat = dialog_yesno(NULL,
-				    "Do you wish to save your new Astfin configuration?", 5, 60);
+				    "Do you wish to save your new Switchfin configuration?", 5, 60);
 	} while (stat < 0);
 	end_dialog();
 
 	if (stat == 0) {
 		conf_write(NULL);
 		printf("\n\n"
-			"*** End of Astfin configuration.\n"
+			"*** End of Switchfin configuration.\n"
 			"*** Check the top-level Makefile for additional configuration options.\n\n");
 	} else
-		printf("\n\nYour Astfin configuration changes were NOT saved.\n\n");
+		printf("\n\nYour Switchfin configuration changes were NOT saved.\n\n");
 
 	return 0;
 }

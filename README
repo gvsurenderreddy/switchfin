@@ -61,8 +61,10 @@ Copyright (C) 2010 SwitchFin dpn@switchfin.org
 
 * NEW INSTALLATIONS
 
-  SwitchFin requires lzo and lzo-devel packages. It will download and install 
-  GNU C Compiler Collection (GCC) cross compilation toolchain
+  SwitchFin requires few packages as it is described at 
+  http://docs.blackfin.uclinux.org/doku.php?id=installing_linux. 
+  The building process will download and install GNU C Compiler 
+  Collection (GCC) cross compilation toolchain
 
 So let's proceed:
 
@@ -102,13 +104,6 @@ So let's proceed:
 
 ----
 Asterisk is a trademark belonging to Digium, inc
-
-
-----
-Remark:
-Currently SwitchFin compiles successfully for the following boards
-PR1-Appliance
-BR4-Appliance
 
 
 Dimitar Penev
