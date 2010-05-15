@@ -14,7 +14,7 @@ then
 		if [[ "$DHCPD" == yes ]]
 		then
 			rm -f /var/run/dhcpcd*
-			dhcpcd &
+			dhcpcd -p & sleep 5
 		elif [[ "$DHCPD" == auto ]]
                 then    
 			ifconfig $IF $IPADDRESS netmask $NETMASK up
