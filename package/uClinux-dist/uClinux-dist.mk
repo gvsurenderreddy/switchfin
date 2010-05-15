@@ -58,9 +58,6 @@ $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/ncpu.patch
 	
-	#Ugly hack to make g729 loadin. Needs to be investigate. 
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/mmap.patch
-
 ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/curl.patch
 endif

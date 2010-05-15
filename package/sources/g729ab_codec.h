@@ -77,8 +77,6 @@ typedef G729_DecObj * G729_dec_h;
 /* Function ptrs for g729 library functions so we can support dlopen() 
    with .so version.  These need to be initialised before lib is used,
    in both flat and .so versions */
-void (*g729ab_dec_reset)(G729_dec_h svptr);
-void (*g729ab_dec_process)(G729_dec_h svptr, short *data_ptr, short *pcm_ptr);
 
 /*
 **
@@ -94,14 +92,14 @@ void (*g729ab_dec_process)(G729_dec_h svptr, short *data_ptr, short *pcm_ptr);
 ** Return value:        Returns 1.
 **
 */
-void G729AB_DEC_PROCESS(G729_dec_h svptr, short *data_ptr, short *pcm_ptr);
+extern void G729AB_DEC_PROCESS(G729_dec_h svptr, short *data_ptr, short *pcm_ptr);
 void G729AB_DEC(G729_dec_h svptr, short *data_ptr, short *pcm_ptr);
 void G729AB_DEC(G729_dec_h svptr, short *data_ptr, short *pcm_ptr)
 {
 #if defined(G729_MULTI_INST)
 	pthread_mutex_lock(&g729_mutex);
 #endif
-	(*g729ab_dec_process)(svptr, data_ptr, pcm_ptr);
+	G729AB_DEC_PROCESS(svptr, data_ptr, pcm_ptr);
 #if defined(G729_MULTI_INST)
 	pthread_mutex_unlock(&g729_mutex);	
 #endif	
@@ -188,8 +186,7 @@ typedef G729_EncObj * G729_enc_h;
 /* Function ptrs for g729 library functions so we can support dlopen() 
    with .so version.  These need to be initialised before lib is used,
    in both flat and .so versions */
-void (*g729ab_enc_reset)(G729_enc_h svptr);
-void (*g729ab_enc_process)(G729_enc_h svptr, short *pcm_ptr, short *data_ptr);
+void G729AB_ENC_PROCESS(G729_enc_h svptr, short *pcm_ptr, short *data_ptr);
 
 /*
 **
@@ -204,14 +201,13 @@ void (*g729ab_enc_process)(G729_enc_h svptr, short *pcm_ptr, short *data_ptr);
 ** Return value:        None.
 **
 */
-void G729AB_ENC_PROCESS(G729_enc_h svptr, short * pcm_ptr, short * data_ptr);
 void G729AB_ENC(G729_enc_h svptr, short * pcm_ptr, short * data_ptr);
 void G729AB_ENC(G729_enc_h svptr, short * pcm_ptr, short * data_ptr)
 {
 #if defined(G729_MULTI_INST)
 	pthread_mutex_lock(&g729_mutex);
 #endif
-        (*g729ab_enc_process)(svptr, pcm_ptr, data_ptr);
+        G729AB_ENC_PROCESS(svptr, pcm_ptr, data_ptr);
 #if defined(G729_MULTI_INST)
         pthread_mutex_unlock(&g729_mutex);
 #endif

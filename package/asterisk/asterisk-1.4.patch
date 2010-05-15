@@ -474,3 +474,13 @@
  		if (fdm == MAP_FAILED) {
  			ast_log(LOG_WARNING, "Memory map failed!\n");
  			ast_odbc_release_obj(obj);
+--- asterisk/codecs/Makefile	2010-05-15 11:06:33.000000000 +0300
++++ asterisk/codecs/Makefile	2010-05-15 11:05:01.000000000 +0300
+@@ -71,3 +71,7 @@
+         
+ 
+ $(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): $(LIBG722)
++
++$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
++	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../uClinux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
++

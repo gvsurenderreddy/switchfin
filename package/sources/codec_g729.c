@@ -167,7 +167,7 @@ static int lintog729_new(struct ast_trans_pvt *pvt) {
 			ast_log(LOG_ERROR, "inst_g729_enc_h not aligned");
 			return 1;
 		}
-		(*g729ab_enc_reset) (tmp->inst_g729_enc_h);
+		G729AB_ENC_RESET(tmp->inst_g729_enc_h);
 		G729AB_ENC_CONFIG(tmp->inst_g729_enc_h, G729_ENC_OUTPUTFORMAT, 
 				  BIT_UNPACKED);
 		G729AB_ENC_CONFIG(tmp->inst_g729_enc_h, G729_ENC_VAD, MODE_G729A);
@@ -203,7 +203,7 @@ static int g729tolin_new(struct ast_trans_pvt *pvt) {
 			ast_log(LOG_ERROR, "inst_g729_dec_h not aligned");
 			return 1;
 		}
-		(*g729ab_dec_reset) (tmp->inst_g729_dec_h);
+		G729AB_DEC_RESET(tmp->inst_g729_dec_h);
 		G729AB_DEC_CONFIG(tmp->inst_g729_dec_h, G729_DEC_INPUTFORMAT, 
 				  BIT_UNPACKED);
 
@@ -454,45 +454,9 @@ static struct ast_translator lintog729 = {
 
 static int load_module(void) {
 	int   res;
-	void *handle;
-	char *error;
 
 	total_enc_cycles = total_dec_cycles = 0;
 	enc_calls = dec_calls = 0;
-
-	/* Set up function ptrs to g729 .so library functions */
-
-	handle = dlopen ("libg729ab.so", RTLD_NOW);
-	if (!handle) {
-		ast_log(LOG_ERROR, "Error opening libg729ab.so : %s\n", dlerror());
-		return 1;
-	}  
-	dlerror();
-	g729ab_enc_reset = dlsym(handle, "G729AB_ENC_RESET");
-	error = (char*)dlerror();
-	if (error != NULL)  {
-		ast_log(LOG_ERROR, "%s\n", error);
-		return 1;
-	}
-
-	g729ab_enc_process = dlsym(handle, "G729AB_ENC_PROCESS");
-	error = (char*)dlerror();
-	if (error != NULL)  {
-		ast_log(LOG_ERROR, "%s\n", error);
-		return 1;
-	}
-	g729ab_dec_reset   = dlsym(handle, "G729AB_DEC_RESET");
-	error = (char*)dlerror();
-	if (error != NULL)  {
-		ast_log(LOG_ERROR, "%s\n", error);
-		return 1;
-	}
-	g729ab_dec_process = dlsym(handle, "G729AB_DEC_PROCESS");
-	error = (char*)dlerror();
-	if (error != NULL)  {
-		ast_log(LOG_ERROR, "%s\n", error);
-		return 1;
-	}
 
 	res = ast_register_translator(&g729tolin);
 	if(!res)
