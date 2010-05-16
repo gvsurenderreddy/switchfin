@@ -181,3 +181,4 @@ fi
 ln -sf /persistent/sounds/moh /var/lib/asterisk/
 ln -sf /persistent/sounds/meetme /var/spool/asterisk/
 ln -sf /persistent/sounds/voicemail /var/spool/asterisk/
+ln -sf /persistent/sounds/monitor /var/spool/asterisk/

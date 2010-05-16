@@ -6,6 +6,7 @@ echo "Downloading and unpacking sounds"
 cd /persistent/sounds || exit 1
 mkdir -p voicemail
 mkdir -p meetme
+mkdir -p monitor
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
