@@ -157,7 +157,7 @@ endif
 	cp -v $(ASTERISK_DIR)/main/asterisk $(TARGET_DIR)/bin/
 	ln -sf /bin/asterisk $(TARGET_DIR)/bin/rasterisk
 	find $(ASTERISK_DIR) -name '*.so' -exec cp -v "{}" $(TARGET_DIR)/usr/lib/asterisk/modules/ \;
-	$(TARGET_STRIP)  $(TARGET_DIR)/bin/asterisk --keep-symbol=_ast_register_application
+	$(TARGET_STRIP)  $(TARGET_DIR)/bin/asterisk
 	$(TARGET_STRIP) $(TARGET_DIR)/usr/lib/asterisk/modules/*.so
 
 
