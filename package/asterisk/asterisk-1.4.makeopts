@@ -1,4 +1,4 @@
-MENUSELECT_APPS=app_alarmreceiver app_externalivr app_festival app_ices app_ivrdemo app_morsecode app_mp3 app_nbscat app_osplookup app_rpt app_sms app_speech_utils app_zapras app_amd app_adsiprog app_controlplayback app_sayunixtime app_page app_test app_mixmonitor app_image app_skel
+MENUSELECT_APPS=app_alarmreceiver app_externalivr app_festival app_ices app_ivrdemo app_morsecode app_mp3 app_nbscat app_osplookup app_rpt app_sms app_speech_utils app_zapras app_amd app_adsiprog app_controlplayback app_sayunixtime app_page app_test app_image app_skel
 MENUSELECT_CDR=cdr_odbc cdr_pgsql cdr_radius cdr_sqlite cdr_tds
 MENUSELECT_CHANNELS=chan_alsa chan_gtalk chan_misdn chan_h323 chan_mgcp chan_nbs chan_oss chan_phone chan_skinny chan_vpb
 MENUSELECT_CODECS=codec_adpcm codec_lpc10 codec_zap codec_ilbc
