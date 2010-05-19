@@ -3,7 +3,8 @@
 
 case $1 in
 	start) 	modprobe wcfxs;
-        	dahdi_scan;
+		wctdm=`dahdi_scan | grep WCTDM`;
+		if test -z $wctdm; then; modprobe dahdi_dummy; fi;
 		dahdi_cfg;;
 	stop) modprobe -r wcfxs;;
 	restart) modprobe -r wcfxs;
