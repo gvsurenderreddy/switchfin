@@ -52,6 +52,7 @@ $(DL_DIR)/$(DAHDI_SOURCE):
 $(DAHDI_DIR)/.unpacked: $(DL_DIR)/$(DAHDI_SOURCE) $(BASE_DIR)/.config
 	$(DAHDI_UNZIP) $(DL_DIR)/$(DAHDI_SOURCE) | \
 	tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
+	mkdir -p $(DAHDI_DIR)/linux/drivers/staging/
 	cp -rf package/sources/oslec $(DAHDI_DIR)/linux/drivers/staging/echo
 	cd $(DAHDI_DIR); patch -p0 < $(BASE_DIR)/package/dahdi/dahdi.patch
 
