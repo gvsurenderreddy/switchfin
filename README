@@ -51,13 +51,14 @@ Copyright (C) 2010 SwitchFin dpn@switchfin.org
   In order to use the compiled images you will need one of the following 
   supported targets:
 
-	BR4 Appliance
-	PR1 Appliance
-	IP08
-	IP02
-	IP01
-	IP01p
-	FX08
+	BR4 Appliance (Originates from uCpbx/Switchvoice, Atcom manufactures under name IP-BRIM/IP-4BM)
+	PR1 Appliance (Originates from uCpbx/Switchvoice)
+	IP04 (Originates from Rowetel, Manufactured by Atcom)
+	IP08 (Manufactured by Atcom)
+	IP02 (Manufactured by Atcom)
+	IP01 (Manufactured by Atcom)
+	IP01p(Manufactured by Atcom)
+	FX08 (Manufactured by EdgePBX)
 
 * NEW INSTALLATIONS
 
