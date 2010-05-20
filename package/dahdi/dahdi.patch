@@ -20,3 +20,20 @@
  
  stackcheck: checkstack modules
  	./checkstack kernel/*.ko kernel/*/*.ko
+--- linux/drivers/dahdi/Kbuild	2010-05-20 15:01:32.000000000 +0300
++++ linux/drivers/dahdi/Kbuild	2010-05-20 15:01:58.000000000 +0300
+@@ -32,12 +32,12 @@
+ 
+ # Only enable this if you think you know what you're doing. This is not
+ # supported yet:
+-#obj-m += dahdi_echocan_oslec.o
++obj-m += dahdi_echocan_oslec.o
+ #
+ # A quick and dirty way to build OSLEC, if you happened to place it
+ # yourself in the dahdi source tree. This is experimental. See README
+ # regarding OSLEC.
+-#obj-m += ../staging/echo/
++obj-m += ../staging/echo/
+ 
+ CFLAGS_MODULE += -I$(DAHDI_INCLUDE) -I$(src)
+ 
