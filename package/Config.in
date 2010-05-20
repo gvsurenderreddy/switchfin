@@ -21,7 +21,6 @@ source "package/uBoot/Config.in"
 
 comment "Hardware settings"
 source "package/lec/Config.in"
-source "package/oslec/Config.in"
 
 comment "Applications"
 source "package/asterisk/Config.in"
