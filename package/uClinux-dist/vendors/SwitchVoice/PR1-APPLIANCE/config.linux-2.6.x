@@ -691,6 +691,7 @@ CONFIG_SERIAL_CORE_CONSOLE=y
 # CONFIG_SERIAL_BFIN_SPORT is not set
 CONFIG_UNIX98_PTYS=y
 # CONFIG_LEGACY_PTYS is not set
+# CONFIG_SDIO_UART is not set
 
 #
 # CAN, the car bus and industrial fieldbus
@@ -808,12 +809,16 @@ CONFIG_MMC_BLOCK=m
 # MMC/SD Host Controller Drivers
 #
 CONFIG_SPI_MMC=m
+CONFIG_MMC_SPI=m
 CONFIG_SPI_MMC_FRAMEWORK_DRIVER=y
 # CONFIG_SPI_MMC_BFIN_PIO_SPI is not set
 CONFIG_SPI_MMC_CS_CHAN=4
 CONFIG_SPI_MMC_MAX_HZ=20000000
 # CONFIG_SPI_MMC_CARD_DETECT is not set
 # CONFIG_SPI_MMC_DEBUG_MODE is not set
+CONFIG_MMC_BLOCK_BOUNCE=y
+# CONFIG_MMC_TEST is not set
+# CONFIG_MMC_SDHCI is not set
 
 #
 # LED devices
@@ -1062,10 +1067,10 @@ CONFIG_NLS_ISO8859_1=y
 #
 # Profiling support
 #
-CONFIG_ROFILING=y
+# CONFIG_PROFILING is not set
 
 #Penev!!!! take use of hardware performance monitor to profiling the kernel and application.     
-CONFIG_HARDWARE_PM=y
+# CONFIG_HARDWARE_PM is not set
 
 #
 # Kernel hacking

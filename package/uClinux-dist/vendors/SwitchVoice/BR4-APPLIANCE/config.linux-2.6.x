@@ -1145,10 +1145,10 @@ CONFIG_NLS_ISO8859_1=y
 #
 # Profiling support
 #
-CONFIG_ROFILING=y
+# CONFIG_PROFILING is not set
 
-#Penev!!!! take use of hardware performance monitor to profiling the kernel and application.     
-CONFIG_HARDWARE_PM=y
+# Penev!!!! take use of hardware performance monitor to profiling the kernel and application.     
+# CONFIG_HARDWARE_PM is not set
 
 #
 # Kernel hacking

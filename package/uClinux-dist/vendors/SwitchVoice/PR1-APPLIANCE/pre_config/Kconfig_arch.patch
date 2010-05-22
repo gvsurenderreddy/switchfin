@@ -1,21 +1,86 @@
---- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2009-02-04 16:23:50.000000000 +0200
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig_	2009-07-14 13:06:05.000000000 +0300
-@@ -1,6 +1,6 @@
+--- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-20 20:58:06.000000000 +0300
++++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-20 20:58:56.000000000 +0300
+@@ -1,42 +1,48 @@
  choice
  	prompt "System type"
--	default BFIN537_STAMP
+-	default FIN537_STAMP
 +	default PR1_APPLIANCE
  	help
  	  Select your board!
  
-@@ -33,4 +33,10 @@
- 	help
- 	  Board supply package for CSP Minotaur
- 
+-config BFIN537_STAMP
+-	bool "BF537-STAMP"
+-	help
+-	  BF537-STAMP board support.
+-
+-config BFIN537_BLUETECHNIX_CM_E
+-	bool "Bluetechnix CM-BF537E"
+-	depends on (BF537)
+-	help
+-	  CM-BF537E support for EVAL- and DEV-Board.
+-
+-config BFIN537_BLUETECHNIX_CM_U
+-	bool "Bluetechnix CM-BF537U"
+-	depends on (BF537)
+-	help
+-	  CM-BF537U support for EVAL- and DEV-Board.
+-
+-config BFIN537_BLUETECHNIX_TCM
+-	bool "Bluetechnix TCM-BF537"
+-	depends on (BF537)
+-	help
+-	  TCM-BF537 support for EVAL- and DEV-Board.
+-
+-config PNAV10
+-	bool "PNAV board"
+-	depends on (BF537)
+-	help
+-	  PNAV board support.
+-
+-config CAMSIG_MINOTAUR
+-	bool "Cambridge Signal Processing LTD Minotaur"
+-	depends on (BF537)
+-	help
+-	  Board supply package for CSP Minotaur
++#config BFIN537_STAMP
++#	bool "BF537-STAMP"
++#	help
++#	  BF537-STAMP board support.
++#
++#config BFIN537_BLUETECHNIX_CM_E
++#	bool "Bluetechnix CM-BF537E"
++#	depends on (BF537)
++#	help
++#	  CM-BF537E support for EVAL- and DEV-Board.
++#
++#config BFIN537_BLUETECHNIX_CM_U
++#	bool "Bluetechnix CM-BF537U"
++#	depends on (BF537)
++#	help
++#	  CM-BF537U support for EVAL- and DEV-Board.
++#
++#config BFIN537_BLUETECHNIX_TCM
++#	bool "Bluetechnix TCM-BF537"
++#	depends on (BF537)
++#	help
++#	  TCM-BF537 support for EVAL- and DEV-Board.
++#
++#config PNAV10
++#	bool "PNAV board"
++#	depends on (BF537)
++#	help
++#	  PNAV board support.
++#
++#config CAMSIG_MINOTAUR
++#	bool "Cambridge Signal Processing LTD Minotaur"
++#	depends on (BF537)
++#	help
++#	  Board supply package for CSP Minotaur
++
 +config PR1_APPLIANCE
 +       bool "PR1_APPLIANCE"
 +       depends on (BF537)
 +       help
 +         PR1_APPLIANCE board Support
-+
+ 
  endchoice
