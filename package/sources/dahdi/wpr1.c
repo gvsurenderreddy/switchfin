@@ -1360,7 +1360,7 @@ static int pr1_software_init(struct t1 *wc)
 	sprintf(wc->span.name, "WCT1/%d", wc->num);
 	sprintf(wc->span.desc, "%s Card %d", wc->variety, wc->num);
 
-	wc->span.manufacturer 	= "uCpbx";
+	wc->span.manufacturer 	= "Switchvoice";
 	strncpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
 	wc->span.spanconfig 	= pr1_spanconfig;
 	wc->span.chanconfig 	= pr1_chanconfig;

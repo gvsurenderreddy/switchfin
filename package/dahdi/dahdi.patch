@@ -37,3 +37,19 @@
  
  CFLAGS_MODULE += -I$(DAHDI_INCLUDE) -I$(src)
  
+--- tools/dahdi_scan.c	2009-11-04 18:36:21.000000000 +0200
++++ tools/dahdi_scan.c	2010-05-23 12:36:32.000000000 +0300
+@@ -156,8 +156,11 @@
+ 			fprintf(stdout, "framing=");
+ 			if (s.lineconfig & DAHDI_CONFIG_ESF) fprintf(stdout, "ESF");
+ 			else if (s.lineconfig & DAHDI_CONFIG_D4) fprintf(stdout, "D4");
+-			else if (s.lineconfig & DAHDI_CONFIG_CCS) fprintf(stdout, "CCS");
+-			else if (s.lineconfig & DAHDI_CONFIG_CRC4) fprintf(stdout, "/CRC4");
++			else
++                        if (s.lineconfig & DAHDI_CONFIG_CCS) {
++                                fprintf(stdout, "CCS");
++                                if (s.lineconfig & DAHDI_CONFIG_CRC4) fprintf(stdout, "/CRC4"); //Penev in general CRC4 can go together with CAS as well
++                        }	
+ 			fprintf(stdout, "\n");
+ 		} else {
+ 			/* this is an analog span */

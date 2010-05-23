@@ -69,9 +69,6 @@ asterisk-gui: gui_check_prev_ver $(ASTERISKGUI_DIR)/.configured
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk/static-http/config
 	cp -Rv $(ASTERISKGUI_DIR)/config/* $(TARGET_DIR)/var/lib/asterisk/static-http/config/
 	cp -v $(ASTERISKGUI_DIR)/scripts/* $(TARGET_DIR)/var/lib/asterisk/scripts/
-ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-	cp -v $(BASE_DIR)/package/asterisk-gui/editzap.sh $(TARGET_DIR)/var/lib/asterisk/scripts/
-endif
 	chmod +x  $(TARGET_DIR)/var/lib/asterisk/scripts/*
 
 
