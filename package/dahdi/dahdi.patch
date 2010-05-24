@@ -20,23 +20,6 @@
  
  stackcheck: checkstack modules
  	./checkstack kernel/*.ko kernel/*/*.ko
---- linux/drivers/dahdi/Kbuild	2010-05-20 15:01:32.000000000 +0300
-+++ linux/drivers/dahdi/Kbuild	2010-05-20 15:01:58.000000000 +0300
-@@ -32,12 +32,12 @@
- 
- # Only enable this if you think you know what you're doing. This is not
- # supported yet:
--#obj-m += dahdi_echocan_oslec.o
-+obj-m += dahdi_echocan_oslec.o
- #
- # A quick and dirty way to build OSLEC, if you happened to place it
- # yourself in the dahdi source tree. This is experimental. See README
- # regarding OSLEC.
--#obj-m += ../staging/echo/
-+obj-m += ../staging/echo/
- 
- CFLAGS_MODULE += -I$(DAHDI_INCLUDE) -I$(src)
- 
 --- tools/dahdi_scan.c	2009-11-04 18:36:21.000000000 +0200
 +++ tools/dahdi_scan.c	2010-05-23 12:36:32.000000000 +0300
 @@ -156,8 +156,11 @@
@@ -53,3 +36,22 @@
  			fprintf(stdout, "\n");
  		} else {
  			/* this is an analog span */
+--- linux/drivers/dahdi/Kbuild	2010-05-24 15:29:04.000000000 +0300
++++ linux/drivers/dahdi/Kbuild	2010-05-24 15:30:06.000000000 +0300
+@@ -32,12 +32,14 @@
+ 
+ # Only enable this if you think you know what you're doing. This is not
+ # supported yet:
+-#obj-m += dahdi_echocan_oslec.o
++obj-m += dahdi_echocan_oslec.o
+ #
+ # A quick and dirty way to build OSLEC, if you happened to place it
+ # yourself in the dahdi source tree. This is experimental. See README
+ # regarding OSLEC.
+-#obj-m += ../staging/echo/
++obj-m += ../staging/echo/
++
++obj-m += dahdi_echocan_zarlink.o
+ 
+ CFLAGS_MODULE += -I$(DAHDI_INCLUDE) -I$(src)
+ 

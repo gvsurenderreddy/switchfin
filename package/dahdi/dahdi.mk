@@ -31,7 +31,7 @@ DAHDI_MODULES_EXTRA+= wpr1
 DAHDI_EXTRA_CFLAGS+= -DCONFIG_PR1_CLOCK_10
 ifeq ($(strip $(SF_PACKAGE_LEC)),y)
 ZARLINK_LEC=lec
-ZAPTEL_EXTRA_CFLAGS+= -DECHO_CAN_FROMENV -DECHO_CAN_ZARLINK
+DAHDI_EXTRA_CFLAGS+= -DECHO_CAN_FROMENV #-DECHO_CAN_ZARLINK
 endif
 endif
 ifeq ($(strip $(SF_IP04)),y)
@@ -77,14 +77,11 @@ ifeq ($(strip $(SF_IP01)),y)
 endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-	ln -sf $(LEC_SOURCES)/zl_wrap.h $(DAHDI_DIR)/linux/drivers/dahdi/zl_wrap.h	
+	ln -sf $(LEC_SOURCES)/dahdi_echocan_zarlink.c $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_zarlink.c
 	ln -sf $(DAHDI_SOURCES)/wpr1.c $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.c
 	ln -sf $(DAHDI_SOURCES)/wpr1.h $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.h
 endif
 
-ifeq ($(strip $(SF_PACKAGE_LEC)),y)
-	ln -sf $(LEC_SOURCES)/zl_wrap.c $(DAHDI_DIR)/linux/drivers/dahdi/zl_wrap.c
-endif
 	touch $(DAHDI_DIR)/.unpacked
 
 $(DAHDI_DIR)/.linux: $(DAHDI_DIR)/.unpacked
@@ -115,10 +112,11 @@ dahdi: $(ZARLINK_LEC) $(OSLEC_IN) $(DAHDI_DIR)/.configured
 	cp $(DAHDI_DIR)/tools/libtonezone.so $(STAGING_LIB)
 	cp $(DAHDI_DIR)/tools/libtonezone.so $(TARGET_DIR)/lib
 	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtonezone.so
-ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 
+ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_zarlink.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 endif
 ifeq ($(strip $(SF_PACKAGE_DAHDI_TDMOE)),y)
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dynamic_eth.ko $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dynamic_loc.ko $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dynamic.ko \

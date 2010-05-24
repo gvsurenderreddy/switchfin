@@ -64,7 +64,6 @@
 #endif
 
 #include "wpr1.h"
-#include "zl_wrap.h"
 
 //Use line below for FALC 56 ver. 2.2
 #define FALC56_2_2
@@ -1370,12 +1369,7 @@ static int pr1_software_init(struct t1 *wc)
 	wc->span.maint 		= __t1_maint;
 	wc->span.open 		= pr1_open;
 	wc->span.close 		= pr1_close;
-#if defined(ECHO_CAN_ZARLINK)
-	int res = echo_can_wrap_init();
-	if( res == 0 ){
-		wc->span.echocan = echo_can_wrap_tail_length;
-	}
-#endif
+	
 	if (wc->spantype == E1) {
 		wc->span.channels = 31;
 		wc->span.linecompat = DAHDI_CONFIG_HDB3 | DAHDI_CONFIG_CCS | DAHDI_CONFIG_CRC4;
@@ -2044,9 +2038,6 @@ static int __init pr1_init()
 
 static void __exit pr1_cleanup(void)
 {
-#if defined(ECHO_CAN_ZARLINK)
-	echo_can_wrap_shutdown();
-#endif
 		pr1_sport_stop();
 		pr1_dma_close();
 		pCard->ledtestreg = 0;

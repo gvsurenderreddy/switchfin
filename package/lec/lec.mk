@@ -15,14 +15,13 @@
 # Echo Cancelleation package for Astfin.org
 #############################################
 
-LEC_REV=5
-LEC_SOURCE=lec-$(LEC_REV)
+LEC_SOURCE=lec
 LEC_DIR=$(DL_DIR)/$(LEC_SOURCE)
 LEC_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/lec/trunk
 LEC_WORKING=$(BUILD_DIR)/$(LEC_SOURCE)
 
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)	 
-ifneq ($(strip $(STFIN_LEC_128)),y)	 
+ifneq ($(strip $(SF_LEC_128)),y)	 
 LEC_EXTRA_CFLAGS=-DCHANNELS_8
 else
 LEC_EXTRA_CFLAGS=-DCHANNELS_16
@@ -36,7 +35,7 @@ endif
 
 
 $(LEC_DIR):
-	$(SVN) -r $(LEC_REV) $(LEC_SITE) $(LEC_DIR)
+	$(SVN)  $(LEC_SITE) $(LEC_DIR)
 
 $(LEC_WORKING)/.unpacked: $(LEC_DIR)
 	rm -rf $(LEC_WORKING)
@@ -70,5 +69,5 @@ lec-clean:
 #
 #################################################
 ifeq ($(strip $(SF_PACKAGE_LEC)),y)	 
- TARGETS+=lec	 
- endif
+TARGETS+=lec	 
+endif
