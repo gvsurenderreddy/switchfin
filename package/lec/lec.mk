@@ -45,7 +45,7 @@ $(LEC_WORKING)/.unpacked: $(LEC_DIR)
 
 $(LEC_WORKING)/.configured: $(LEC_WORKING)/.unpacked
 	-find $(LEC_WORKING) -type d -name .svn | xargs rm -rf
-	touch $(LEC_DIR)/.configured
+	touch $(LEC_WORKING)/.configured
 
 
 lec: $(LEC_WORKING)/.configured
