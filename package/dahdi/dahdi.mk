@@ -127,16 +127,16 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 endif
 ifeq ($(strip $(SF_IP04)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko \
+	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 endif	
 ifeq ($(strip $(SF_IP01)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko \
+	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
