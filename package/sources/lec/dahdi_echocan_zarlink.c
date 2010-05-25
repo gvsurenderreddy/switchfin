@@ -59,7 +59,7 @@ static void echo_can_free(struct dahdi_chan *chan, struct dahdi_echocan_state *e
 
 	//Sets BYPASS (0ms tail e/c) for the freed channel
 	if (ec_tail_length) {
-		res=ec_tail_length(chan->channo, 0);
+		res=ec_tail_length(chan->channo - 1, 0);
 		if(res) {
                         printk(KERN_WARNING "ZARLINK echo canceler: unsuported channel\n");
                 }
@@ -78,7 +78,7 @@ static int echo_can_create(struct dahdi_chan *chan, struct dahdi_echocanparams *
 	
 	//Sets 64ms tail e/c for the requested channel
 	if (ec_tail_length) {
-		res=ec_tail_length(chan->channo, ecp->tap_length);
+		res=ec_tail_length(chan->channo - 1, ecp->tap_length);
 		if(res) {
                 	printk(KERN_WARNING "ZARLINK echo canceler: unsuported channel or tail length\n");
                 	return -EINVAL;

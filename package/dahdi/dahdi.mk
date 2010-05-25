@@ -55,6 +55,7 @@ $(DAHDI_DIR)/.unpacked: $(DL_DIR)/$(DAHDI_SOURCE) $(BASE_DIR)/.config
 	mkdir -p $(DAHDI_DIR)/linux/drivers/staging/
 	cp -rf package/sources/oslec $(DAHDI_DIR)/linux/drivers/staging/echo
 	cd $(DAHDI_DIR); patch -p0 < $(BASE_DIR)/package/dahdi/dahdi.patch
+	ln -sf $(LEC_SOURCES)/dahdi_echocan_zarlink.c $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_zarlink.c
 
 ifeq ($(strip $(SF_IP04)),y)
 	ln -sf $(DAHDI_SOURCES)/sport_interface.h $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.h
@@ -77,7 +78,6 @@ ifeq ($(strip $(SF_IP01)),y)
 endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-	ln -sf $(LEC_SOURCES)/dahdi_echocan_zarlink.c $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_zarlink.c
 	ln -sf $(DAHDI_SOURCES)/wpr1.c $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.c
 	ln -sf $(DAHDI_SOURCES)/wpr1.h $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.h
 endif
