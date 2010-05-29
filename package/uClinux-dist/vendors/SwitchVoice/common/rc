@@ -86,7 +86,6 @@ echo "We are going to unpack default configuration!!!"
 gzip -dc defaults.tgz |  tar xvf - 
 touch /persistent/.unpacked
 fi
-rm /defaults.tgz
 
 #We will link all files/folders fro /etc/persistnet back to /etc
 for filename in `ls /persistent/etc/`; do
