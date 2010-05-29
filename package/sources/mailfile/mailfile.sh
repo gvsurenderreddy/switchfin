@@ -24,7 +24,7 @@ echo 'Content-Transfer-Encoding: 7bit' >> $tmpfile
 
 #email body and replace /n with new line
 echo '' >> $tmpfile
-echo $body >> $tmpfile
+echo $body | sed 's/\n/\n/g' >> $tmpfile
 echo '' >> $tmpfile
 
 #tiff file
@@ -36,7 +36,7 @@ echo 'Content-Disposition: attachment;' >> $tmpfile
 echo ' filename="'$1'"' >> $tmpfile
 
 #encode the file
-uuencode -m $1 $1 | sed '1d$d' >> $tmpfile
+uuencode -m $1 $1 | sed '$d' >> $tmpfile
 
 #email footer
 echo '' >> $tmpfile
