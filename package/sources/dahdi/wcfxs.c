@@ -838,7 +838,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 		res = wcfxs_getreg(wc, card, 5);
 		if ((res & 0x60) && wc->mod.fxo.battery[card]) {
 			wc->mod.fxo.ringdebounce[card] += (DAHDI_CHUNKSIZE * NUM_CARDS);
-			if (wc->mod.fxo.ringdebounce[card] >= DAHDI_CHUNKSIZE * 64) {
+			if (wc->mod.fxo.ringdebounce[card] >= DAHDI_CHUNKSIZE * 32) {
 				if (!wc->mod.fxo.wasringing[card]) {
 					wc->mod.fxo.wasringing[card] = 1;
 					dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
@@ -846,7 +846,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 					if (debug>=2)
 						printk("RING on %d/%d!\n", wc->span.spanno, card + 1);
 				}
-				wc->mod.fxo.ringdebounce[card] = DAHDI_CHUNKSIZE * 64;
+				wc->mod.fxo.ringdebounce[card] = DAHDI_CHUNKSIZE * 32;
 			}
 		} else {
 
@@ -964,12 +964,12 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 
 	/* For some reason we have to debounce the
 	   hook detector.  */
-
+	
 	res = wcfxs_getreg(wc, card, 68);
 	hook = (res & 1);
 	if (hook != wc->mod.fxs.lastrxhook[card]) {
 		/* Reset the debounce (must be multiple of 4ms) */
-		wc->mod.fxs.debounce[card] = 8 * (4 * 8);
+		wc->mod.fxs.debounce[card] = 4 * (4 * 8);
 	} else {
 		if (wc->mod.fxs.debounce[card] > 0) {
 			wc->mod.fxs.debounce[card]-= 4 * DAHDI_CHUNKSIZE;
@@ -1059,16 +1059,18 @@ static void work_interrupt_processing(struct work_struct *test) {
 
           if ((x < wc->cards) && (wc->cardflag & (1 << x))) {
             if (wc->modtype[x] == MOD_TYPE_FXS) {
-            	wcfxs_proslic_check_hook(wc, x);
+            	if (!((wc->intcount>>3) % 4)) wcfxs_proslic_check_hook(wc, x);
+
 //#define DR_DONT_NEED
 #ifdef DR_DONT_NEED
               if (!(wc->intcount & 0xfc))
                 wcfxs_proslic_recheck_sanity(wc, x);
 #endif
             } else if (wc->modtype[x] == MOD_TYPE_FXO) {
-              /* ring detection, despite name */
-              wcfxs_voicedaa_check_hook(wc, x);
+              	/* ring detection, despite name */
+            	if (!(((wc->intcount>>3)+1) % 4)) wcfxs_voicedaa_check_hook(wc, x); 
             }
+
           }
 
 #ifdef DR_DONT_NEED

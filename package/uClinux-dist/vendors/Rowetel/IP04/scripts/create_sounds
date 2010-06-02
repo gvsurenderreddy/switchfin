@@ -7,15 +7,25 @@ cd /persistent/sounds || exit 1
 mkdir -p voicemail
 mkdir -p meetme
 mkdir -p monitor
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-g729-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-core-sounds-en-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-g729-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-extra-sounds-en-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 mkdir -p moh
 cd moh
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-g729-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
+echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 echo "Sound prompts have been downloaded."

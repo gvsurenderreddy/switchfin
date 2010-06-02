@@ -134,12 +134,10 @@ void sport_tx_byte(u16 chip_select, u8 bits)
 {
 	u16 tmp;
 	u16 dummy;
-	int timeout_cntr;
 
         // Enable the receive operation so we can use RXNE to monitor the transmit status  
         sport1_write_TCR1( sport1_read_TCR1() | TSPEN );
 	sport1_write_RCR1( sport1_read_RCR1() | RSPEN );
-	__builtin_bfin_ssync();
 
 	/* drop chip select */
 	if ( chip_select >7 )
@@ -151,15 +149,13 @@ void sport_tx_byte(u16 chip_select, u8 bits)
 #if (defined(CONFIG_BF536) || defined(CONFIG_BF537))
         	bfin_write_PORTFIO_CLEAR((1<<chip_select));
 #endif
-		__builtin_bfin_ssync();
-		ndelay(100);		 //tsu1 - Setup Time, /CS to SCLK fall
+		ndelay(50);		 //tsu1 - Setup Time, /CS to SCLK fall
 	}
 	
 	tmp = bits & 0x0ff;
 	bfin_write_SPORT1_TX16(tmp);
 
-	timeout_cntr=0;			 //If we have data in the RX FIFO it means we have transmited out the byte
-	while (!(sport1_read_STAT() & RXNE) && timeout_cntr++<400) ndelay(25); 
+	while (!(sport1_read_STAT() & RXNE)); //If we have data in the RX FIFO it means we have transmited out the byte
 
 	dummy = bfin_read_SPORT1_RX16(); //Dummy read to clean the receive register.
 
@@ -183,7 +179,6 @@ void sport_tx_byte(u16 chip_select, u8 bits)
 	//Disable the receiving and transmitter
         sport1_write_TCR1( sport1_read_TCR1() & ~(TSPEN) );
 	sport1_write_RCR1( sport1_read_RCR1() & ~(RSPEN) );
-        __builtin_bfin_ssync();
 
 	return;
 }
@@ -191,13 +186,11 @@ void sport_tx_byte(u16 chip_select, u8 bits)
 u8 sport_rx_byte(u16 chip_select)
 {
 	u8 ret = 0;
-	int timeout_cntr;
 	PRINTK("Come into %s\n",__FUNCTION__);
 
 	//Enable the receiving and transmitter
         sport1_write_TCR1( sport1_read_TCR1() | TSPEN );
         sport1_write_RCR1( sport1_read_RCR1() | RSPEN );
- 	__builtin_bfin_ssync();
 	
 	/* drop chip select */
 	if ( chip_select >7 )
@@ -209,16 +202,14 @@ u8 sport_rx_byte(u16 chip_select)
 #if (defined(CONFIG_BF536) || defined(CONFIG_BF537))
         	bfin_write_PORTFIO_CLEAR((1<<chip_select));
 #endif
-		__builtin_bfin_ssync();
-		ndelay(100);    //tsu1 - Setup Time, /CS to SCLK fall
+		ndelay(50);    //tsu1 - Setup Time, /CS to SCLK fall
 	}
 
 	/* Write a dummy byte to generate a FSYNC */
 	bfin_write_SPORT1_TX16(0x00ff);
 
-        timeout_cntr=0;
-        while (!(sport1_read_STAT() & RXNE) && timeout_cntr++<400) ndelay(25); 
-	
+        while (!(sport1_read_STAT() & RXNE)); 
+
 	ret = (u8)bfin_read_SPORT1_RX16();
 	
 	PRINTK("%s Line%d: tcr1:0x%x, tcr2:0x%x, rcr1:0x%x, rcr2:0x%x\n",
@@ -242,7 +233,6 @@ u8 sport_rx_byte(u16 chip_select)
 	//Disable the receiving and transmitter
         sport1_write_TCR1( sport1_read_TCR1() & ~(TSPEN) );
         sport1_write_RCR1( sport1_read_RCR1() & ~(RSPEN) );
-	__builtin_bfin_ssync();
 
 	PRINTK("%s Line%d receive byte OK!\n",__FUNCTION__, __LINE__ );
 
