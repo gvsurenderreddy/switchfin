@@ -11,7 +11,13 @@ fi
 
 
 case $1 in
-	start)	modprobe ec_module encoding=$ENCOD;;
+	start)	modprobe ec_module encoding=$ENCOD;
+		module=`lsmod | grep ec_module`;
+		if test -z $module; then;
+			sed -i 's/echocancel = 64/echocancel = 0/' /etc/asterisk/chan_dahdi.conf;
+		else;
+			sed -i 's/echocancel = 0/echocancel = 64/' /etc/asterisk/chan_dahdi.conf;
+		fi;;
 	stop) 	modprobe -r ec_module;;
 	restart) modprobe -r ec_module;
 		 modprobe ec_module encoding=$ENCOD;;

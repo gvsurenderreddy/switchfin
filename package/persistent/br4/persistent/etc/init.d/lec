@@ -2,7 +2,13 @@
 # Start up file for lec
 
 case $1 in
-	start)	modprobe ec_module encoding=2 doubletail=2;;
+	start)	modprobe ec_module encoding=2 doubletail=2;
+		module=`lsmod | grep ec_module`;
+    		if test -z $module; then;
+            		sed -i 's/echocancel = 64/echocancel = 0/' /etc/asterisk/misdn.conf;
+    		else;
+            		sed -i 's/echocancel = 0/echocancel = 64/' /etc/asterisk/misdn.conf;
+    		fi;;
 	stop) 	modprobe -r ec_module;;
 	restart) modprobe -r ec_module;
 		 modprobe ec_module encoding=2 doubletail=2;;
