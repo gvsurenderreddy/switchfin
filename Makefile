@@ -160,6 +160,9 @@ image: $(TARGETS_IMAGE)
 clean:  
 	rm -rf $(UCLINUX_DIR) $(STAGING_DIR) $(TARGET_DIR) $(IMAGE_DIR)
 
+clean-config:
+	rm -rf $(UCLINUX_DIR)/.configured
+
 dirclean: $(TARGETS_DIRCLEAN)
 	rm -rf $(BUILD_DIR)
 	rm -rf .config

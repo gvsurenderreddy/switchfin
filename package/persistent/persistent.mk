@@ -31,45 +31,60 @@ ifeq ($(strip $(SF_PACKAGE_LEC)),y)
 	cd package/persistent/pr1/persistent/etc/rc.d; \
 	ln -sf ../init.d/lec S39lec
 endif
+ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
+        cd package/persistent/pr1/persistent/etc/rc.d; \
+        ln -sf ../init.d/dhcpd S60dhcpd
+endif
 	cd package/persistent/pr1; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/pr1/persistent/etc/rc.d; \
-	rm -f S39lec S45mdnsd
+	rm -f S39lec S45mdnsd S60dhcpd
 endif
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/br4/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
-
 ifeq ($(strip $(SF_PACKAGE_LEC)),y)
 	cd package/persistent/br4/persistent/etc/rc.d; \
 	ln -sf ../init.d/lec S39lec
 endif
+ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
+	cd package/persistent/br4/persistent/etc/rc.d; \
+	ln -sf ../init.d/dhcpd S60dhcpd
+endif
 	cd package/persistent/br4; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/br4/persistent/etc/rc.d; \
-	rm -f S39lec S45mdnsd
+	rm -f S39lec S45mdnsd S60dhcpd
 endif
 ifeq ($(strip $(SF_IP04)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/ip04/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
+ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
+	cd package/persistent/ip04/persistent/etc/rc.d; \
+	ln -sf ../init.d/dhcpd S60dhcpd
+endif
 	cd package/persistent/ip04; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/ip04/persistent/etc/rc.d; \
-	rm -f S45mdnsd
+	rm -f S45mdnsd S60dhcpd
 endif
 ifeq ($(strip $(SF_IP01)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/ip01/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
+ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
+	cd package/persistent/ip01/persistent/etc/rc.d; \
+	ln -sf ../init.d/dhcpd S60dhcpd
+endif
 	cd package/persistent/ip01; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/ip01/persistent/etc/rc.d; \
-	rm -f S45mdnsd
+	rm -f S45mdnsd S60dhcpd
 endif
 
 ifeq ($(strip $(SF_FX08)),y)
@@ -77,10 +92,14 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/fx08/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
+ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
+	cd package/persistent/fx08/persistent/etc/rc.d; \
+	ln -sf ../init.d/dhcpd S60dhcpd
+endif
 	cd package/persistent/fx08; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/fx08/persistent/etc/rc.d; \
-	rm -f S45mdnsd
+	rm -f S45mdnsd S60dhcpd
 endif
 
 

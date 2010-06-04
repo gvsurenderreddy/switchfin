@@ -7,7 +7,7 @@ case $1 in
         restart) killall -9 udhcpd;                                             
                  /usr/sbin/udhcpd > /dev/null 2>&1 &;;                                            
         enable) rm -f /persistent/etc/rc.d/S85dhcpd;                            
-                ln -s /persistent/etc/init.d/dhcpd /persistent/etc/rc.d/S85dhcpd
+                ln -s /persistent/etc/init.d/dhcpd /persistent/etc/rc.d/S85dhcpd;;
         disable) rm -f /persistent/etc/rc.d/S85dhcpd;;                          
         *) echo 'Syntax: /etc/init.d/dhcpd [command]'
            echo ''

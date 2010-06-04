@@ -1,0 +1,15 @@
+--- uClinux-dist/user/busybox/busybox-1.16.1/networking/udhcp/dhcpd.c	2010-06-03 16:23:21.000000000 +0300
++++ uClinux-dist/user/busybox/busybox-1.16.1/networking/udhcp/dhcpd.c	2010-06-03 16:22:47.000000000 +0300
+@@ -51,11 +51,11 @@
+ 		, &dhcp_verbose
+ #endif
+ 		);
+-	argv += optind;
+ 	if (!(opt & 1)) { /* no -f */
+ 		bb_daemonize_or_rexec(0, argv);
+ 		logmode = LOGMODE_NONE;
+ 	}
++	argv += optind;
+ 	if (opt & 2) { /* -S */
+ 		openlog(applet_name, LOG_PID, LOG_DAEMON);
+ 		logmode |= LOGMODE_SYSLOG;

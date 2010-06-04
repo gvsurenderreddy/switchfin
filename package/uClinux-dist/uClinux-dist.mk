@@ -94,7 +94,6 @@ endif
 	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/gsm.patch
 	patch -d $(UCLINUX_DIR) -u -p0 < package/uClinux-dist/common/mkuclinux.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dropbear.patch
-#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/libbfgdots.patch           Penev: temporray comment
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/u-boot-tools.patch	     Penev: I think not needed
 
 	touch $(UCLINUX_DIR)/.unpacked
@@ -142,7 +141,8 @@ endif
         else \
 		rm -rf $(UCLINUX_DIR)/user/busybox; \
 	fi
-	svn checkout --revision 8701 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/busybox $(UCLINUX_DIR)/user/busybox
+	svn checkout --revision 9645 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/busybox $(UCLINUX_DIR)/user/busybox
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dhcpd.patch
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/
@@ -231,6 +231,15 @@ endif
 ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 	sed -i -e "s/^# CONFIG_USER_CURL_CURL is not set/CONFIG_USER_CURL_CURL=y/" $(LIBS_CONFIG)
 	sed -i -e "s/^# CONFIG_LIB_LIBCURL is not set/CONFIG_LIB_LIBCURL=y/" $(LIBS_CONFIG)
+else
+	sed -i -e "s/^CONFIG_USER_CURL_CURL=y/# CONFIG_USER_CURL_CURL is not set/" $(LIBS_CONFIG)
+	sed -i -e "s/^CONFIG_LIB_LIBCURL=y/# CONFIG_LIB_LIBCURL is not set/" $(LIBS_CONFIG)
+endif
+
+ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
+	sed -i -e "s/^# CONFIG_USER_BUSYBOX_UDHCPD is not set/CONFIG_USER_BUSYBOX_UDHCPD=y/" $(LIBS_CONFIG)        
+else
+	sed -i -e "s/^CONFIG_USER_BUSYBOX_UDHCPD=y/# CONFIG_USER_BUSYBOX_UDHCPD is not set/" $(LIBS_CONFIG)
 endif
 
 	touch $(UCLINUX_DIR)/.configured
