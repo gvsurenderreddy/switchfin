@@ -85,7 +85,7 @@ fi
 
 #Check MD5 checksum to verify the image 
 echo "Verifying the MD5 checksum..."
-FILESIZE=`ls -l ${SAVEDFILENAME} | cut -c 30-42 | xargs basename`
+FILESIZE=`ls -l ${SAVEDFILENAME} | cut -c 30-43 | xargs basename`
 NUMBLOCKS=`expr $FILESIZE / 32`
 NUMBLOCKS=`expr $NUMBLOCKS - 1 `
 dd if=${SAVEDFILENAME} of=${MD5FILENAME} bs=32 skip=${NUMBLOCKS}
@@ -105,7 +105,7 @@ if [ $TEST != $GOLD  ]; then
 	exit 1
 fi 
 
-FILESIZE=`ls -l ${IMAGEFILENAME} | cut -c 30-42 | xargs basename`
+FILESIZE=`ls -l ${IMAGEFILENAME} | cut -c 30-43 | xargs basename`
 	
 if [ ${FILESIZE} -le 0 ] ; then 
 	echo "The filesize ${FILESIZE} is invalid"
