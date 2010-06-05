@@ -337,39 +337,6 @@
  	FIX_INF(af);
  	return af;
  }
---- asterisk/configure	2009-11-22 17:52:48.000000000 +0200
-+++ asterisk/configure	2009-11-23 01:25:36.000000000 +0200
-@@ -12228,7 +12228,7 @@
- fi
- if test "x$ac_cv_func_fork_works" = xcross; then
-   case $host in
--    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* )
-+    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* | bfin-*-* )
-       # Override, as these systems have only a dummy fork() stub
-       ac_cv_func_fork_works=no
-       ;;
-@@ -21358,13 +21358,15 @@
- echo "${ECHO_T}$ac_cv_header_linux_mISDNdsp_h" >&6; }
- 
- fi
--if test $ac_cv_header_linux_mISDNdsp_h = yes; then
- 
--cat >>confdefs.h <<_ACEOF
--#define MISDN_1_2 1
--_ACEOF
--
--fi
-+# DPN: disabled pipeline mode in chan_misdn
-+#if test $ac_cv_header_linux_mISDNdsp_h = yes; then
-+#
-+#cat >>confdefs.h <<_ACEOF
-+# #define MISDN_1_2 1
-+#_ACEOF
-+#
-+#fi
- 
- 
- fi
 --- asterisk/channels/misdn/isdn_lib.c	2009-10-02 02:18:28.000000000 +0300
 +++ asterisk/channels/misdn/isdn_lib.c	2009-12-06 02:37:54.000000000 +0200
 @@ -293,7 +293,13 @@
@@ -484,3 +451,38 @@
 +$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
 +	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../uClinux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
 +
+--- asterisk/configure	2010-06-06 02:05:57.000000000 +0300
++++ asterisk/configure	2010-06-06 02:08:26.000000000 +0300
+@@ -10310,7 +10310,7 @@
+ fi
+ if test "x$ac_cv_func_fork_works" = xcross; then
+   case $host in
+-    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* )
++    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* | bfin-*-* )
+       # Override, as these systems have only a dummy fork() stub
+       ac_cv_func_fork_works=no
+       ;;
+@@ -14488,14 +14488,15 @@
+    fi
+ fi
+ 
+-   ac_fn_c_check_header_mongrel "$LINENO" "linux/mISDNdsp.h" "ac_cv_header_linux_mISDNdsp_h" "$ac_includes_default"
+-if test "x$ac_cv_header_linux_mISDNdsp_h" = x""yes; then :
+-
+-cat >>confdefs.h <<_ACEOF
+-#define MISDN_1_2 1
+-_ACEOF
+-
+-fi
++# DPN: disabled pipeline mode in chan_misdn
++#   ac_fn_c_check_header_mongrel "$LINENO" "linux/mISDNdsp.h" "ac_cv_header_linux_mISDNdsp_h" "$ac_includes_default"
++#if test "x$ac_cv_header_linux_mISDNdsp_h" = x""yes; then :
++#
++#cat >>confdefs.h <<_ACEOF
++##define MISDN_1_2 1
++#_ACEOF
++#
++#fi
+ 
+ 
+ fi
