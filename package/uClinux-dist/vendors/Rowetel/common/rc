@@ -73,15 +73,28 @@ then
 fi
 
 if [ -f /persistent/.unpacked ]; then
-echo "We already have unpacked default configuration..."
+	echo "We already have unpacked default configuration..."
 else
-echo "Can not find persistent configuration files"
-echo "We are going to unpack default configuration!!!"
-gzip -dc defaults.tgz |  tar xvf - 
-touch /persistent/.unpacked
+	echo "Can not find persistent configuration files"
+	echo "We are going to unpack default configuration!!!"
+	if [ -f /persistent/.netbackup ]
+	then
+		echo "Network settings will be kept"
+		cp /persistent/etc/network.conf /persistent/etc/network.conf~
+		cp /persistent/etc/asterisk/rc_org.conf /persistent/etc/asterisk/rc_org.conf~
+	fi
+	gzip -dc defaults.tgz |  tar xvf - 
+	touch /persistent/.unpacked
+	if [ -f /persistent/.netbackup ]
+	then
+		cp /persistent/etc/network.conf~ /persistent/etc/network.conf
+		cp /persistent/etc/asterisk/rc_org.conf~ /persistent/etc/asterisk/rc_org.conf
+		rm /persistent/etc/network.conf~ /persistent/etc/asterisk/rc_org.conf~
+		rm /persistent/.netbackup
+	fi
 fi
 
-#We will link all files/folders fro /etc/persistnet back to /etc
+#We will link all files/folders for /etc/persistent back to /etc
 for filename in `ls /persistent/etc/`; do
         ln -sf /persistent/etc/$filename /etc/
 done
@@ -148,8 +161,6 @@ if [ -f /bin/in.tftpd ]; then
 echo "tftp    dgram  udp wait   root /bin/in.tftpd /persistent/tftp" >> /etc/inetd.conf
 fi
 
-sync; echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
-
 # start up services linked to rc.d
 for i in /persistent/etc/rc.d/S*; do
         $i start
@@ -181,3 +192,4 @@ ln -sf /persistent/sounds/moh /var/lib/asterisk/
 ln -sf /persistent/sounds/meetme /var/spool/asterisk/
 ln -sf /persistent/sounds/voicemail /var/spool/asterisk/
 ln -sf /persistent/sounds/monitor /var/spool/asterisk/
+cat /etc/motd

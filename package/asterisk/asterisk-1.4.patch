@@ -486,3 +486,14 @@
  
  
  fi
+--- asterisk/res/res_agi.c	2010-06-06 15:55:29.000000000 +0300
++++ asterisk/res/res_agi_.c	2010-06-06 15:56:02.000000000 +0300
+@@ -308,7 +308,7 @@
+ 	/* Block SIGHUP during the fork - prevents a race */
+ 	sigfillset(&signal_set);
+ 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
+-	pid = fork();
++	pid = vfork();
+ 	if (pid < 0) {
+ 		ast_log(LOG_WARNING, "Failed to fork(): %s\n", strerror(errno));
+ 		pthread_sigmask(SIG_SETMASK, &old_set, NULL);

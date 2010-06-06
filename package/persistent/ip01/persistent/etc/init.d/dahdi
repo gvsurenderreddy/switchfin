@@ -1,8 +1,10 @@
 #!/bin/hush
 # Start up file for DAHDI
 
+opermode=`cat /etc/asterisk/guipreferences.conf | grep opermode | sed 's/opermode = */\1/'`
+
 case $1 in
-	start) 	modprobe wcfxs;
+	start) 	modprobe wcfxs opermode=$opermode;
 		wctdm=`dahdi_scan | grep WCTDM`;
 		if test -z $wctdm; then; modprobe dahdi_dummy; fi;
 		dahdi_cfg;;
