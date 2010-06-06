@@ -1,4 +1,5 @@
 #!/bin/hush 
+#Original script with some improvements done by Atcom
 export MMC=`cat /etc/mmc`
 if [ $MMC == 1 ]
 then
