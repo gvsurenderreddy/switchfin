@@ -25,6 +25,7 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ASTERISK_VERSION=1.4.32
 	ASTERISK_PATCH=asterisk-1.4.patch
 	CID_PATCH=cid-1.4.patch
+	AUTOMIXMON_PATCH=automixmon-1.4.patch
 	ASTERISK_MAKEOPTS=asterisk-1.4
 else
 	ASTERISK_VERSION=1.6.2.6
@@ -73,6 +74,7 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	ln -sf $(ASTERISK_DIR) $(ASTERISK_DIR_LINK)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(ASTERISK_PATCH)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
