@@ -1,7 +1,7 @@
-Index: apps/app_dial.c
+Index: asterisk/apps/app_dial.c
 ===================================================================
---- apps/app_dial.c	(revision 237062)
-+++ apps/app_dial.c	(working copy)
+--- asterisk/apps/app_dial.c	(revision 237062)
++++ asterisk/apps/app_dial.c	(working copy)
 @@ -212,7 +212,11 @@
  "           of features.conf.\n"
  "    W    - Allow the calling party to enable recording of the call by sending\n"
@@ -75,10 +75,10 @@ Index: apps/app_dial.c
  			if (ast_test_flag(peerflags, OPT_CALLEE_PARK))
  				ast_set_flag(&(config.features_callee), AST_FEATURE_PARKCALL);
  			if (ast_test_flag(peerflags, OPT_CALLER_PARK))
-Index: include/asterisk/channel.h
+Index: asterisk/include/asterisk/channel.h
 ===================================================================
---- include/asterisk/channel.h	(revision 237062)
-+++ include/asterisk/channel.h	(working copy)
+--- asterisk/include/asterisk/channel.h	(revision 237062)
++++ asterisk/include/asterisk/channel.h	(working copy)
 @@ -529,6 +529,7 @@
  	AST_FEATURE_PARKCALL =     (1 << 5),
  	AST_FEATURE_NO_H_EXTEN =   (1 << 6),
@@ -87,10 +87,10 @@ Index: include/asterisk/channel.h
  };
  
  struct ast_bridge_config {
-Index: include/asterisk/audiohook.h
+Index: asterisk/include/asterisk/audiohook.h
 ===================================================================
---- include/asterisk/audiohook.h	(revision 237062)
-+++ include/asterisk/audiohook.h	(working copy)
+--- asterisk/include/asterisk/audiohook.h	(revision 237062)
++++ asterisk/include/asterisk/audiohook.h	(working copy)
 @@ -198,6 +198,28 @@
   */
  void ast_audiohook_trigger_wait(struct ast_audiohook *audiohook);
@@ -120,10 +120,10 @@ Index: include/asterisk/audiohook.h
  /*! \brief Lock an audiohook
   * \param ah Audiohook structure
   */
-Index: res/res_features.c
+Index: asterisk/res/res_features.c
 ===================================================================
---- res/res_features.c	(revision 237062)
-+++ res/res_features.c	(working copy)
+--- asterisk/res/res_features.c	(revision 237062)
++++ asterisk/res/res_features.c	(working copy)
 @@ -62,6 +62,7 @@
  #include "asterisk/adsi.h"
  #include "asterisk/devicestate.h"
@@ -274,8 +274,8 @@ Index: res/res_features.c
  
 Index: main/audiohook.c
 ===================================================================
---- main/audiohook.c	(revision 237130)
-+++ main/audiohook.c	(working copy)
+--- asterisk/main/audiohook.c	(revision 237130)
++++ asterisk/main/audiohook.c	(working copy)
 @@ -738,3 +738,83 @@
  	
  	return;
