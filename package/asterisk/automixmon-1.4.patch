@@ -229,7 +229,7 @@ Index: asterisk/res/res_features.c
 +			len = strlen(touch_monitor) + 50;
 +			args = alloca(len);
 +			touch_filename = alloca(len);
-+			snprintf(touch_filename, len, "auto-%ld-%s", (long)time(NULL), touch_monitor);
++			snprintf(touch_filename, len, "%s", touch_monitor); //jason kenah - change file format for switchfin
 +			snprintf(args, len, "%s.%s", touch_filename, (touch_format) ? touch_format : "wav");
 +		} else {
 +			caller_chan_id = ast_strdupa(S_OR(caller_chan->cid.cid_num, caller_chan->name));
