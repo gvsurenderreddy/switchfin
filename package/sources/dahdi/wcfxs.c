@@ -1702,7 +1702,6 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 			return -EFAULT;
 		wc->mod.fxs.ohttimer[chan->chanpos - 1] = x << 3;
 
-#ifdef DR_DONT_NEED
 		if (lowpower < 2) {
 		    /* DR: Set lowpower=2 to disable this code and run
 		       FXS ports at minimum power.  Unfortunately, this
@@ -1722,8 +1721,6 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
 		    }
 		}
-
-#endif
 
 		break;
 	case WCFXS_GET_STATS:
