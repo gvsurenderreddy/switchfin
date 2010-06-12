@@ -36,9 +36,16 @@
  			fprintf(stdout, "\n");
  		} else {
  			/* this is an analog span */
---- linux/drivers/dahdi/Kbuild	2010-05-24 15:29:04.000000000 +0300
-+++ linux/drivers/dahdi/Kbuild	2010-05-24 15:30:06.000000000 +0300
-@@ -32,12 +32,14 @@
+--- linux/drivers/dahdi/Kbuild	2010-06-11 11:06:41.000000000 +0300
++++ linux/drivers/dahdi/Kbuild	2010-06-11 11:06:56.000000000 +0300
+@@ -1,5 +1,5 @@
+ obj-$(DAHDI_BUILD_ALL)$(CONFIG_DAHDI)			+= dahdi.o
+-#obj-$(DAHDI_BUILD_ALL)$(CONFIG_DAHDI_DUMMY)		+= dahdi_dummy.o
++obj-$(DAHDI_BUILD_ALL)$(CONFIG_DAHDI_DUMMY)		+= dahdi_dummy.o
+ obj-$(DAHDI_BUILD_ALL)$(CONFIG_DAHDI_DYNAMIC)		+= dahdi_dynamic.o
+ obj-$(DAHDI_BUILD_ALL)$(CONFIG_DAHDI_DYNAMIC_LOC)	+= dahdi_dynamic_loc.o
+ obj-$(DAHDI_BUILD_ALL)$(CONFIG_DAHDI_DYNAMIC_ETH)	+= dahdi_dynamic_eth.o
+@@ -33,12 +33,14 @@
  
  # Only enable this if you think you know what you're doing. This is not
  # supported yet:
