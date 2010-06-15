@@ -154,6 +154,9 @@ else
     ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
     modprobe -r spi_mmc
 fi
+if [ -d /persistent/var/log/asterisk ]; then
+	ln -sf /persistent/var/log/asterisk/ /var/log/
+fi
 
 if [ -d /etc/scripts ]; then
 ln -sf /etc/scripts /etc/asterisk/
@@ -193,4 +196,6 @@ ln -sf /persistent/sounds/moh /var/lib/asterisk/
 ln -sf /persistent/sounds/meetme /var/spool/asterisk/
 ln -sf /persistent/sounds/voicemail /var/spool/asterisk/
 ln -sf /persistent/sounds/monitor /var/spool/asterisk/
-
+if [ -d /persistent/mem ]; then
+        ln -sf /persistent/mem/ /tmp/
+fi

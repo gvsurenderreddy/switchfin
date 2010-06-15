@@ -74,4 +74,18 @@ config SF_PACKAGE_ASTERISK_G729
                 contributory infringement and induced infringement.
 
 		Please note that in addition you will need to compile g729 library (libgfdots).
-	
+
+config SF_PACKAGE_NVFAX
+        bool "Fax Detection for IAX/SIP/ZAP"
+        default y
+        depends SF_PACKAGE_ASTERISK
+        help
+		This applications listens for fax tones (on IAX and SIP channels too) 
+		for waitdur seconds of time. In addition, it can be interrupted by digits, 
+		or non-silence. Audio is only monitored in the receive direction. 
+		If digits interrupt, they must be the start of a valid extension unless 
+		the option is included to ignore. If fax is detected, it will jump to the 
+		'fax' extension. If a period of non-silence greater than 'mindur' ms, 
+		yet less than 'maxdur' ms is followed by silence at least 'sildur' ms 
+		then the app is aborted and jumps to the 'talk' extension. 
+		If all undetected, control will continue at the next priority. 

@@ -18,4 +18,5 @@ cd moh
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-alaw-current.tar.gz -O - | gzip -dc | tar xvf -
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-g729-current.tar.gz -O - | gzip -dc | tar xvf -
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
-echo "Sound prompts have been downloaded."
+echo "Sound prompts have been downloaded. Restarting..."
+reboot

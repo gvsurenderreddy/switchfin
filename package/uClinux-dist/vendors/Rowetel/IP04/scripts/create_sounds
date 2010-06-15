@@ -27,5 +27,6 @@ echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-g729-current.tar.gz -O - | gzip -dc | tar xvf -
 echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
 wget http://downloads.digium.com/pub/telephony/sounds/asterisk-moh-opsound-ulaw-current.tar.gz -O - | gzip -dc | tar xvf -
-echo 3 > /proc/sys/vm/drop_caches       # Force cache memory cleanup
-echo "Sound prompts have been downloaded."
+echo "Sound prompts have been downloaded. Restarting..."
+reboot
+
