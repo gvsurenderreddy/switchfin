@@ -1,0 +1,72 @@
+<=====================================================================>
+Title: NVFaxDetect/NVBackgroundDetect on Asterisk Versions 1.4.23.1+
+
+Author:  Drew Thomson
+
+Email:  dthomson@austechpartnerships.com
+
+Archive Name:  app_nv_1.4.2x_07052010.tar.gz
+
+Files:  app_nv_backgrounddetect.c 
+	app_nv_backgrounddetect.c.1.4.2x.patch 
+	app_nv_faxdetect.c 
+	app_nv_faxdetect.c.1.4.2x.patch 
+	app_nv_Makefile.patch
+	README
+
+Date:  7/5/2010
+
+References:
+
+http://www.voip-info.org/wiki/view/NewmanTelOnAsterisk14
+http://blogtech.oc9.com/index.php?option=com_content&view=article&catid=4:asterisk&id=77:20071121ast&Itemid=6
+
+Description:  Source code and patches for nvfaxdetect and nvbackgrounddetect
+	applications to use with Asterisk v1.4.24+ versions.  
+
+<=====================================================================>
+
+I have sucessfully tested NVFaxDetect with the following versions of 
+Asterisk 1.4 branch.
+
+Asterisk 1.4.26
+Asterisk 1.4.26.1
+Asterisk 1.4.31
+
+My customer was using an anaogue Patton gateway SN4114 bringing 
+the calls in via SIP.  Since the Patton gateway cannot do the fax 
+detection call-routing I had to try get NVFaxDetect working with the 
+later versions of Asterisk.  
+
+<=====================================================================>
+
+INSTALLATION (my version of Asterisk is 1.4.31):
+
+cd /usr/src
+wget http://www.austechpartnerships.com.au/app_nv_1.4.2x_07052010.tar.gz
+tar -zxvf app_nv_1.4.2x_07052010.tar.gz
+
+cd app_nv_1.4.2x_07052010
+cp app_nv_faxdetect.c /usr/src/asterisk-1.4.31/apps/
+cp app_nv_backgrounddetect.c /usr/src/asterisk-1.4.31/apps/
+cp app_nv_Makefile.patch /usr/src/asterisk-1.4.31/apps/
+
+cd /usr/src/asterisk-1.4.31/apps/
+patch -p0 <app_nv_Makefile.patch
+
+cd /usr/src/asterisk-1.4.31/
+make
+make install
+
+Verify Module: From the Asterisk CLI, type "core show application <app name>" 
+(app name = NVFaxDetect or NVBackgroundDetect). If it shows the module's help,
+you are in business.
+
+<=====================================================================>
+
+I hope this information helps at least 1 person out there wishing to bring
+nvfax back into the 1.4 branch of Asterisk.
+
+
+//drew
+//Dcap Certified
