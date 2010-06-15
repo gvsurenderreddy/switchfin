@@ -76,14 +76,12 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 
-ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ln -sf $(SOURCES_DIR)/codec_g729.c $(ASTERISK_DIR)/codecs
 else
 	ln -sf $(SOURCES_DIR)/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
 endif
 	ln -sf $(SOURCES_DIR)/g729ab_codec.h $(ASTERISK_DIR)/codecs
-endif
   
 ifeq ($(strip $(SF_ASTERISK_1_4)),y) 
 	ln -sf $(SOURCES_DIR)/codec_speex.c $(ASTERISK_DIR)/codecs
@@ -111,9 +109,8 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	cd $(ASTERISK_DIR)/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/addon_version.h
 endif
 
-ifeq ($(strip $(SF_PACKAGE_NVFAX)),y)
 	cp -v package/sources/nvfax/app_nv_faxdetect.c $(ASTERISK_DIR)/apps/app_nvfaxdetect.c
-endif
+	
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:
@@ -163,9 +160,12 @@ endif
 	find $(ASTERISK_DIR) -name '*.so' -exec cp -v "{}" $(TARGET_DIR)/usr/lib/asterisk/modules/ \;
 	$(TARGET_STRIP)  $(TARGET_DIR)/bin/asterisk
 	$(TARGET_STRIP) $(TARGET_DIR)/usr/lib/asterisk/modules/*.so
-
-
-
+ifneq ($(strip $(SF_PACKAGE_NVFAX)),y)
+	rm -f $(TARGET_DIR)/usr/lib/asterisk/modules/app_nvfaxdetect.so
+endif
+ifneq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
+	rm -f $(TARGET_DIR)/usr/lib/asterisk/modules/codec_g729.so
+endif
 asterisk-configure: $(ASTERISK_DIR)/.configured
 
 asterisk-clean:

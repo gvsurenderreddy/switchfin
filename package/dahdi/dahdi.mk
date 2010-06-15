@@ -144,6 +144,9 @@ endif
 ifeq ($(strip $(SF_PACKAGE_DAHDI_EXTRATOOLS)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_maint $(DAHDI_DIR)/tools/dahdi_monitor $(DAHDI_DIR)/tools/dahdi_speed \
 	$(DAHDI_DIR)/tools/dahdi_test $(DAHDI_DIR)/tools/fxotune $(TARGET_DIR)/bin
+else
+	rm -f $(TARGET_DIR)/bin/dahdi_maint $(TARGET_DIR)/bin/dahdi_monitor $(TARGET_DIR)/bin/dahdi_speed \
+	$(TARGET_DIR)/bin/dahdi_test $(TARGET_DIR)/bin/fxotune
 endif
 
 dahdi-clean:
