@@ -24,6 +24,7 @@ DAHDI_UNZIP=zcat
 DAHDI_SOURCES=$(SOURCES_DIR)/dahdi
 LEC_SOURCES=$(SOURCES_DIR)/lec
 DAHDI_MODULES_EXTRA=
+TARGET_KERNEL_MODULES=$(shell ls $(TARGET_DIR)/lib/modules)
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 DAHDI_MODULES_EXTRA+= wpr1
@@ -102,8 +103,8 @@ $(DAHDI_DIR)/.configured: $(DAHDI_DIR)/.linux
 
 
 dahdi: $(ZARLINK_LEC) $(OSLEC_IN) $(DAHDI_DIR)/.configured
-	mkdir -p $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	mkdir -p $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 
 	cd $(DAHDI_DIR)/tools; make all
 
@@ -114,31 +115,35 @@ dahdi: $(ZARLINK_LEC) $(OSLEC_IN) $(DAHDI_DIR)/.configured
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_zarlink.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_zarlink.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 endif
 ifeq ($(strip $(SF_PACKAGE_DAHDI_TDMOE)),y)
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dynamic_eth.ko $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dynamic_loc.ko $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dynamic.ko \
-	$(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	$(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 endif
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 endif
 ifeq ($(strip $(SF_IP04)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko \
-	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 endif	
 ifeq ($(strip $(SF_IP01)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.ko $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.ko \
-	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
-	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	$(DAHDI_DIR)/linux/drivers/dahdi/bfsi.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+endif
+ifeq ($(strip $(SF_PACKAGE_DAHDI_EXTRATOOLS)),y)
+	cp -f $(DAHDI_DIR)/tools/dahdi_maint $(DAHDI_DIR)/tools/dahdi_monitor $(DAHDI_DIR)/tools/dahdi_speed \
+	$(DAHDI_DIR)/tools/dahdi_test $(DAHDI_DIR)/tools/fxotune $(TARGET_DIR)/bin
 endif
 
 dahdi-clean:

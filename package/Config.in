@@ -21,7 +21,8 @@ source "package/uBoot/Config.in"
 
 comment "Hardware settings"
 source "package/lec/Config.in"
-
+comment "DAHDI"
+source "package/dahdi/Config.in"
 comment "Asterisk"
 source "package/asterisk/Config.in"
 comment "GUI"
