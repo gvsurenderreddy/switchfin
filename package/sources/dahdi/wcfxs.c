@@ -417,7 +417,7 @@ struct wcfxs_desc {
 	int flags;
 };
 
-static struct wcfxs_desc wcfxs_bf = { "Blackfin STAMP", 0 };
+static struct wcfxs_desc wcfxs_bf = { "Blackfin IP0x", 0 };
 static int acim2tiss[16] = { 0x0, 0x1, 0x4, 0x5, 0x7, 0x0, 0x0, 0x6, 0x0, 0x0, 0x0, 0x2, 0x0, 0x3 };
 
 static struct wcfxs *ifaces[WC_MAX_IFACES];
