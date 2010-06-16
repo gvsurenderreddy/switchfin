@@ -838,7 +838,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 		res = wcfxs_getreg(wc, card, 5);
 		if ((res & 0x60) && wc->mod.fxo.battery[card]) {
 			wc->mod.fxo.ringdebounce[card] += (DAHDI_CHUNKSIZE * NUM_CARDS);
-			if (wc->mod.fxo.ringdebounce[card] >= DAHDI_CHUNKSIZE * 32) {
+			if (wc->mod.fxo.ringdebounce[card] >= DAHDI_CHUNKSIZE * 64) {
 				if (!wc->mod.fxo.wasringing[card]) {
 					wc->mod.fxo.wasringing[card] = 1;
 					dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
@@ -846,7 +846,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 					if (debug>=2)
 						printk("RING on %d/%d!\n", wc->span.spanno, card + 1);
 				}
-				wc->mod.fxo.ringdebounce[card] = DAHDI_CHUNKSIZE * 32;
+				wc->mod.fxo.ringdebounce[card] = DAHDI_CHUNKSIZE * 64;
 			}
 		} else {
 
@@ -969,7 +969,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 	hook = (res & 1);
 	if (hook != wc->mod.fxs.lastrxhook[card]) {
 		/* Reset the debounce (must be multiple of 4ms) */
-		wc->mod.fxs.debounce[card] = 4 * (4 * 8);
+		wc->mod.fxs.debounce[card] = 8 * (4 * 8);
 	} else {
 		if (wc->mod.fxs.debounce[card] > 0) {
 			wc->mod.fxs.debounce[card]-= 4 * DAHDI_CHUNKSIZE;
@@ -1059,8 +1059,7 @@ static void work_interrupt_processing(struct work_struct *test) {
 
           if ((x < wc->cards) && (wc->cardflag & (1 << x))) {
             if (wc->modtype[x] == MOD_TYPE_FXS) {
-            	if (!((wc->intcount>>3) % 4)) wcfxs_proslic_check_hook(wc, x);
-
+            	wcfxs_proslic_check_hook(wc, x);
 //#define DR_DONT_NEED
 #ifdef DR_DONT_NEED
               if (!(wc->intcount & 0xfc))
@@ -1068,9 +1067,8 @@ static void work_interrupt_processing(struct work_struct *test) {
 #endif
             } else if (wc->modtype[x] == MOD_TYPE_FXO) {
               	/* ring detection, despite name */
-            	if (!(((wc->intcount>>3)+1) % 4)) wcfxs_voicedaa_check_hook(wc, x); 
+            	wcfxs_voicedaa_check_hook(wc, x); 
             }
-
           }
 
 #ifdef DR_DONT_NEED
@@ -1712,11 +1710,10 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 		       transfers, not sure why we need to modify state of
 		       SLIC here?
 		    */
-		
 		    wc->mod.fxs.idletxhookstate[chan->chanpos - 1] = 0x2;
 		
 		    if (wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x1) {
-				/* Apply the change if appropriate */
+				// Apply the change if appropriate 
 				wc->mod.fxs.lasttxhook[chan->chanpos - 1] = 0x2;
 				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
 		    }
@@ -1917,6 +1914,7 @@ static int wcfxs_initialize(struct wcfxs *wc)
 		wc->chans[x].pvt = wc;
 		wc->_chans[x]=&(wc->chans[x]);
 	}
+	wc->span.owner = THIS_MODULE;
 	wc->span.manufacturer   = "Rowetel";
 	dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
 	wc->span.chans = wc->_chans;
@@ -1951,25 +1949,28 @@ static void wcfxs_post_initialize(struct wcfxs *wc)
 	}
 }
 
-int wcfxs_proc_read(char *buf, char **start, off_t offset, 
+int wcfxs_proc_read(char *buf, char **start, off_t off, 
 		    int count, int *eof, void *data)
 {
-	int len;
+	int i, len=0, real_count;
 	struct wcfxs *wc = devs;
+	
+	real_count=count;
+	count = PAGE_SIZE-1024;
 
-	len = sprintf(buf, 
-		      "[0] reg64.....: 0x%x\n"
-		      "[1] reg64....: 0x%x\n"
-		      "[2] reg64....: 0x%x\n"
-		      "[3] reg64....: 0x%x\n",
-		      wcfxs_getreg(wc, 0, 64),
-		      wcfxs_getreg(wc, 1, 64),
-		      wcfxs_getreg(wc, 2, 64),
-		      wcfxs_getreg(wc, 3, 64)
-		      );
+	for(i=0;i<wc->cards;i++){
+		if (wc->cardflag & (1 << i))
+    		len += snprintf(buf + len, count - len, "Card[%d] -> reg64.....: 0x%x\n", i, wcfxs_getreg(wc, 0, 64));
+	}
 
-	*eof=1;
-	return len;
+	count=real_count;
+        // If everything printed so far is before beginning of request
+        if (len <= off) {off = 0;len = 0;}
+        *start = buf + off;
+        len -= off;          		 // un-count any remaining offset 
+        *eof = 1;
+        if (len > count) len = count;    // don't return bytes not asked for 
+        return len;
 }
 
 static int wcfxs_hardware_init(struct wcfxs *wc)
