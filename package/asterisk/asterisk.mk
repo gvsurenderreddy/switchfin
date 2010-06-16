@@ -22,7 +22,7 @@
 ##########################################
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
-	ASTERISK_VERSION=1.4.32
+	ASTERISK_VERSION=1.4.30
 	ASTERISK_PATCH=asterisk-1.4.patch
 	CID_PATCH=cid-1.4.patch
 	AUTOMIXMON_PATCH=automixmon-1.4.patch
