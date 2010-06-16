@@ -497,3 +497,13 @@
  	if (pid < 0) {
  		ast_log(LOG_WARNING, "Failed to fork(): %s\n", strerror(errno));
  		pthread_sigmask(SIG_SETMASK, &old_set, NULL);
+--- asterisk/channels/chan_dahdi.c	2010-06-17 01:42:49.000000000 +0300
++++ asterisk/channels/chan_dahdi.c	2010-06-17 01:46:03.000000000 +0300
+@@ -4452,6 +4452,7 @@
+ 					p->subs[index].f.subclass = AST_CONTROL_ANSWER;
+ 					/* Make sure it stops ringing */
+ 					p->subs[SUB_REAL].needringing = 0;
++					dahdi_set_hook(p->subs[index].dfd, DAHDI_OFFHOOK);
+ 					ast_log(LOG_DEBUG, "channel %d answered\n", p->channel);
+ 					if (p->cidspill) {
+ 						/* Cancel any running CallerID spill */
