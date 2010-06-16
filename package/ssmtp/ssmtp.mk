@@ -83,8 +83,6 @@ ssmtp: $(SSMTP_DIR)/.configured xgethostname.o ssmtp.o arpadate.o base64.o
 	#add mailfile support (requires uuencode from the busybox)
 	cp -v $(MAILFILE_SOURCES)/mailfile.sh $(TARGET_DIR)/bin/
 	chmod 777 $(TARGET_DIR)/bin/mailfile.sh
-	cp -v $(MAILFILE_SOURCES)/mailfile_header_template $(TARGET_DIR)/bin/
-	cp -v $(MAILFILE_SOURCES)/mailfile_footer_template $(TARGET_DIR)/bin/	
 
 ssmtp-clean:
 	rm -f $(SSMTP_DIR)/.configured
@@ -93,13 +91,17 @@ ssmtp-clean:
 ssmtp-dirclean:
 	rm -rf $(SSMTP_DIR)
 
+ifeq ($(strip $(SF_PACKAGE_SSMTP)),y)
+ssmtp_: ssmtp
+else
+ssmtp_:
+	rm -f $(TARGET_DIR)/bin/ssmtp
+	rm -f $(TARGET_DIR)/bin/mailfile.sh
+endif
 
 ################################################
 #
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_SSMTP)),y)
-TARGETS+=ssmtp
-endif
-
+TARGETS+=ssmtp_

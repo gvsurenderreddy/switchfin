@@ -187,6 +187,3 @@ asterisk-dirclean:
 ifeq ($(strip $(SF_PACKAGE_ASTERISK)),y)
 TARGETS+=asterisk
 endif
-ifeq ($(strip $(SF_PACKAGE_ASTERISK-H323)),y)
-TARGETS+=asterisk-h323
-endif

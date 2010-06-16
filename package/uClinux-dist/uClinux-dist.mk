@@ -57,10 +57,7 @@ $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR);
 
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/ncpu.patch
-	
-ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/curl.patch
-endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/mem.patch
@@ -164,15 +161,7 @@ ifeq ($(strip $(SF_IP04)),y)
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
-ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
-	if egrep "^CONFIG_BF532=y" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig > /dev/null; then \
-		echo "Compiling with G729 support,  ADSP-BF533 will be set..."; \
-		sed -i -e "s/^CONFIG_BF532=y/CONFIG_BF533=y/" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig; \
-		sed -i -e "s/^# CONFIG_BF533 is not set/# CONFIG_BF532 is not set/" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig; \
-		sed -i -e "s/^CONFIG_BF532=y/CONFIG_BF533=y/" $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x; \
-		sed -i -e "s/^# CONFIG_BF533 is not set/# CONFIG_BF532 is not set/" $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x; \
-	fi
-endif
+	
 	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP04_defconfig
 endif
 
@@ -184,15 +173,7 @@ ifeq ($(strip $(SF_IP01)),y)
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/* $(UCLINUX_DIR)/vendors/Rowetel/IP01
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip01.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP01_defconfig
-ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
-	if egrep "^CONFIG_BF532=y" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig > /dev/null; then \
-		echo "Compiling with G729 support,  ADSP-BF533 will be set..."; \
-		sed -i -e "s/^CONFIG_BF532=y/CONFIG_BF533=y/" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig; \
-		sed -i -e "s/^# CONFIG_BF533 is not set/# CONFIG_BF532 is not set/" $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig; \
-		sed -i -e "s/^CONFIG_BF532=y/CONFIG_BF533=y/" $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x; \
-		sed -i -e "s/^# CONFIG_BF533 is not set/# CONFIG_BF532 is not set/" $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x; \
-	fi
-endif
+	
 	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP01_defconfig
 endif
 
@@ -218,30 +199,6 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	$(MAKE) -C $(UCLINUX_DIR) SwitchVoice/BR4-APPLIANCE_defconfig
 endif
 
-
-ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
-	if egrep "^# CONFIG_LIB_LIBBFGDOTS is not set" $(LIBS_CONFIG) > /dev/null; then \
-        	echo "LIBBFGDOTS has been enabled..."; \
-                sed -i -e "s/^# CONFIG_LIB_LIBBFGDOTS is not set/CONFIG_LIB_LIBBFGDOTS=y/" $(LIBS_CONFIG); \
-	fi
-else
-	sed -i -e "s/^CONFIG_LIB_LIBBFGDOTS=y/# CONFIG_LIB_LIBBFGDOTS is not set/" $(LIBS_CONFIG)
-endif
-
-ifeq ($(strip $(SF_PACKAGE_CURL)),y)
-	sed -i -e "s/^# CONFIG_USER_CURL_CURL is not set/CONFIG_USER_CURL_CURL=y/" $(LIBS_CONFIG)
-	sed -i -e "s/^# CONFIG_LIB_LIBCURL is not set/CONFIG_LIB_LIBCURL=y/" $(LIBS_CONFIG)
-else
-	sed -i -e "s/^CONFIG_USER_CURL_CURL=y/# CONFIG_USER_CURL_CURL is not set/" $(LIBS_CONFIG)
-	sed -i -e "s/^CONFIG_LIB_LIBCURL=y/# CONFIG_LIB_LIBCURL is not set/" $(LIBS_CONFIG)
-endif
-
-ifeq ($(strip $(SF_PACKAGE_DHCPD)),y)
-	sed -i -e "s/^# CONFIG_USER_BUSYBOX_UDHCPD is not set/CONFIG_USER_BUSYBOX_UDHCPD=y/" $(LIBS_CONFIG)        
-else
-	sed -i -e "s/^CONFIG_USER_BUSYBOX_UDHCPD=y/# CONFIG_USER_BUSYBOX_UDHCPD is not set/" $(LIBS_CONFIG)
-endif
-
 	touch $(UCLINUX_DIR)/.configured
 
 #---------------------------------------------------------------------------
@@ -254,6 +211,12 @@ ifeq ($(strip $(SF_TARGET_CUSTOM)),y)
 endif
 	$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR)
 	cp -af $(SOURCES_DIR)/groups $(TARGET_DIR)/bin
+ifeq ($(strip $(SF_PACKAGE_CURL)),y)
+	cp -f $(shell find  $(UCLINUX_DIR)/lib/libcurl/ -type f -name curl | xargs file | grep ELF | cut -d: -f1) $(TARGET_DIR)/usr/bin/curl
+else
+	rm -f $(TARGET_DIR)/usr/bin/curl
+endif	
+
 
 uClinux-unpacked: $(UCLINUX_DIR)/.unpacked
 	@echo "---- uClinux Unpacked ------"

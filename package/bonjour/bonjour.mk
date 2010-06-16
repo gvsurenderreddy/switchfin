@@ -29,8 +29,6 @@ $(BONJOUR_DIR)/.configured: $(BONJOUR_DIR)/.unpacked
 	touch $(BONJOUR_DIR)/.configured
 
 bonjour: $(BONJOUR_DIR)/.configured
-#	make -C $(BONJOUR_DIR)/mDNSPosix/ CC=bfin-linux-uclibc-gcc STRIP=bfin-linux-uclibc-strip LD=bfin-linux-uclibc-ld os=linux STAG_INC=$(STAGING_INC) \
-        LINKOPTS="-shared -L$(STAGING_DIR)/usr/lib -lc -L/home/dpenev/switchfin/switchfin/trunk/build_pr1/uClinux-dist/linux-2.6.x/arch/blackfin/lib/"
 	make -C $(BONJOUR_DIR)/mDNSPosix/ CC=bfin-linux-uclibc-gcc STRIP=bfin-linux-uclibc-strip LD=bfin-linux-uclibc-gcc os=linux STAG_INC=$(STAGING_INC)
 	mkdir -p $(TARGET_DIR)/usr/sbin/
 	mkdir -p $(TARGET_DIR)/usr/bin/
@@ -43,7 +41,16 @@ bonjour: $(BONJOUR_DIR)/.configured
 	cd $(TARGET_DIR)/lib/; ln -sf libnss_mdns-0.2.so libnss_mdns.so.2
 
 
-
+ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
+bonjour_: bonjour
+else
+bonjour_:
+	rm -f $(TARGET_DIR)/usr/sbin/mdnsd
+	rm -f $(TARGET_DIR)/lib/libdns_sd.so
+	rm -f $(TARGET_DIR)/lib/libnss_mdns.so.2
+	rm -f $(TARGET_DIR)/lib/libnss_mdns-0.2.so
+	rm -f $(TARGET_DIR)/usr/bin/dns-sd
+endif
 
 
 bonjour-dirclean:
@@ -54,7 +61,5 @@ bonjour-dirclean:
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
-TARGETS+=bonjour
-endif
+TARGETS+=bonjour_
 

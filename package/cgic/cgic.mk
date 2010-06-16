@@ -12,10 +12,6 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
-##############################################
-# cgic package for Astfin.org
-##############################################
-
 CGIC_MAJ_VERSION=2
 CGIC_MIN_VERSION=05
 CGIC_VER=$(CGIC_MAJ_VERSION)$(CGIC_MIN_VERSION)

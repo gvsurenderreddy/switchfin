@@ -128,8 +128,8 @@ CONFIG_PREEMPT_NONE=y
 # CONFIG_BF526 is not set
 # CONFIG_BF527 is not set
 # CONFIG_BF531 is not set
-CONFIG_BF532=y
-# CONFIG_BF533 is not set
+# CONFIG_BF532 is not set
+CONFIG_BF533=y
 # CONFIG_BF534 is not set
 # CONFIG_BF536 is not set
 # CONFIG_BF538 is not set

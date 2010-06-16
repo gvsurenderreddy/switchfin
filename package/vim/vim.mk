@@ -42,12 +42,16 @@ vim: $(VIM_DIR)/.configured
 vim-dirclean:
 	rm -rf $(VIM_DIR)
 
+ifeq ($(strip $(SF_PACKAGE_VIM)),y)
+vim_: vim
+else
+vim_:
+	rm -f $(TARGET_DIR)/bin/vim
+	rm -f $(TARGET_DIR)/usr/share/vim/vimrc	
+endif
 ################################################
 #
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_VIM)),y)
-TARGETS+=vim
-endif
-
+TARGETS+=vim_

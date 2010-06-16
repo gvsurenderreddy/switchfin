@@ -63,3 +63,16 @@ asterisk-h323-clean:
 asterisk-h323-dirclean:
 	rm -rf $(ASTERISK-H323_DIR)
 
+ifeq ($(strip $(SF_PACKAGE_ASTERISK-H323)),y)
+asterisk-h323_: asterisk-h323
+else
+asterisk-h323_:
+	rm -f $(TARGET_DIR)/usr/lib/asterisk/modules/chan_ooh323.so
+endif
+################################################
+#
+# Toplevel Makefile options
+#
+#################################################
+TARGETS+=asterisk-h323_
+

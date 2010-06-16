@@ -33,11 +33,17 @@ n2n-clean:
 n2n-dirclean:
 	rm -rf $(N2N_WORKING)
 
+ifeq ($(strip $(SF_PACKAGE_N2N)),y)
+n2n_: n2n
+else
+n2n_:
+	rm -f $(TARGET_DIR)/usr/sbin/edge
+	rm -f $(TARGET_DIR)/usr/bin/supernode
+endif
+
 ################################################
 #
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_N2N)),y)
-TARGETS+=n2n
-endif
+TARGETS+=n2n_

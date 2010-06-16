@@ -50,5 +50,16 @@ perl-dirclean:
 	rm -rf $(PERL_DIR)
 
 ifeq ($(strip $(SF_PACKAGE_PERL)),y)
-TARGETS+=perl
+perl_: perl
+else
+perl_:
+	rm -f $(TARGET_DIR)/bin/microperl
+	rm -rf $(TARGET_DIR)/usr/local/lib/perl5/
 endif
+
+################################################
+#
+# Toplevel Makefile options
+#
+#################################################
+TARGETS+=perl_

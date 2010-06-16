@@ -52,13 +52,17 @@ tftpd-dirclean:
 tftpd-clean:
 	rm -rf $(TFTPD_DIR)
 
+ifeq ($(strip $(SF_PACKAGE_TFTPD)),y)
+tftpd_: tftpd
+else
+tftpd_:
+	rm -f $(TARGET_DIR)/bin/in.tftpd
+endif
 
 ################################################
 #
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_TFTPD)),y)
-TARGETS+=tftpd
-endif
+TARGETS+=tftpd_
 

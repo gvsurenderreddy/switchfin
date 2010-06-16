@@ -36,11 +36,16 @@ rsync: $(RSYNC_DIR)/.configured
 rsync-dirclean:
 	rm -rf $(RSYNC_DIR)
 
+ifeq ($(strip $(SF_PACKAGE_RSYNC)),y)
+rsync_: rsync
+else
+rsync_:
+	rm -f $(TARGET_DIR)/bin/rsync
+endif
+
 ###############################################
 #
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_RSYNC)),y)
-TARGETS+=rsync
-endif
+TARGETS+=rsync_
