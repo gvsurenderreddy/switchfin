@@ -13,6 +13,7 @@
 config SF_PACKAGE_DAHDI_EXTRATOOLS
 	bool "DAHDI Extra Tools"
 	default n
+	depends on !SF_BR4_APPLIANCE
 	help
 		Enable some useful DAHDI tools like dahdi_speed dahdi_test dahdi_monitor 
 		dahdi_maint fxotune  
