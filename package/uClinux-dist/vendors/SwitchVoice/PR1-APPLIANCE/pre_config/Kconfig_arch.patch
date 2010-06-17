@@ -3,7 +3,7 @@
 @@ -1,42 +1,48 @@
  choice
  	prompt "System type"
--	default FIN537_STAMP
+-	default BFIN537_STAMP
 +	default PR1_APPLIANCE
  	help
  	  Select your board!
