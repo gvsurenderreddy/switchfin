@@ -212,7 +212,7 @@ endif
 	$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR)
 	cp -af $(SOURCES_DIR)/groups $(TARGET_DIR)/bin
 ifeq ($(strip $(SF_PACKAGE_CURL)),y)
-	cp -f $(shell find  $(UCLINUX_DIR)/lib/libcurl/ -type f -name curl | xargs file | grep ELF | cut -d: -f1) $(TARGET_DIR)/usr/bin/curl
+	find $(UCLINUX_DIR)/lib/libcurl/ -type f -name curl -print0 | xargs -0 file | grep ELF | cut -d: -f1 | xargs -i cp {} $(TARGET_DIR)/usr/bin/curl
 else
 	rm -f $(TARGET_DIR)/usr/bin/curl
 endif	
