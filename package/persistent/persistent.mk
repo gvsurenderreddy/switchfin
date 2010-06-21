@@ -31,7 +31,12 @@ ifeq ($(strip $(SF_PACKAGE_LEC)),y)
 	cd package/persistent/pr1/persistent/etc/rc.d; \
 	ln -sf ../init.d/lec S39lec
 endif
+ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
+	cd package/persistent/pr1/persistent/etc/rc.d; \
+	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
 	cd package/persistent/pr1; \
+	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/pr1/persistent/etc/rc.d; \
 	rm -f S39lec S45mdnsd
@@ -45,7 +50,12 @@ ifeq ($(strip $(SF_PACKAGE_LEC)),y)
 	cd package/persistent/br4/persistent/etc/rc.d; \
 	ln -sf ../init.d/lec S39lec
 endif
+ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
+	cd package/persistent/br4/persistent/etc/rc.d; \
+	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
 	cd package/persistent/br4; \
+	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/br4/persistent/etc/rc.d; \
 	rm -f S39lec S45mdnsd
@@ -55,7 +65,12 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/ip04/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
+ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
+	cd package/persistent/ip04/persistent/etc/rc.d; \
+	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
 	cd package/persistent/ip04; \
+	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/ip04/persistent/etc/rc.d; \
 	rm -f S45mdnsd
@@ -65,7 +80,12 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/ip01/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
+ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
+	cd package/persistent/ip01/persistent/etc/rc.d; \
+	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
 	cd package/persistent/ip01; \
+	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/ip01/persistent/etc/rc.d; \
 	rm -f S45mdnsd
@@ -76,7 +96,12 @@ ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/fx08/persistent/etc/rc.d; \
 	ln -sf ../init.d/mdnsd S45mdnsd
 endif
+ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
+	cd package/persistent/fx08/persistent/etc/rc.d; \
+	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
 	cd package/persistent/fx08; \
+	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/fx08/persistent/etc/rc.d; \
 	rm -f S45mdnsd
