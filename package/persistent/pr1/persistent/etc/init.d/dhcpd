@@ -11,7 +11,7 @@ case $1 in
         disable) rm -f /persistent/etc/rc.d/S85dhcpd;;                          
         *) echo 'Syntax: /etc/init.d/dhcpd [command]'
            echo ''
-           echo '       Available commands:'
+           echo '       Available commands:' 
            echo '               start   Start the service'
            echo '               stop    Stop the service'
            echo '               restart Restart the service'
