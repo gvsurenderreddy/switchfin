@@ -32,16 +32,21 @@ procwatch: $(PROCWATCH_DIR)/.unpacked
 	cp -f $(PROCWATCH_DIR)/procwatch $(TARGET_DIR)/bin 
 	touch $(PROCWATCH_DIR)/.built
 	
-all: procwatch
-
 procwatch-dirclean:
 	rm -rf $(PROCWATCH_DIR)
+
+ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
+procwatch_: procwatch
+	make persistent
+else
+procwatch_:
+	rm -f $(TARGET_DIR)/bin/procwatch
+	make persistent
+endif
 
 ################################################
 # 
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
-TARGETS+=procwatch
-endif
+TARGETS+=procwatch_

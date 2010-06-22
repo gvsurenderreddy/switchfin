@@ -2,10 +2,10 @@
 # Start up file for Asterisk Watchdog timer
 
 case $1 in
-	start)  procwatch -t 6000 -w 27 -p asterisk -c 10000 & ;;
+	start)  procwatch -t 6000 -w 27 -p asterisk -c 5000 -l /var/log/asterisk/procwatch.log & ;;
 	stop) killall -9 procwatch;;
 	restart) killall -9 procwatch;
-		 procwatch -t 6000 -w 27 -p asterisk -c 10000 & ;;
+		 procwatch -t 6000 -w 27 -p asterisk -c 5000 -l /var/log/asterisk/procwatch.log & ;;
 	enable) rm -f /persistent/etc/rc.d/S90asteriskwatch; 
 	        ln -s /persistent/etc/init.d/asteriskwatch /persistent/etc/rc.d/S90asteriskwatch;;
 	disable) rm -f /persistent/etc/rc.d/S90asteriskwatch;;
