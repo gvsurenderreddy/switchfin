@@ -77,22 +77,15 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
-	ln -sf $(SOURCES_DIR)/codec_g729.c $(ASTERISK_DIR)/codecs
-else
-	ln -sf $(SOURCES_DIR)/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
-endif
-	ln -sf $(SOURCES_DIR)/g729ab_codec.h $(ASTERISK_DIR)/codecs
-  
-ifeq ($(strip $(SF_ASTERISK_1_4)),y) 
-	ln -sf $(SOURCES_DIR)/codec_speex.c $(ASTERISK_DIR)/codecs
-endif
-	touch $(ASTERISK_DIR)/.unpacked
-ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
+	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs
 	touch $(ASTERISK_DIR)/.asterisk.1.4
 else
+	ln -sf $(SOURCES_DIR)/asterisk/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
 	touch $(ASTERISK_DIR)/.asterisk.1.6
 endif
-
+	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
+	touch $(ASTERISK_DIR)/.unpacked
 
 $(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
