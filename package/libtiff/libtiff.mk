@@ -35,6 +35,10 @@ libtiff: $(LIBTIFF_DIR)/.configured
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffconf.h $(STAGING_DIR)/usr/include/
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffio.h $(STAGING_DIR)/usr/include/
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffvers.h $(STAGING_DIR)/usr/include/
+ifeq ($(strip $(SF_PACKAGE_TIFF2PDF)),y)
+	cp -f $(LIBTIFF_DIR)/tools/tiff2pdf $(STAGING_DIR)/bin/
+endif
+
 
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff.so.3 $(TARGET_DIR)/lib
 	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtiff.so.3
