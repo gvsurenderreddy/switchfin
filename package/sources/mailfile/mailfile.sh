@@ -58,4 +58,4 @@ cat $tmpfile | ssmtp $2
 
 #clean the tmp files
 rm $tmpfile
-
+rm $1
