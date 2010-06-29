@@ -36,7 +36,7 @@ libtiff: $(LIBTIFF_DIR)/.configured
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffio.h $(STAGING_DIR)/usr/include/
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffvers.h $(STAGING_DIR)/usr/include/
 ifeq ($(strip $(SF_PACKAGE_TIFF2PDF)),y)
-	cp -f $(LIBTIFF_DIR)/tools/tiff2pdf $(TARGET_DIR)/bin/
+	cp -f $(LIBTIFF_DIR)/tools/.libs/tiff2pdf $(TARGET_DIR)/bin/
 endif
 
 
