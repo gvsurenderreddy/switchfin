@@ -55,6 +55,9 @@ endif
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 ASTERISK_DEP+= libpri
 endif
+ifeq ($(strip $(SF_PACKAGE_LUA)),y)
+ASTERISK_DEP+= lua_
+endif
 ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl
 ASTERISK_CONFIGURE_OPTS+= --without-curl --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux
 
@@ -79,6 +82,10 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs
+ifeq ($(strip $(SF_PACKAGE_LUA)),y)
+	ln -sf $(SOURCES_DIR)/lua/pbx_lua.c $(ASTERISK_DIR)/pbx
+	ln -sf $(SOURCES_DIR)/lua/hashtab.h $(ASTERISK_DIR)/include/asterisk/
+endif
 	touch $(ASTERISK_DIR)/.asterisk.1.4
 else
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
@@ -96,6 +103,7 @@ endif
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
+	echo LUA=1 >> $(ASTERISK_DIR)/build_tools/menuselect-deps
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)	
 	cd $(ASTERISK_DIR)/apps/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/app-spandsp/app_fax.c 

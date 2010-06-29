@@ -507,3 +507,12 @@
  					ast_log(LOG_DEBUG, "channel %d answered\n", p->channel);
  					if (p->cidspill) {
  						/* Cancel any running CallerID spill */
+--- asterisk/pbx/Makefile	2010-06-29 15:56:04.000000000 +0300
++++ asterisk/pbx/Makefile	2010-06-29 15:57:19.000000000 +0300
+@@ -69,3 +69,6 @@
+ $(if $(filter pbx_dundi,$(EMBEDDED_MODS)),modules.link,pbx_dundi.so): dundi-parser.o
+ 
+ pbx_gtkconsole.o: _ASTCFLAGS+=-Wno-strict-prototypes
++
++pbx_lua.so:
++	$(CC) -o pbx_lua.so -shared  $(ASTLDFLAGS) pbx_lua.o $(wildcard $(ASTTOPDIR)/../uClinux-dist/user/lua/lua-5.1.4/src/*[!lua].o)

@@ -42,5 +42,6 @@ source "package/bonjour/Config.in"
 source "package/curl/Config.in"
 source "package/procwatch/Config.in"
 source "package/libtiff/Config.in"
+source "package/lua/Config.in"
 endmenu
 

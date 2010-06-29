@@ -47,4 +47,3 @@ endif
 libtiff-dirclean:
 	rm -rf $(LIBTIFF_DIR)
 
-

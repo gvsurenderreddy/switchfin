@@ -216,7 +216,7 @@ ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 else
 	rm -f $(TARGET_DIR)/usr/bin/curl
 endif	
-
+	touch $(UCLINUX_DIR)/.built
 
 uClinux-unpacked: $(UCLINUX_DIR)/.unpacked
 	@echo "---- uClinux Unpacked ------"
