@@ -1,0 +1,797 @@
+diff -r -u asterisk-1.4.32/include/asterisk/channel.h asterisk-1.4.32-attrafax/include/asterisk/channel.h
+--- asterisk-1.4.32/include/asterisk/channel.h	2010-03-09 23:25:36.000000000 +0100
++++ asterisk-1.4.32-attrafax/include/asterisk/channel.h	2010-07-01 00:03:33.000000000 +0100
+@@ -90,6 +90,8 @@
+ #include "asterisk/abstract_jb.h"
+ 
+ #include <unistd.h>
++#include <sys/types.h>
++#include <sys/select.h>
+ 
+ #include "asterisk/poll-compat.h"
+ 
+@@ -132,6 +134,7 @@
+ 	AST_BRIDGE_FAILED = -1,
+ 	AST_BRIDGE_FAILED_NOWARN = -2,
+ 	AST_BRIDGE_RETRY = -3,
++	AST_BRIDGE_T38_GATE = -4,
+ };
+ 
+ typedef unsigned long long ast_group_t;
+@@ -415,7 +418,11 @@
+ 								in the CHANNEL dialplan function */
+ 
+ 	struct ast_channel_monitor *monitor;		/*!< Channel monitoring */
+-
++	
++	int zap_fax_detected; /* set by the zap channel to indicate a fax signal on the line */
++	int t38_mode_active; /* set by the SIP channel to indicate T.38 */
++	int should_reinvite; /* set by the applications */
++	
+ 	/*! Track the read/written samples for monitor use */
+ 	unsigned long insmpl;
+ 	unsigned long outsmpl;
+diff -r -u asterisk-1.4.32/include/asterisk/logger.h asterisk-1.4.32-attrafax/include/asterisk/logger.h
+--- asterisk-1.4.32/include/asterisk/logger.h	2010-03-09 23:25:36.000000000 +0100
++++ asterisk-1.4.32-attrafax/include/asterisk/logger.h	2010-07-01 00:03:33.000000000 +0100
+@@ -80,6 +80,8 @@
+ void ast_verbose(const char *fmt, ...)
+ 	__attribute__((format(printf, 1, 2)));
+ 
++void vast_verbose(const char *fmt, va_list arg);
++
+ int ast_register_verbose(void (*verboser)(const char *string));
+ int ast_unregister_verbose(void (*verboser)(const char *string));
+ 
+diff -r -u asterisk-1.4.32/include/asterisk/threadstorage.h asterisk-1.4.29.1-attrafax/include/asterisk/threadstorage.h
+--- asterisk-1.4.32/include/asterisk/threadstorage.h	2010-03-09 23:25:36.000000000 +0100
++++ asterisk-1.4.32-attrafax/include/asterisk/threadstorage.h	2010-07-01 00:03:33.000000000 +0100
+@@ -337,6 +337,15 @@
+ 		(__res);                                                         \
+ 	})
+ 
++#define vast_dynamic_str_thread_set_va(buf, max_len, ts, fmt, ap)                \
++	({                                                                       \
++		int __res;                                                       \
++		while ((__res = ast_dynamic_str_thread_build_va(buf, max_len,    \
++			ts, 0, fmt, ap)) == AST_DYNSTR_BUILD_RETRY) {            \
++		}                                                                \
++		(__res);                                                         \
++	})
++
+ /*!
+  * \brief Append to a thread local dynamic string using a va_list
+  *
+diff -r -u asterisk-1.4.32/main/udptl.c asterisk-1.4.32-attrafax/main/udptl.c
+--- asterisk-1.4.32/main/udptl.c	2010-03-09 23:25:35.000000000 +0100
++++ asterisk-1.4.32-attrafax/main/udptl.c	2010-07-01 00:03:33.000000000 +0100
+@@ -68,7 +68,7 @@
+ static int udptlmaxdatagram;
+ static int use_even_ports;
+ 
+-#define LOCAL_FAX_MAX_DATAGRAM      1400
++#define LOCAL_FAX_MAX_DATAGRAM      1024
+ #define MAX_FEC_ENTRIES             5
+ #define MAX_FEC_SPAN                5
+ 
+diff -ur asterisk-1.4.32/channels/chan_dahdi.c asterisk-1.4.32-attrafax/channels/chan_dahdi.c
+--- asterisk-1.4.32/channels/chan_dahdi.c	2010-05-01 01:22:46.000000000 +0300
++++ asterisk-1.4.32-attrafax/channels/chan_dahdi.c	2010-07-01 00:03:33.000000000 +0300
+@@ -4035,6 +4035,7 @@
+ 		/* Fax tone -- Handle and return NULL */
+ 		if ((p->callprogress & 0x6) && !p->faxhandled) {
+ 			p->faxhandled = 1;
++			ast->zap_fax_detected = 1;
+ 			if (strcmp(ast->exten, "fax")) {
+ 				const char *target_context = S_OR(ast->macrocontext, ast->context);
+ 
+@@ -5070,6 +5071,7 @@
+ 	int index;
+ 	void *readbuf;
+ 	struct ast_frame *f;
++	int bridge_flag = 0;
+ 
+ 	while (ast_mutex_trylock(&p->lock)) {
+ 		DEADLOCK_AVOIDANCE(&ast->lock);
+@@ -8567,6 +8569,8 @@
+ 		} else if (groupmatched) {
+ 			*cause = AST_CAUSE_CONGESTION;
+ 		}
++	} else {
++		tmp->zap_fax_detected = 0;
+ 	}
+ 		
+ 	return tmp;
+diff -ur asterisk-1.4.32/channels/chan_misdn.c asterisk-1.4.32-attrafax/channels/chan_misdn.c
+--- asterisk-1.4.32/channels/chan_misdn.c	2010-02-19 19:18:49.000000000 +0200
++++ asterisk-1.4.32-attrafax/channels/chan_misdn.c	2010-07-01 00:05:25.000000000 +0300
+@@ -2711,6 +2711,7 @@
+  		if (!tmp->faxhandled) {
+   			struct ast_channel *ast = tmp->ast;
+  			tmp->faxhandled++;
++			ast->zap_fax_detected = 1;
+  			chan_misdn_log(0, tmp->bc->port, "Fax detected, preparing %s for fax transfer.\n", ast->name);
+  			tmp->bc->rxgain = 0;
+  			isdn_lib_update_rxgain(tmp->bc);
+@@ -3497,7 +3498,8 @@
+ 			tmp->rings = 1;
+ 		else
+ 			tmp->rings = 0;
+-		
++
++		tmp->zap_fax_detected = 0;	
+ 	} else {
+ 		chan_misdn_log(-1, 0, "Unable to allocate channel structure\n");
+ 	}
+diff -ur asterisk-1.4.32/main/asterisk.c asterisk-1.4.32-attrafax/main/asterisk.c
+--- asterisk-1.4.32/main/asterisk.c	2010-03-15 03:33:50.000000000 +0200
++++ asterisk-1.4.32-attrafax/main/asterisk.c	2010-07-01 00:45:04.000000000 +0300
+@@ -129,6 +129,8 @@
+ 
+ #include "../defaults.h"
+ 
++#include "attractel/attrlic.h"
++
+ #ifndef AF_LOCAL
+ #define AF_LOCAL AF_UNIX
+ #define PF_LOCAL PF_UNIX
+@@ -3142,6 +3144,8 @@
+ 
+ 	ast_udptl_init();
+ 
++	t38_clean();
++
+ 	if (ast_image_init()) {
+ 		printf("%s", term_quit());
+ 		exit(1);
+diff -ur asterisk-1.4.32/main/channel.c asterisk-1.4.32-attrafax/main/channel.c
+--- asterisk-1.4.32/main/channel.c	2010-05-05 02:47:08.000000000 +0300
++++ asterisk-1.4.32-attrafax/main/channel.c	2010-07-01 00:49:10.000000000 +0300
+@@ -70,6 +70,8 @@
+ #include "asterisk/threadstorage.h"
+ #include "asterisk/slinfactory.h"
+ 
++#include "attractel/attrlic.h"
++
+ /* uncomment if you have problems with 'monitoring' synchronized files */
+ #if 0
+ #define MONITOR_CONSTANT_DELAY
+@@ -4211,7 +4213,7 @@
+ 						 struct ast_channel **rc, struct timeval bridge_end)
+ {
+ 	/* Copy voice back and forth between the two channels. */
+-	struct ast_channel *cs[3];
++	struct ast_channel *cs[3], *sip, *zap;
+ 	struct ast_frame *f;
+ 	enum ast_bridge_result res = AST_BRIDGE_COMPLETE;
+ 	int o0nativeformats;
+@@ -4223,7 +4225,9 @@
+ 	int frame_put_in_jb = 0;
+ 	int jb_in_use;
+ 	int to;
+-	
++	int mode;
++	t38bri bri;
++
+ 	cs[0] = c0;
+ 	cs[1] = c1;
+ 	pvt0 = c0->tech_pvt;
+@@ -4310,6 +4314,36 @@
+ 			break;
+ 		}
+ 
++		if ((!strcasecmp(c0->tech->type, "SIP")) &&
++				(T38_SUPPORTED_TECH(c1->tech->type)) ) {
++			if (c0->t38_mode_active) {
++				res = AST_BRIDGE_T38_GATE;
++				mode = T38_GATE_RECEIVING;
++				sip = c0;
++				zap = c1;
++				ast_verbose("entering T.38 gateway mode as RECEIVING gateway\n");
++				if (f->frametype != AST_FRAME_MODEM || f->subclass != AST_MODEM_T38) {
++					ast_frfree(f);
++					f = NULL;
++				}
++				break;
++			}
++		} else if ((T38_SUPPORTED_TECH(c0->tech->type)) &&
++				(!strcasecmp(c1->tech->type,"SIP"))) {
++			if (c1->t38_mode_active) {
++				res = AST_BRIDGE_T38_GATE;
++				mode = T38_GATE_EMITTING;
++				sip = c1;
++				zap = c0;
++				ast_verbose("entering T.38 gateway mode as EMITTING gateway\n");
++				if (f->frametype != AST_FRAME_MODEM || f->subclass != AST_MODEM_T38) {
++					ast_frfree(f);
++					f = NULL;
++				}
++				break;
++			}
++		}
++
+ 		other = (who == c0) ? c1 : c0; /* the 'other' channel */
+ 		/* Try add the frame info the who's bridged channel jitterbuff */
+ 		if (jb_in_use)
+@@ -4351,6 +4385,39 @@
+ 			/* monitored dtmf causes exit from bridge */
+ 			int monitored_source = (who == c0) ? watch_c0_dtmf : watch_c1_dtmf;
+ 
++			if ((f->frametype == AST_FRAME_MODEM) && (f->subclass == AST_MODEM_T38) &&
++					(!strcasecmp(who->tech->type, "SIP")) &&
++					(!strcasecmp(other->tech->type,"Zap"))) {
++/*
++	c0 is the incomming call, c1 is the outgoing call
++	app_dial.c:
++		ast_bridge_call(chan, peer, ...
++	which calls
++	res_features.c:
++		ast_channel_bridge(chan, peer, ...
++	which calls
++		ast_generic_bridge(c0, c1, ...
++	where c0 == chan and c1 == peer
++*/
++				if ((!strcasecmp(c0->tech->type, "SIP")) &&
++						(T38_SUPPORTED_TECH(c1->tech->type))) {
++					res = AST_BRIDGE_T38_GATE;
++					mode = T38_GATE_RECEIVING;
++					sip = c0;
++					zap = c1;
++					ast_verbose("entering T.38 gateway mode as RECEIVING gateway\n");
++					break;
++				} else if ((T38_SUPPORTED_TECH(c0->tech->type))
++						&& (!strcasecmp(c1->tech->type,"SIP"))) {
++					res = AST_BRIDGE_T38_GATE;
++					mode = T38_GATE_EMITTING;
++					sip = c1;
++					zap = c0;
++					ast_verbose("entering T.38 gateway mode as EMITTING gateway\n");
++					break;
++				}
++			}
++
+ 			if (monitored_source && 
+ 				(f->frametype == AST_FRAME_DTMF_END || 
+ 				f->frametype == AST_FRAME_DTMF_BEGIN)) {
+@@ -4379,6 +4446,12 @@
+ 		cs[0] = cs[1];
+ 		cs[1] = cs[2];
+ 	}
++	
++	if (res == AST_BRIDGE_T38_GATE) { /* we've just gotten the first T.38 frame */
++		if ((bri = t38_get())) res = (*bri)(mode, zap, sip, f);
++		else res = AST_BRIDGE_COMPLETE;
++	}
++	
+ 	return res;
+ }
+ 
+diff -ur asterisk-1.4.32/main/logger.c asterisk-1.4.32-attrafax/main/logger.c
+--- asterisk-1.4.32/main/logger.c	2010-02-24 23:02:18.000000000 +0200
++++ asterisk-1.4.32-attrafax/main/logger.c	2010-07-01 00:52:05.000000000 +0300
+@@ -895,6 +895,42 @@
+ 		v->verboser(buf->str);
+ 	AST_LIST_UNLOCK(&verbosers);
+ 
++	ast_log(LOG_VERBOSE, "%s", buf->str);
++}
++
++void vast_verbose(const char *fmt, va_list arg)
++{
++	struct verb *v;
++	struct ast_dynamic_str *buf;
++	int res;
++
++	if (ast_opt_timestamp) {
++		time_t t;
++		struct tm tm;
++		char date[40];
++		char *datefmt;
++
++		time(&t);
++		ast_localtime(&t, &tm, NULL);
++		strftime(date, sizeof(date), dateformat, &tm);
++		datefmt = alloca(strlen(date) + 3 + strlen(fmt) + 1);
++		sprintf(datefmt, "[%s] %s", date, fmt);
++		fmt = datefmt;
++	}
++
++	if (!(buf = ast_dynamic_str_thread_get(&verbose_buf, VERBOSE_BUF_INIT_SIZE)))
++		return;
++
++	res = vast_dynamic_str_thread_set_va(&buf, 0, &verbose_buf, fmt, arg);
++
++	if (res == AST_DYNSTR_BUILD_FAILED)
++		return;
++
++	AST_LIST_LOCK(&verbosers);
++	AST_LIST_TRAVERSE(&verbosers, v, list)
++		v->verboser(buf->str);
++	AST_LIST_UNLOCK(&verbosers);
++
+ 	ast_log(LOG_VERBOSE, "%s", buf->str + 1);
+ }
+ 
+diff -ur asterisk-1.4.32/main/Makefile asterisk-1.4.32-attrafax/main/Makefile
+--- asterisk-1.4.32/main/Makefile	2010-03-24 00:45:55.000000000 +0200
++++ asterisk-1.4.32-attrafax/main/Makefile	2010-07-01 00:44:07.000000000 +0300
+@@ -50,6 +50,8 @@
+   AST_LIBS+=$(EDITLINE_LIB) -lm
+ endif
+ 
++OBJS+=attrlic.o
++
+ ifneq ($(findstring darwin,$(OSARCH)),)
+   AST_LIBS+=-lresolv
+   ifneq ($(findstring LOADABLE_MODULES,$(MENUSELECT_CFLAGS)),)
+diff -ur asterisk-1.4.32/Makefile asterisk-1.4.32-attrafax/Makefile
+--- asterisk-1.4.32/Makefile	2010-05-03 19:54:41.000000000 +0300
++++ asterisk-1.4.32-attrafax/Makefile	2010-07-01 00:54:24.000000000 +0300
+@@ -156,7 +156,7 @@
+ HTTP_CGIDIR=/var/www/cgi-bin
+ 
+ # Uncomment this to use the older DSP routines
+-#_ASTCFLAGS+=-DOLD_DSP_ROUTINES
++_ASTCFLAGS+=-DOLD_DSP_ROUTINES
+ 
+ # If the file .asterisk.makeopts is present in your home directory, you can
+ # include all of your favorite menuselect options so that every time you download
+diff -ur asterisk-1.4.32/main/dsp.c asterisk-1.4.32-attrafax/main/dsp.c
+--- asterisk-1.4.32/main/dsp.c	2010-07-02 00:54:23.000000000 +0300
++++ asterisk-1.4.32-attrafax/main/dsp.c	2010-07-02 00:56:58.000000000 +0300
+@@ -229,12 +229,14 @@
+ 	goertzel_state_t col_out[4];
+ #ifdef FAX_DETECT
+ 	goertzel_state_t fax_tone;
++	goertzel_state_t fax_tone1;
+ #endif
+ #ifdef OLD_DSP_ROUTINES
+ 	goertzel_state_t row_out2nd[4];
+ 	goertzel_state_t col_out2nd[4];
+ #ifdef FAX_DETECT
+ 	goertzel_state_t fax_tone2nd;    
++	goertzel_state_t fax_tone2nd1;
+ #endif
+ 	int hit1;
+ 	int hit2;
+@@ -300,6 +302,7 @@
+ 
+ #ifdef FAX_DETECT
+ static float fax_freq = 1100.0;
++static float fax_freq1 = 2100.0;
+ #endif
+ 
+ static char dtmf_positions[] = "123A" "456B" "789C" "*0#D";
+@@ -431,10 +434,12 @@
+ #ifdef FAX_DETECT
+ 	/* Same for the fax dector */
+ 	goertzel_init (&s->fax_tone, fax_freq, 102);
++	goertzel_init (&s->fax_tone1, fax_freq1, 102);
+ 
+ #ifdef OLD_DSP_ROUTINES
+ 	/* Same for the fax dector 2nd harmonic */
+ 	goertzel_init (&s->fax_tone2nd, fax_freq * 2.0, 102);
++	goertzel_init (&s->fax_tone2nd1, fax_freq1 * 2.0, 102);
+ #endif	
+ #endif /* FAX_DETECT */
+ 	s->current_sample = 0;
+@@ -477,8 +482,10 @@
+ 	float col_energy[4];
+ #ifdef FAX_DETECT
+ 	float fax_energy;
++	float fax_energy1;
+ #ifdef OLD_DSP_ROUTINES
+ 	float fax_energy_2nd;
++	float fax_energy_2nd1;
+ #endif	
+ #endif /* FAX_DETECT */
+ 	int i;
+@@ -487,7 +494,7 @@
+ 	int best_row;
+ 	int best_col;
+ 	int hit;
+-	int limit,before;
++	int limit, before;
+ 	before = cycles();
+ 
+ 	hit = 0;
+@@ -514,10 +521,10 @@
+ 		}
+ 		s->energy += (float)acc * ((float)(1<<AMP_SCALE)) * ((float)(1<<AMP_SCALE));
+ 	}
+-#ifdef OLD_DSP_ROUTINES
++/*#ifdef OLD_DSP_ROUTINES
+ 		_dtmf_goertzel_update (s->row_out2nd, amp + sample, limit2 - sample);
+ 		_dtmf_goertzel_update (s->col_out2nd, amp + sample, limit2 - sample);
+-#endif		
++#endif*/	
+ 		/* XXX Need to fax detect for 3dnow too XXX */
+ #else
+ 		/* The following unrolled loop takes only 35% (rough estimate) of the 
+@@ -556,6 +563,10 @@
+ 			v1 = s->fax_tone.v2;
+ 			s->fax_tone.v2 = s->fax_tone.v3;
+ 			s->fax_tone.v3 = s->fax_tone.fac*s->fax_tone.v2 - v1 + famp;
++			
++			v1 = s->fax_tone1.v2;
++			s->fax_tone1.v2 = s->fax_tone1.v3;
++			s->fax_tone1.v3 = s->fax_tone1.fac*s->fax_tone1.v2 - v1 + famp;
+ #endif /* FAX_DETECT */
+ #ifdef OLD_DSP_ROUTINES
+ 			v1 = s->col_out2nd[0].v2;
+@@ -587,6 +598,10 @@
+ 			v1 = s->fax_tone.v2;
+ 			s->fax_tone2nd.v2 = s->fax_tone2nd.v3;
+ 			s->fax_tone2nd.v3 = s->fax_tone2nd.fac*s->fax_tone2nd.v2 - v1 + famp;
++			
++			v1 = s->fax_tone1.v2;
++			s->fax_tone2nd1.v2 = s->fax_tone2nd1.v3;
++			s->fax_tone2nd1.v3 = s->fax_tone2nd1.fac*s->fax_tone2nd1.v2 - v1 + famp;
+ #endif /* FAX_DETECT */
+ #endif
+ 		}
+@@ -605,6 +620,7 @@
+ #ifdef FAX_DETECT
+ 		/* Detect the fax energy, too */
+ 		fax_energy = goertzel_result(&s->fax_tone);
++		fax_energy1 = goertzel_result(&s->fax_tone1);
+ #endif
+ 		/* We are at the end of a DTMF detection block */
+ 		/* Find the peak row and the peak column */
+@@ -700,8 +716,12 @@
+ #endif
+ 
+ #ifdef FAX_DETECT
+-		if (!hit && (fax_energy >= FAX_THRESHOLD) && 
+-			(fax_energy >= DTMF_TO_TOTAL_ENERGY*s->energy) &&
++/*
++		ast_verbose("faxdetect=%d hit=%d fax_energy=%f\n", faxdetect, hit, fax_energy);
++*/
++		if (!hit &&
++				(((fax_energy >= FAX_THRESHOLD) && (fax_energy >= DTMF_TO_TOTAL_ENERGY*s->energy)) ||
++				((fax_energy1 >= FAX_THRESHOLD) && (fax_energy1 >= DTMF_TO_TOTAL_ENERGY*s->energy))) &&
+ 			(faxdetect)) {
+ #if 0
+ 			printf("Fax energy/Second Harmonic: %f\n", fax_energy);
+@@ -742,8 +762,10 @@
+ 		}
+ #ifdef FAX_DETECT
+ 		goertzel_reset (&s->fax_tone);
++		goertzel_reset (&s->fax_tone1);
+ #ifdef OLD_DSP_ROUTINES
+ 		goertzel_reset (&s->fax_tone2nd);
++		goertzel_reset (&s->fax_tone2nd1);
+ #endif			
+ #endif
+ 		s->energy = 0.0;
+@@ -1567,7 +1589,7 @@
+ 		ast_frfree(af);
+ 		return ast_frisolate(&dsp->f);
+ 	}
+-	if ((dsp->features & DSP_FEATURE_DTMF_DETECT)) {
++	if ((dsp->features & DSP_FEATURE_DTMF_DETECT)) {		
+ 		digit = __ast_dsp_digitdetect(dsp, shortdata, len, &writeback);
+ #if 0
+ 		if (digit)
+@@ -1790,10 +1812,12 @@
+ 		}
+ #ifdef FAX_DETECT
+ 		goertzel_reset (&dsp->td.dtmf.fax_tone);
++		goertzel_reset (&dsp->td.dtmf.fax_tone1);
+ #endif
+ #ifdef OLD_DSP_ROUTINES
+ #ifdef FAX_DETECT
+ 		goertzel_reset (&dsp->td.dtmf.fax_tone2nd);
++		goertzel_reset (&dsp->td.dtmf.fax_tone2nd1);
+ #endif
+ 		dsp->td.dtmf.hit1 = dsp->td.dtmf.hit2 = dsp->td.dtmf.hit3 = dsp->td.dtmf.hit4 = dsp->td.dtmf.mhit = 0;
+ #else
+diff -ur asterisk-1.4.32/channels/chan_sip.c asterisk-1.4.32-attrafax/channels/chan_sip.c
+--- asterisk-1.4.32/channels/chan_sip.c	2010-05-05 19:42:22.000000000 +0300
++++ asterisk-1.4.32-attrafax/channels/chan_sip.c	2010-07-02 01:44:48.000000000 +0300
+@@ -149,6 +149,7 @@
+ #include "asterisk/compiler.h"
+ #include "asterisk/threadstorage.h"
+ #include "asterisk/translate.h"
++#include "attractel/attrlic.h"
+ 
+ #ifndef FALSE
+ #define FALSE    0
+@@ -1047,6 +1048,7 @@
+ 	struct sip_pvt *next;			/*!< Next dialog in chain */
+ 	struct sip_invite_param *options;	/*!< Options for INVITE */
+ 	int autoframing;
++	int faxdetected;
+ 	int hangupcause;			/*!< Storage of hangupcause copied from our owner before we disconnect from the AST channel (only used at hangup) */
+ 	/*! When receiving an SDP offer, it is important to take note of what media types were offered.
+ 	 * By doing this, even if we don't want to answer a particular media stream with something meaningful, we can
+@@ -3865,7 +3867,16 @@
+ 			ast_log(LOG_DEBUG, "SIP answering channel: %s\n", ast->name);
+ 
+ 		ast_rtp_new_source(p->rtp);
+-		res = transmit_response_with_sdp(p, "200 OK", &p->initreq, XMIT_CRITICAL);
++		if (p->t38.state == T38_PEER_DIRECT) {
++			p->t38.state = T38_ENABLED;
++			if (p->rtp) ast_rtp_set_rtptimeout(p->rtp, 0);
++			if (p->owner) p->owner->t38_mode_active = 1;
++			if (option_debug > 1)
++				ast_verbose("T38State change to %d on channel %s\n", p->t38.state, ast->name);
++			res = transmit_response_with_t38_sdp(p, "200 OK", &p->initreq, XMIT_CRITICAL);
++		} else {
++			res = transmit_response_with_sdp(p, "200 OK", &p->initreq, XMIT_CRITICAL);
++		}		
+ 		ast_set_flag(&p->flags[1], SIP_PAGE2_DIALOG_ESTABLISHED);
+ 	}
+ 	ast_mutex_unlock(&p->lock);
+@@ -3943,6 +3954,7 @@
+ 				we simply forget the frames if we get modem frames before the bridge is up.
+ 				Fax will re-transmit.
+ 			*/
++			p->lastrtprx = p->lastrtptx = time(NULL);
+ 			if (ast->_state == AST_STATE_UP) {
+ 				if (ast_test_flag(&p->flags[1], SIP_PAGE2_T38SUPPORT) && p->t38.state == T38_DISABLED) {
+ 					if (!p->pendinginvite) {
+@@ -4270,7 +4282,7 @@
+ 
+ 	if ((ast_test_flag(&i->flags[0], SIP_DTMF) == SIP_DTMF_INBAND) || (ast_test_flag(&i->flags[0], SIP_DTMF) == SIP_DTMF_AUTO)) {
+ 		i->vad = ast_dsp_new();
+-		ast_dsp_set_features(i->vad, DSP_FEATURE_DTMF_DETECT);
++		ast_dsp_set_features(i->vad, DSP_FEATURE_DTMF_DETECT | DSP_FEATURE_FAX_DETECT);
+ 		if (global_relaxdtmf)
+ 			ast_dsp_digitmode(i->vad, DSP_DIGITMODE_DTMF | DSP_DIGITMODE_RELAXDTMF);
+ 	}
+@@ -4349,6 +4361,9 @@
+ 	if (!ast_test_flag(&i->flags[0], SIP_NO_HISTORY))
+ 		append_history(i, "NewChan", "Channel %s - from %s", tmp->name, i->callid);
+ 
++	tmp->t38_mode_active = 0;
++	tmp->should_reinvite = 0;
++
+ 	return tmp;
+ }
+ 
+@@ -4562,10 +4577,11 @@
+ 	if (f && (ast_test_flag(&p->flags[0], SIP_DTMF) == SIP_DTMF_INBAND) && p->vad) {
+ 		f = ast_dsp_process(p->owner, p->vad, f);
+ 		if (f && f->frametype == AST_FRAME_DTMF) {
++			ast_verbose("T.38 flag for this channel is %d\n", ast_test_flag(&p->t38.t38support, SIP_PAGE2_T38SUPPORT_UDPTL));
+ 			if (ast_test_flag(&p->t38.t38support, SIP_PAGE2_T38SUPPORT_UDPTL) && f->subclass == 'f') {
+-				if (option_debug)
+-					ast_log(LOG_DEBUG, "Fax CNG detected on %s\n", ast->name);
+-				*faxdetect = 1;
++				ast_verbose("Fax CNG detected on %s\n", ast->name);
++				*faxdetect = 1; /* reinviting because of the sip channel */
++				p->faxdetected = 1;
+ 			} else if (option_debug) {
+ 				ast_log(LOG_DEBUG, "* Detected inband DTMF '%c'\n", f->subclass);
+ 			}
+@@ -4580,28 +4596,52 @@
+ {
+ 	struct ast_frame *fr;
+ 	struct sip_pvt *p = ast->tech_pvt;
+-	int faxdetected = FALSE;
++	struct ast_channel *bridgepeer;
++	int faxdetected = 0, bridge_flag = 0;
+ 
+ 	ast_mutex_lock(&p->lock);
+ 	fr = sip_rtp_read(ast, p, &faxdetected);
++	faxdetected = faxdetected?1:p->faxdetected;
+ 	p->lastrtprx = time(NULL);
++	if (fr && (fr->frametype == AST_FRAME_MODEM)) p->lastrtptx = time(NULL);
+ 
+ 	/* If we are NOT bridged to another channel, and we have detected fax tone we issue T38 re-invite to a peer */
+ 	/* If we are bridged then it is the responsibility of the SIP device to issue T38 re-invite if it detects CNG or fax preamble */
+-	if (faxdetected && ast_test_flag(&p->t38.t38support, SIP_PAGE2_T38SUPPORT_UDPTL) && (p->t38.state == T38_DISABLED) && !(ast_bridged_channel(ast))) {
+-		if (!ast_test_flag(&p->flags[0], SIP_GOTREFER)) {
+-			if (!p->pendinginvite) {
+-				if (option_debug > 2)
+-					ast_log(LOG_DEBUG, "Sending reinvite on SIP (%s) for T.38 negotiation.\n",ast->name);
+-				p->t38.state = T38_LOCAL_REINVITE;
+-				transmit_reinvite_with_t38_sdp(p);
+-				if (option_debug > 1)
+-					ast_log(LOG_DEBUG, "T38 state changed to %d on channel %s\n", p->t38.state, ast->name);
++	/* Attractel mod: we'll reinvite if we are bridged to a Zap channel */
++
++	if (ast_bridged_channel(ast)) {
++		if ((bridgepeer = ast_bridged_channel(p->owner))) {
++			if (T38_SUPPORTED_TECH(bridgepeer->tech->type)) {
++				bridge_flag = 1; /* zap, so check if fax is also detected over the zap channel and reinvite */
++				if (bridgepeer->zap_fax_detected) faxdetected = 2; /* reinviting because of the zap channel */
++			} else bridge_flag = 0; /* not a zap channel. do not reinvite */
++		} else bridge_flag = 0; /* bridged, but no pointer to the peer channel */
++	} else bridge_flag = 1; /* not bridged at all, so we are probably a terminating/originating T.38 IAF */
++
++	if (ast->should_reinvite==1) faxdetected = 3;
++
++	if (ast->should_reinvite==-1)
++	{
++		faxdetected=0;
++		bridge_flag=0;
++	}
++
++	if (faxdetected && ast_test_flag(&p->t38.t38support, SIP_PAGE2_T38SUPPORT_UDPTL) && ast_test_flag(&p->flags[1], SIP_PAGE2_T38SUPPORT_UDPTL)
++			&& (p->t38.state == T38_DISABLED)) {
++		if (bridge_flag) {
++			ast_verbose("sip_read: bridge_flag=%d, faxdetected=%d\n", bridge_flag, faxdetected);
++			if (!ast_test_flag(&p->flags[0], SIP_GOTREFER)) {
++				if (!p->pendinginvite) {
++					ast_verbose("Sending reinvite on SIP (%s) for T.38 negotiation.\n",ast->name);
++					p->t38.state = T38_LOCAL_REINVITE;
++					transmit_reinvite_with_t38_sdp(p);
++					p->faxdetected = 0;
++					ast_verbose("T38 state changed to %d on channel %s\n", p->t38.state, ast->name);
++				} else ast_verbose("sip_read: pendinginvite\n");
++			} else if (!ast_test_flag(&p->flags[0], SIP_PENDINGBYE)) {
++				ast_verbose("Deferring reinvite on SIP (%s) - it will be re-negotiated for T.38\n", ast->name);
++				ast_set_flag(&p->flags[0], SIP_NEEDREINVITE);
+ 			}
+-		} else if (!ast_test_flag(&p->flags[0], SIP_PENDINGBYE)) {
+-			if (option_debug > 2)
+-				ast_log(LOG_DEBUG, "Deferring reinvite on SIP (%s) - it will be re-negotiated for T.38\n", ast->name);
+-			ast_set_flag(&p->flags[0], SIP_NEEDREINVITE);
+ 		}
+ 	}
+ 
+@@ -4706,8 +4746,10 @@
+ 		/* If the global videosupport flag is on, we always create a RTP interface for video */
+ 		if (ast_test_flag(&p->flags[1], SIP_PAGE2_VIDEOSUPPORT))
+ 			p->vrtp = ast_rtp_new_with_bindaddr(sched, io, 1, 0, bindaddr.sin_addr);
+-		if (ast_test_flag(&p->flags[1], SIP_PAGE2_T38SUPPORT))
++		if (ast_test_flag(&p->flags[1], SIP_PAGE2_T38SUPPORT)) {
+ 			p->udptl = ast_udptl_new_with_bindaddr(sched, io, 0, bindaddr.sin_addr);
++			ast_set_flag(&p->t38.t38support, SIP_PAGE2_T38SUPPORT_UDPTL);
++		}
+ 		if (!p->rtp || (ast_test_flag(&p->flags[1], SIP_PAGE2_VIDEOSUPPORT) && !p->vrtp)) {
+ 			ast_log(LOG_WARNING, "Unable to create RTP audio %s session: %s\n",
+ 				ast_test_flag(&p->flags[1], SIP_PAGE2_VIDEOSUPPORT) ? "and video" : "", strerror(errno));
+@@ -7117,12 +7159,12 @@
+ 			ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxVersion:1\r\n");
+ 		if ((x = t38_get_rate(p->t38.jointcapability)))
+ 			ast_build_string(&a_modem_next, &a_modem_left, "a=T38MaxBitRate:%d\r\n",x);
+-		if ((p->t38.jointcapability & T38FAX_FILL_BIT_REMOVAL) == T38FAX_FILL_BIT_REMOVAL)
++/*		if ((p->t38.jointcapability & T38FAX_FILL_BIT_REMOVAL) == T38FAX_FILL_BIT_REMOVAL)
+ 			ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxFillBitRemoval\r\n");
+ 		if ((p->t38.jointcapability & T38FAX_TRANSCODING_MMR) == T38FAX_TRANSCODING_MMR)
+ 			ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxTranscodingMMR\r\n");
+ 		if ((p->t38.jointcapability & T38FAX_TRANSCODING_JBIG) == T38FAX_TRANSCODING_JBIG)
+-			ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxTranscodingJBIG\r\n");
++			ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxTranscodingJBIG\r\n");*/
+ 		ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxRateManagement:%s\r\n", (p->t38.jointcapability & T38FAX_RATE_MANAGEMENT_LOCAL_TCF) ? "localTCF" : "transferredTCF");
+ 		x = ast_udptl_get_local_max_datagram(p->udptl);
+ 		ast_build_string(&a_modem_next, &a_modem_left, "a=T38FaxMaxBuffer:%d\r\n",x);
+@@ -12858,6 +12900,7 @@
+ 	int xmitres = 0;
+ 	int reinvite = (p->owner && p->owner->_state == AST_STATE_UP);
+ 	struct ast_channel *bridgepeer = NULL;
++	enum t38state prev_t38_state;
+ 
+ 	if (option_debug > 3) {
+ 		if (reinvite)
+@@ -12945,6 +12988,7 @@
+ 		break;
+ 
+ 	case 200:	/* 200 OK on invite - someone's answering our call */
++		prev_t38_state = p->t38.state; /* XXX process_sdp changes this so save it and check both */
+ 		if (!ast_test_flag(req, SIP_PKT_IGNORE) && (p->invitestate != INV_CANCELLED) && sip_cancel_destroy(p))
+ 			ast_log(LOG_WARNING, "Unable to cancel SIP destruction.  Expect bad things.\n");
+ 		p->authtries = 0;
+@@ -13003,20 +13047,21 @@
+ 					if (option_debug > 1)
+ 						ast_log(LOG_DEBUG,"T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+ 				}
+-			} else {
+-				/* Other side is not a SIP channel */
++			} else if (!T38_SUPPORTED_TECH(bridgepeer->tech->type))  {
++				/* Other side is not a SIP/DAHDI channel */
+ 				if (option_debug > 1)
+-					ast_log(LOG_DEBUG, "Strange... The other side of the bridge is not a SIP channel\n");
++					ast_log(LOG_DEBUG, "Strange... The other side of the bridge is not a SIP/ISDN/IAX2 channel\n");
+ 				p->t38.state = T38_DISABLED;
+ 				if (option_debug > 1)
+ 					ast_log(LOG_DEBUG,"T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+ 			}
+ 		}
+-		if (p->t38.state == T38_LOCAL_REINVITE) {
++		if ((prev_t38_state == T38_LOCAL_REINVITE) && (p->t38.state != T38_DISABLED)) {
+ 			/* If there was T38 reinvite and we are supposed to answer with 200 OK than this should set us to T38 negotiated mode */
+ 			p->t38.state = T38_ENABLED;
+-			if (option_debug)
+-				ast_log(LOG_DEBUG, "T38 changed state to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
++			if (p->rtp) ast_rtp_set_rtptimeout(p->rtp, 0);
++			if (p->owner) p->owner->t38_mode_active = 1;
++			ast_verbose("T38 changed state to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+ 		}
+ 
+ 		if (!ast_test_flag(req, SIP_PKT_IGNORE) && p->owner) {
+@@ -13106,6 +13151,7 @@
+ 	case 488: /* Not acceptable here */
+ 	case 606: /* Not Acceptable */
+ 		xmitres = transmit_request(p, SIP_ACK, seqno, XMIT_UNRELIABLE, FALSE);
++		if (p->udptl) p->owner->should_reinvite=-1;
+ 		if (reinvite && p->udptl) {
+ 			/* If this is a T.38 call, we should go back to 
+ 			   audio. If this is an audio call - something went
+@@ -13121,9 +13167,11 @@
+ 			   sides here? 
+ 			*/
+ 			/* While figuring that out, hangup the call */
+-			if (p->owner && !ast_test_flag(req, SIP_PKT_IGNORE))
++			/* Disabled by Vasil Kolev. Why should we drop the call? */
++/*			if (p->owner && !ast_test_flag(req, SIP_PKT_IGNORE))
+ 				ast_queue_control(p->owner, AST_CONTROL_CONGESTION);
+ 			ast_set_flag(&p->flags[0], SIP_NEEDDESTROY);
++*/
+ 		} else {
+ 			/* We can't set up this call, so give up */
+ 			if (p->owner && !ast_test_flag(req, SIP_PKT_IGNORE))
+@@ -15329,15 +15377,22 @@
+ 							ast_set_flag(&p->flags[1], SIP_PAGE2_DIALOG_ESTABLISHED);
+ 							transmit_response_with_t38_sdp(p, "200 OK", req, XMIT_CRITICAL);
+ 							p->t38.state = T38_ENABLED;
++							if (p->rtp) ast_rtp_set_rtptimeout(p->rtp, 0);
+ 							if (option_debug)
+ 								ast_log(LOG_DEBUG, "T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+ 						}
++					} else if (T38_SUPPORTED_TECH(bridgepeer->tech->type)) { /* we are bridged to a zap channel */
++						transmit_response_with_t38_sdp(p, "200 OK", req, XMIT_CRITICAL);
++						p->t38.state = T38_ENABLED;
++						if (p->rtp) ast_rtp_set_rtptimeout(p->rtp, 0);
++						if (p->owner) p->owner->t38_mode_active = 1;
++						ast_verbose("T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+ 					} else {
+ 						/* Other side is not a SIP channel */
+ 						if (ast_test_flag(req, SIP_PKT_IGNORE))
+-							transmit_response(p, "488 Not acceptable here", req);
++							transmit_response(p, "488 Not acceptable here - bad bridge", req);
+ 						else
+-							transmit_response_reliable(p, "488 Not acceptable here", req);
++							transmit_response_reliable(p, "488 Not acceptable here - bad bridge", req);
+ 						p->t38.state = T38_DISABLED;
+ 						if (option_debug > 1)
+ 							ast_log(LOG_DEBUG,"T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+@@ -15350,8 +15405,9 @@
+ 					ast_set_flag(&p->flags[1], SIP_PAGE2_DIALOG_ESTABLISHED);
+ 					transmit_response_with_t38_sdp(p, "200 OK", req, XMIT_CRITICAL);
+ 					p->t38.state = T38_ENABLED;
+-					if (option_debug)
+-						ast_log(LOG_DEBUG,"T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
++					if (p->rtp) ast_rtp_set_rtptimeout(p->rtp, 0);
++					if (p->owner) p->owner->t38_mode_active = 1;
++					ast_verbose("T38 state changed to %d on channel %s\n", p->t38.state, p->owner ? p->owner->name : "<none>");
+ 				}
+ 			} else if (p->t38.state == T38_DISABLED) { /* Channel doesn't have T38 offered or enabled */
+ 				/* If this is not a re-invite or something to ignore - it's critical */
+@@ -16804,8 +16860,6 @@
+ 		}
+ 
+ 		/* This is unsafe, since p->owner is not locked. */
+-		if (p->owner)
+-			ast_log(LOG_ERROR, "Channel lock for %s could not be obtained, and request was unable to be queued.\n", S_OR(p->owner->name, "- no channel name ??? - "));
+ 		ast_log(LOG_ERROR, "SIP transaction failed: %s \n", p->callid);
+ 		if (req.method != SIP_ACK)
+ 			transmit_response(p, "503 Server error", &req);	/* We must respond according to RFC 3261 sec 12.2 */
+@@ -17412,6 +17466,7 @@
+ 		sip_destroy(p);
+ 	ast_update_use_count();
+ 	restart_monitor();
++	p->faxdetected = 0;
+ 	return tmpc;
+ }
+ 
+@@ -18994,6 +19049,7 @@
+ 				ast_log(LOG_DEBUG, "Responding 200 OK on SIP '%s' - It's UDPTL soon redirected to us (IP %s)\n", p->callid, ast_inet_ntoa(p->ourip));
+ 		}
+ 		pvt->t38.state = T38_ENABLED;
++		if (p->rtp) ast_rtp_set_rtptimeout(p->rtp, 0);
+ 		p->t38.state = T38_ENABLED;
+ 		if (option_debug > 1) {
+ 			ast_log(LOG_DEBUG, "T38 changed state to %d on channel %s\n", pvt->t38.state, pvt->owner ? pvt->owner->name : "<none>");
+@@ -19193,7 +19249,7 @@
+ 	if (ast_test_flag(&p->flags[0], SIP_DTMF) == SIP_DTMF_INBAND) {
+ 		if (!p->vad) {
+ 			p->vad = ast_dsp_new();
+-			ast_dsp_set_features(p->vad, DSP_FEATURE_DTMF_DETECT);
++			ast_dsp_set_features(p->vad, DSP_FEATURE_DTMF_DETECT | DSP_FEATURE_FAX_DETECT);
+ 		}
+ 	} else {
+ 		if (p->vad) {

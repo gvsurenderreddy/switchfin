@@ -27,6 +27,8 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	CID_PATCH=cid-1.4.patch
 	AUTOMIXMON_PATCH=automixmon-1.4.patch
 	ASTERISK_MAKEOPTS=asterisk-1.4
+	ATTRAFAX_NAME=attrafax-0.9
+	ATTRAFAX_DIR=$(BUILD_DIR)/$(ATTRAFAX_NAME)
 else
 	ASTERISK_VERSION=1.6.2.6
 	ASTERISK_PATCH=asterisk-1.6.patch
@@ -94,7 +96,7 @@ endif
 	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
 	touch $(ASTERISK_DIR)/.unpacked
 
-$(ASTERISK_DIR)/.configured: $(ASTERISK_DIR)/.unpacked
+$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DIR)/.unpacked $(ATTRAFAX_DIR)/.unpacked 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
 	cp -v package/asterisk/$(ASTERISK_MAKEOPTS)_misdn.makeopts $(ASTERISK_DIR)/menuselect.makeopts
 else
@@ -105,13 +107,18 @@ endif
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
 	echo LUA=1 >> $(ASTERISK_DIR)/build_tools/menuselect-deps
 
-ifeq ($(strip $(SF_ASTERISK_1_4)),y)	
+ifeq ($(strip $(SF_PACKAGE_SPANDSPFAX)),y)	
 	cd $(ASTERISK_DIR)/apps/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/app-spandsp/app_fax.c 
 	cd $(ASTERISK_DIR)/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/addon_version.h
 endif
-
 	cp -v package/sources/nvfax/app_nv_faxdetect.c $(ASTERISK_DIR)/apps/app_nvfaxdetect.c
-	
+
+ifeq ($(strip $(SF_PACKAGE_ATTRAFAX)),y)
+        #Patch Asterisk for Attrafax if not already patched
+	patch -p1 -d $(ASTERISK_DIR) < package/asterisk/asterisk-attrafax.patch; \
+	ln -sf ${ATTRAFAX_DIR}/src/asterisk/include/attractel/ $(ASTERISK_DIR)/include/
+	ln -sf ${ATTRAFAX_DIR}/src/asterisk/main/attrlic.c $(ASTERISK_DIR)/main/
+endif
 	touch $(ASTERISK_DIR)/.configured
 
 $(STAGING_LIB)/libgsm.a:
@@ -138,7 +145,7 @@ ifeq ($(strip $(SF_ASTERISK_1_6)),y)
 	fi
 endif
 
-asterisk: check_prev_ver $(ASTERISK_DEP) $(ASTERISK_DIR)/.configured
+asterisk: check_prev_ver $(ASTERISK_DEP) $(ASTERISK_DIR_LINK)/.configured
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_VERBOSE)),y)
 #	-$(MAKE1) -C $(ASTERISK_DIR) menuselect

@@ -1,0 +1,59 @@
+--- attrafax-0.9/src/modules/Makefile	2008-08-28 12:25:49.000000000 +0300
++++ attrafax-0.9/src/modules/Makefile	2010-07-01 18:31:44.000000000 +0300
+@@ -12,10 +12,10 @@
+ 
+ 
+ CC?=cc
+-INCLUDES=-I${IDIR}/usr/include -I../asterisk/include -I../../include  -I/usr/local/include
++INCLUDES=-I${STAGING_INC} -I${ASTERISK_INC} -I../../include 
+ CCOPTS=-Wall -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -O6 -fPIC -pthread -pipe -shared $(ARCH)
+ CFLAGS=-D_GNU_SOURCE -DOLD_DSP_ROUTINES
+-LIBS=-L/usr/local/lib -lt30 -lm -lssl -lpthread -lssl -lcrypto
++LIBS=-L${STAGING_LIB} -L../../bin/ -lt30 -lm -lssl -lpthread -lssl -lcrypto
+ CMPL=$(CC) $(INCLUDES) $(CCOPTS) $(CFLAGS)
+ 
+ 
+--- attrafax-0.9/compile.sh	2010-02-10 16:15:07.000000000 +0200
++++ attrafax-0.9/compile.sh	2010-07-01 18:42:54.000000000 +0300
+@@ -25,6 +25,8 @@
+ 	elif [ `uname -s` = "SunOS" ]; then
+ 		CC="/opt/sunstudio12.1/bin/cc"
+ 	fi
++else
++        CC="$CC -std=gnu99"
+ fi
+ 
+ if [ -z "$CFLAGS" ]; then
+@@ -36,7 +38,7 @@
+ else
+ 	CFLAGS="${CFLAGS} -Wall -Werror -fPIC -D_FILE_OFFSET_BITS=64"
+ fi
+-INCLUDE="-I../../include -I/usr/local/include $EXTINCLUDES"
++INCLUDE="-I../../include -I$1 $EXTINCLUDES"
+ BLIBS="-lm -lz -lssl -lcrypto"
+ 
+ 
+@@ -69,7 +71,7 @@
+ 	fi
+ fi
+ 
+-LIBS="-L../../bin -L/usr/local/lib -lt30"
++LIBS="-L../../bin -L$2 -lt30"
+ 
+ BIN_COMMON="rev.o hdlc.o llist.o tlogger.o context.o"
+ TONE_COMMON="dds.o goertzel.o cng.o ced.o"
+@@ -109,11 +111,11 @@
+ 	${CC} ${CFLAGS} ${INCLUDE} -c "$i"
+ done
+ 
+-${CC} ${CFLAGS} -shared -Xlinker ${BLIBS} \
++${CC} ${CFLAGS} -shared -Xlinker ${BLIBS} ${LIBS} \
+ 	${BIN_COMMON} ${TONE_COMMON} ${MODEMS} ${FAX_COMMON} \
+ 	${TIFF} ${JPEG} -o ../../${BINDIR}/libt30.so
+ 
+ 
+-ar rv ../../${BINDIR}/libt30.a ${BIN_COMMON} ${TONE_COMMON} ${MODEMS} ${FAX_COMMON}
+-ranlib ../../${BINDIR}/libt30.a
++bfin-linux-uclibc-ar rv ../../${BINDIR}/libt30.a ${BIN_COMMON} ${TONE_COMMON} ${MODEMS} ${FAX_COMMON}
++bfin-linux-uclibc-ranlib ../../${BINDIR}/libt30.a
+ 

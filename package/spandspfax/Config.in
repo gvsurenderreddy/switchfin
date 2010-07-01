@@ -1,0 +1,19 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
+#########################################################################
+
+config SF_PACKAGE_SPANDSPFAX
+	bool "spandspfax"
+	default n
+	depends on (SF_ASTERISK_1_4)
+	help
+		If enabled you will get app_fax Asterisk application included in your image. It is for sending/receiving a TIFF FAX file. It is based on Spandsp library. 
+
