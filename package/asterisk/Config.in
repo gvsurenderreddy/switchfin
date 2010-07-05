@@ -78,7 +78,7 @@ config SF_PACKAGE_ASTERISK_G729
 config SF_PACKAGE_NVFAX
         bool "Fax Detection for IAX/SIP/ZAP"
         default y
-        depends SF_PACKAGE_ASTERISK
+        depends SF_ASTERISK_1_4
         help
 		This applications listens for fax tones (on IAX and SIP channels too) 
 		for waitdur seconds of time. In addition, it can be interrupted by digits, 

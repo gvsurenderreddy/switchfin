@@ -34,7 +34,9 @@ else
 	ASTERISK_PATCH=asterisk-1.6.patch
 	CID_PATCH=cid-1.6.patch
 	ASTERISK_MAKEOPTS=asterisk-1.6
+	ATTRAFAX_DIR=$(BUILD_DIR)/asterisk-$(ASTERISK_VERSION)
 endif
+
 ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
 ASTERISK_DIR=$(BUILD_DIR)/$(ASTERISK_NAME)
 ASTERISK_DIR_LINK=$(BUILD_DIR)/asterisk
@@ -42,7 +44,7 @@ ASTERISK_SOURCE=$(ASTERISK_NAME).tar.gz
 ASTERISK_SITE=http://downloads.asterisk.org/pub/telephony/asterisk/releases
 ASTERISK_UNZIP=zcat
 
-APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
+APP_FAX_SITE=https://agx-ast-addons.svn.sASTERISK_NAMEourceforge.net/svnroot/agx-ast-addons/trunk
 APP_FAX_REV=69
 
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
@@ -79,9 +81,9 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	ln -sf $(ASTERISK_DIR) $(ASTERISK_DIR_LINK)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(ASTERISK_PATCH)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs
 ifeq ($(strip $(SF_PACKAGE_LUA)),y)
