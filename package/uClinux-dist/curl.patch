@@ -1,9 +1,0 @@
---- uClinux-dist/lib/libcurl/Makefile	2010-04-11 19:58:13.000000000 +0300
-+++ uClinux-dist/lib/libcurl/Makefile	2010-04-11 19:58:00.000000000 +0300
-@@ -5,5 +5,5 @@
- include $(ROOTDIR)/tools/autotools.mk
- 
- romfs:
--	$(ROMFSINST) -d -e CONFIG_FMT_USE_FDPIC_ELF $(STAGEDIR)/usr/lib/libcurl.so.5 /usr/lib/libcurl.so.5
-+	$(ROMFSINST) -d -e CONFIG_FMT_USE_FDPIC_ELF $(STAGEDIR)/usr/lib/libcurl.so.4 /usr/lib/libcurl.so.4
- 	$(ROMFSINST) -d -e CONFIG_USER_CURL_CURL $(STAGEDIR)/usr/bin/curl /usr/bin/curl
