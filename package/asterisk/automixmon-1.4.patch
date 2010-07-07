@@ -122,9 +122,9 @@ Index: asterisk/include/asterisk/audiohook.h
   */
 Index: asterisk/res/res_features.c
 ===================================================================
---- asterisk/res/res_features.c	(revision 237062)
-+++ asterisk/res/res_features.c	(working copy)
-@@ -62,6 +62,7 @@
+--- asterisk/res/res_features.c	2010-04-22 14:49:07.000000000 -0700
++++ asterisk/res/res_features.c	2010-07-06 23:35:13.818104000 -0700
+@@ -64,6 +64,7 @@
  #include "asterisk/adsi.h"
  #include "asterisk/devicestate.h"
  #include "asterisk/monitor.h"
@@ -132,7 +132,15 @@ Index: asterisk/res/res_features.c
  #include "asterisk/global_datastores.h"
  
  #define DEFAULT_PARK_TIME 45000
-@@ -150,6 +151,12 @@
+@@ -107,6 +108,7 @@
+ static int parkedcallreparking;                            /*!< Who can PARKCALL after picking up a parked call */
+ static int parkedcallhangup;                               /*!< Who can DISCONNECT after picking up a parked call */
+ static int parkedcallrecording;                            /*!< Who can AUTOMON after picking up a parked call */
++static int parkedcallmixrecording;                         /*!< Who can AUTOMIXMON after picking up a parked call */
+ 
+ static char courtesytone[256];                             /*!< Courtesy tone */
+ static int parkedplay = 0;                                 /*!< Who to play the courtesy tone to */
+@@ -152,6 +154,12 @@
  static struct ast_app *monitor_app = NULL;
  static int monitor_ok = 1;
  
@@ -145,15 +153,16 @@ Index: asterisk/res/res_features.c
  struct parkeduser {
  	struct ast_channel *chan;                   /*!< Parking channel */
  	struct timeval start;                       /*!< Time the parking started */
-@@ -749,6 +756,118 @@
+@@ -756,6 +764,122 @@
  	return -1;
  }
  
 +static int builtin_automixmonitor(struct ast_channel *chan, struct ast_channel *peer, struct ast_bridge_config *config, char *code, int sense, void *data)
 +{
-+	char *caller_chan_id = NULL, *callee_chan_id = NULL, *args = NULL, *touch_filename = NULL;
++	char *caller_chan_id = NULL, *callee_chan_id = NULL, *args = NULL, *touch_filename = NULL, *outtime = NULL;
 +	int x = 0;
 +	size_t len;
++	time_t t;
 +	struct ast_channel *caller_chan, *callee_chan;
 +	const char *mixmonitor_spy_type = "MixMonitor";
 +	int count = 0;
@@ -229,15 +238,18 @@ Index: asterisk/res/res_features.c
 +			len = strlen(touch_monitor) + 50;
 +			args = alloca(len);
 +			touch_filename = alloca(len);
-+			snprintf(touch_filename, len, "%s", touch_monitor); //jason kenah - change file format for switchfin
++			snprintf(touch_filename, len, "%s", touch_monitor); 
 +			snprintf(args, len, "%s.%s", touch_filename, (touch_format) ? touch_format : "wav");
 +		} else {
++			t = time(NULL);
++			outtime = alloca(100);
 +			caller_chan_id = ast_strdupa(S_OR(caller_chan->cid.cid_num, caller_chan->name));
 +			callee_chan_id = ast_strdupa(S_OR(callee_chan->cid.cid_num, callee_chan->name));
-+			len = strlen(caller_chan_id) + strlen(callee_chan_id) + 50;
++			strftime(outtime, 100, "%Y%m%d-%H%M%S", localtime(&t));
++			len = strlen(caller_chan_id) + strlen(callee_chan_id) + strlen(outtime) + 50;
 +			args = alloca(len);
 +			touch_filename = alloca(len);
-+			snprintf(touch_filename, len, "auto-%ld-%s-%s", (long)time(NULL), caller_chan_id, callee_chan_id);
++			snprintf(touch_filename, len, "%s-%s-%s", caller_chan_id, callee_chan_id, outtime);
 +			snprintf(args, len, "%s.%s", touch_filename, S_OR(touch_format, "wav"));
 +		}
 +
@@ -264,13 +276,51 @@ Index: asterisk/res/res_features.c
  static int builtin_disconnect(struct ast_channel *chan, struct ast_channel *peer, struct ast_bridge_config *config, char *code, int sense, void *data)
  {
  	if (option_verbose > 3)
-@@ -1074,6 +1193,7 @@
+@@ -1114,6 +1238,7 @@
  	{ AST_FEATURE_AUTOMON, "One Touch Monitor", "automon", "", "", builtin_automonitor, AST_FEATURE_FLAG_NEEDSDTMF, "" },
  	{ AST_FEATURE_DISCONNECT, "Disconnect Call", "disconnect", "*", "*", builtin_disconnect, AST_FEATURE_FLAG_NEEDSDTMF, "" },
  	{ AST_FEATURE_PARKCALL, "Park Call", "parkcall", "", "", builtin_parkcall, AST_FEATURE_FLAG_NEEDSDTMF, "" },
 +	{ AST_FEATURE_AUTOMIXMON, "One Touch MixMonitor", "automixmon", "", "", builtin_automixmonitor, AST_FEATURE_FLAG_NEEDSDTMF, "" },
  };
  
+ 
+@@ -2652,6 +2777,12 @@
+ 		if ((parkedcallrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallrecording == AST_FEATURE_FLAG_BYBOTH)) {
+ 			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMON);
+ 		}
++		if ((parkedcallmixrecording == AST_FEATURE_FLAG_BYCALLEE) || (parkedcallmixrecording == AST_FEATURE_FLAG_BYBOTH)) {
++			ast_set_flag(&(config.features_callee), AST_FEATURE_AUTOMIXMON);
++		}
++		if ((parkedcallmixrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallmixrecording == AST_FEATURE_FLAG_BYBOTH)) {
++			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMIXMON);
++		}
+ 		res = ast_bridge_call(chan, peer, &config);
+ 
+ 		pbx_builtin_setvar_helper(chan, "PARKEDCHANNEL", peer->name);
+@@ -2946,6 +3077,7 @@
+ 	parkedcallreparking = 0;
+ 	parkedcallhangup = 0;
+ 	parkedcallrecording = 0;
++	parkedcallmixrecording = 0;
+ 
+ 	transferdigittimeout = DEFAULT_TRANSFER_DIGIT_TIMEOUT;
+ 	featuredigittimeout = DEFAULT_FEATURE_DIGIT_TIMEOUT;
+@@ -3014,6 +3146,15 @@
+ 				parkedcallrecording = AST_FEATURE_FLAG_BYCALLEE;
+ 			else if (!strcasecmp(var->value, "both"))
+ 				parkedcallrecording = AST_FEATURE_FLAG_BYBOTH;
++		} else if (!strcasecmp(var->name, "parkedcallmixrecording")) {
++			if (!strcasecmp(var->value, "no"))
++				parkedcallmixrecording = 0;
++			else if (!strcasecmp(var->value, "caller"))
++				parkedcallmixrecording = AST_FEATURE_FLAG_BYCALLER;
++			else if (!strcasecmp(var->value, "callee"))
++				parkedcallmixrecording = AST_FEATURE_FLAG_BYCALLEE;
++			else if (!strcasecmp(var->value, "both"))
++				parkedcallmixrecording = AST_FEATURE_FLAG_BYBOTH;
+ 		} else if (!strcasecmp(var->name, "adsipark")) {
+ 			adsipark = ast_true(var->value);
+ 		} else if (!strcasecmp(var->name, "transferdigittimeout")) {
  
 Index: main/audiohook.c
 ===================================================================
@@ -360,50 +410,3 @@ Index: main/audiohook.c
 +	return count;
 +}
 +
---- asterisk/res/res_features.c	2010-07-04 20:52:49.023319000 -0700
-+++ asterisk/res/res_features.c	2010-07-05 21:19:00.891817268 -0700
-@@ -108,6 +108,7 @@
- static int parkedcallreparking;                            /*!< Who can PARKCALL after picking up a parked call */
- static int parkedcallhangup;                               /*!< Who can DISCONNECT after picking up a parked call */
- static int parkedcallrecording;                            /*!< Who can AUTOMON after picking up a parked call */
-+static int parkedcallmixrecording;                         /*!< Who can AUTOMIXMON after picking up a parked call */
- 
- static char courtesytone[256];                             /*!< Courtesy tone */
- static int parkedplay = 0;                                 /*!< Who to play the courtesy tone to */
-@@ -2772,6 +2773,12 @@
- 		if ((parkedcallrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallrecording == AST_FEATURE_FLAG_BYBOTH)) {
- 			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMON);
- 		}
-+		if ((parkedcallmixrecording == AST_FEATURE_FLAG_BYCALLEE) || (parkedcallmixrecording == AST_FEATURE_FLAG_BYBOTH)) {
-+			ast_set_flag(&(config.features_callee), AST_FEATURE_AUTOMIXMON);
-+		}
-+		if ((parkedcallmixrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallmixrecording == AST_FEATURE_FLAG_BYBOTH)) {
-+			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMIXMON);
-+		}
- 		res = ast_bridge_call(chan, peer, &config);
- 
- 		pbx_builtin_setvar_helper(chan, "PARKEDCHANNEL", peer->name);
-@@ -3066,6 +3073,7 @@
- 	parkedcallreparking = 0;
- 	parkedcallhangup = 0;
- 	parkedcallrecording = 0;
-+	parkedcallmixrecording = 0;
- 
- 	transferdigittimeout = DEFAULT_TRANSFER_DIGIT_TIMEOUT;
- 	featuredigittimeout = DEFAULT_FEATURE_DIGIT_TIMEOUT;
-@@ -3134,6 +3142,15 @@
- 				parkedcallrecording = AST_FEATURE_FLAG_BYCALLEE;
- 			else if (!strcasecmp(var->value, "both"))
- 				parkedcallrecording = AST_FEATURE_FLAG_BYBOTH;
-+		} else if (!strcasecmp(var->name, "parkedcallmixrecording")) {
-+			if (!strcasecmp(var->value, "no"))
-+				parkedcallmixrecording = 0;
-+			else if (!strcasecmp(var->value, "caller"))
-+				parkedcallmixrecording = AST_FEATURE_FLAG_BYCALLER;
-+			else if (!strcasecmp(var->value, "callee"))
-+				parkedcallmixrecording = AST_FEATURE_FLAG_BYCALLEE;
-+			else if (!strcasecmp(var->value, "both"))
-+				parkedcallmixrecording = AST_FEATURE_FLAG_BYBOTH;
- 		} else if (!strcasecmp(var->name, "adsipark")) {
- 			adsipark = ast_true(var->value);
- 		} else if (!strcasecmp(var->name, "transferdigittimeout")) {
