@@ -15,7 +15,7 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
-mainmenu "Astfin Configuration"
+mainmenu "SwitchFin Configuration"
 
 config SF_HAVE_DOT_CONFIG
         bool

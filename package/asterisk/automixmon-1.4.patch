@@ -360,3 +360,50 @@ Index: main/audiohook.c
 +	return count;
 +}
 +
+--- asterisk/res/res_features.c	2010-07-04 20:52:49.023319000 -0700
++++ asterisk/res/res_features.c	2010-07-05 21:19:00.891817268 -0700
+@@ -108,6 +108,7 @@
+ static int parkedcallreparking;                            /*!< Who can PARKCALL after picking up a parked call */
+ static int parkedcallhangup;                               /*!< Who can DISCONNECT after picking up a parked call */
+ static int parkedcallrecording;                            /*!< Who can AUTOMON after picking up a parked call */
++static int parkedcallmixrecording;                         /*!< Who can AUTOMIXMON after picking up a parked call */
+ 
+ static char courtesytone[256];                             /*!< Courtesy tone */
+ static int parkedplay = 0;                                 /*!< Who to play the courtesy tone to */
+@@ -2772,6 +2773,12 @@
+ 		if ((parkedcallrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallrecording == AST_FEATURE_FLAG_BYBOTH)) {
+ 			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMON);
+ 		}
++		if ((parkedcallmixrecording == AST_FEATURE_FLAG_BYCALLEE) || (parkedcallmixrecording == AST_FEATURE_FLAG_BYBOTH)) {
++			ast_set_flag(&(config.features_callee), AST_FEATURE_AUTOMIXMON);
++		}
++		if ((parkedcallmixrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallmixrecording == AST_FEATURE_FLAG_BYBOTH)) {
++			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMIXMON);
++		}
+ 		res = ast_bridge_call(chan, peer, &config);
+ 
+ 		pbx_builtin_setvar_helper(chan, "PARKEDCHANNEL", peer->name);
+@@ -3066,6 +3073,7 @@
+ 	parkedcallreparking = 0;
+ 	parkedcallhangup = 0;
+ 	parkedcallrecording = 0;
++	parkedcallmixrecording = 0;
+ 
+ 	transferdigittimeout = DEFAULT_TRANSFER_DIGIT_TIMEOUT;
+ 	featuredigittimeout = DEFAULT_FEATURE_DIGIT_TIMEOUT;
+@@ -3134,6 +3142,15 @@
+ 				parkedcallrecording = AST_FEATURE_FLAG_BYCALLEE;
+ 			else if (!strcasecmp(var->value, "both"))
+ 				parkedcallrecording = AST_FEATURE_FLAG_BYBOTH;
++		} else if (!strcasecmp(var->name, "parkedcallmixrecording")) {
++			if (!strcasecmp(var->value, "no"))
++				parkedcallmixrecording = 0;
++			else if (!strcasecmp(var->value, "caller"))
++				parkedcallmixrecording = AST_FEATURE_FLAG_BYCALLER;
++			else if (!strcasecmp(var->value, "callee"))
++				parkedcallmixrecording = AST_FEATURE_FLAG_BYCALLEE;
++			else if (!strcasecmp(var->value, "both"))
++				parkedcallmixrecording = AST_FEATURE_FLAG_BYBOTH;
+ 		} else if (!strcasecmp(var->name, "adsipark")) {
+ 			adsipark = ast_true(var->value);
+ 		} else if (!strcasecmp(var->name, "transferdigittimeout")) {
