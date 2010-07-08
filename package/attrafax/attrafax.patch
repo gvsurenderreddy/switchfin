@@ -57,3 +57,341 @@
 +bfin-linux-uclibc-ar rv ../../${BINDIR}/libt30.a ${BIN_COMMON} ${TONE_COMMON} ${MODEMS} ${FAX_COMMON}
 +bfin-linux-uclibc-ranlib ../../${BINDIR}/libt30.a
  
+--- attrafax-0.9/compile.sh	2010-07-08 20:18:34.000000000 +0300
++++ attrafax-0.9/compile.sh	2010-07-08 20:17:55.000000000 +0300
+@@ -26,17 +26,17 @@
+ 		CC="/opt/sunstudio12.1/bin/cc"
+ 	fi
+ else
+-        CC="$CC -std=gnu99"
++        CC="$CC -std=gnu99 -save-temps"
+ fi
+ 
+ if [ -z "$CFLAGS" ]; then
+-	CFLAGS="-g"
++	CFLAGS="-g -save-temps"
+ fi
+ 
+ if [ `uname -s` = "SunOS" ]; then
+ 	CFLAGS="${CFLAGS} -KPIC -D_FILE_OFFSET_BITS=64 -xc99=all"
+ else
+-	CFLAGS="${CFLAGS} -Wall -Werror -fPIC -D_FILE_OFFSET_BITS=64"
++	CFLAGS="${CFLAGS} -Wall -Werror -fPIC -D_FILE_OFFSET_BITS=64 -save-temps"
+ fi
+ INCLUDE="-I../../include -I$1 $EXTINCLUDES"
+ BLIBS="-lm -lz -lssl -lcrypto"
+--- attrafax-0.9/include/internal/faxing/hdlc.h	2010-01-29 16:18:03.000000000 +0200
++++ attrafax-0.9/include/internal/faxing/hdlc.h	2010-07-08 20:17:55.000000000 +0300
+@@ -171,14 +171,14 @@
+ int hdlc_deframe(int *, unsigned char *, int, unsigned char *, int);
+ int hdlc_deframe_cp_bad(int *, unsigned char *, int, unsigned char *, int);
+ 
+-void hdlc_rx_init(hdlc_rx_state *, int, int, unsigned char *, int,
++void hdlc_rx_init1(hdlc_rx_state *, int, int, unsigned char *, int,
+ 		void *, hdlc_rx_handler_f);
+ int hdlc_rx_flags_received(hdlc_rx_state *);
+ void hdlc_rx_set_octen_handler(hdlc_rx_state *, octet_proc_f);
+ void hdlc_rx(void *, int);
+ int hdlc_rx_end(hdlc_rx_state *);
+ 
+-void hdlc_tx_init(hdlc_tx_state *, int, unsigned short *, int);
++void hdlc_tx_init1(hdlc_tx_state *, int, unsigned short *, int);
+ int hdlc_tx(void *);
+ 
+ void hdlc_dyntx_init(hdlc_tx_state *, int, unsigned short *, int *);
+--- attrafax-0.9/include/internal/faxing/t38.h	2010-01-29 16:18:03.000000000 +0200
++++ attrafax-0.9/include/internal/faxing/t38.h	2010-07-08 20:17:55.000000000 +0300
+@@ -75,7 +75,7 @@
+ 	hdlc_rx_state rxctrl;
+ 	hdlc_tx_state txctrl;
+ /* hdlc control */
+-	int hdlc_rx_init, hdlc_tx_init;
++	int hdlc_rx_init, hdlc_tx_init1;
+ /* ifp */
+ 	t38_ifp *ifp;
+ /*
+@@ -168,7 +168,7 @@
+ 	modem_t rxtxcmd;
+ 	hdlc_rx_state rxctrl;
+ 	hdlc_tx_state txctrl;
+-	int hdlc_rx_init, hdlc_tx_init;
++	int hdlc_rx_init, hdlc_tx_init1;
+ 	int flags_ind_tx;
+ 	int skip_frame, dis_detected, dis_counter;
+ 	int got_hdlc;
+--- attrafax-0.9/src/faxing/hdlc.c	2010-01-29 16:14:12.000000000 +0200
++++ attrafax-0.9/src/faxing/hdlc.c	2010-07-08 20:17:55.000000000 +0300
+@@ -86,6 +86,7 @@
+ 	unsigned short crc;
+ 	int j;
+ 
++	printf("inside hdlc_frame\n");
+ 	if (blen < (len+4)) return 0;
+ 	buf[0] = HDLC_ADDR;
+ 	buf[1] = HDLC_CTRL(final);
+@@ -99,7 +100,8 @@
+ 
+ int hdlc_deframe(int *final, unsigned char *data, int len,
+ 		unsigned char *buf, int blen) {
+-
++	
++	printf("inside hdlc_deframe\n");
+ 	if (len < 5) return 0;
+ 	if (blen < (len-4)) return 0;
+ 	if (data[0] != HDLC_ADDR) return 0;
+@@ -114,7 +116,8 @@
+ 
+ int hdlc_deframe_cp_bad(int *final, unsigned char *data, int len,
+ 		unsigned char *buf, int blen) {
+-
++	
++	printf("inside hdlc_deframe_cp_bad\n");
+ 	if (len < 5) return 0;
+ 	if (blen < (len-4)) return 0;
+ 	if (data[0] != HDLC_ADDR) return 0;
+@@ -126,8 +129,9 @@
+ 		return len-4;
+ 	} else return -len+4;
+ }
+-
+-void hdlc_tx_init(hdlc_tx_state *state, int prlen, unsigned short *buf, int len) {
++void hdlc_tx_init1(hdlc_tx_state *state, int prlen, unsigned short *buf, int len) {
++	
++	printf("inside hdlc_tx_init1\n");
+ 	bzero(state, sizeof (hdlc_tx_state));
+ 	state->cmdbuf = buf;
+ 	state->cmdlen = len;
+@@ -192,6 +196,8 @@
+ }
+ 
+ void hdlc_dyntx_init(hdlc_tx_state *state, int prlen, unsigned short *buf, int *len) {
++	
++	printf("inside hdlc_dyntx_init\n");
+ 	bzero(state, sizeof (hdlc_tx_state));
+ 	state->cmdbuf = buf;
+ 	state->dynlen = len;
+@@ -266,8 +272,10 @@
+ 	return;
+ }
+ 
+-void hdlc_rx_init(hdlc_rx_state *state, int ptres, int ftres, unsigned char *buf, int len,
++void hdlc_rx_init1(hdlc_rx_state *state, int ptres, int ftres, unsigned char *buf, int len,
+ 		void *context, hdlc_rx_handler_f handler) {
++	
++	printf("inside hdlc_rx_init1\n");
+ 	bzero(state, sizeof (hdlc_rx_state));
+ 	state->cmdbuf = buf;
+ 	state->cmdlen = len;
+--- attrafax-0.9/src/faxing/t30rx.c	2010-02-10 16:05:26.000000000 +0200
++++ attrafax-0.9/src/faxing/t30rx.c	2010-07-08 20:17:55.000000000 +0300
+@@ -105,7 +105,7 @@
+ 	actlog(state->log, "init_rxpreamble\n");
+ 	modem_rx_init(&state->rxtxcmd, MODEM_V21, &hdlc_rx, 1);
+ 	modem_rx_context(&state->rxtxcmd, &state->rxctrl);
+-	hdlc_rx_init(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
++	hdlc_rx_init1(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
+ 			state->cmdbuf, MAXCMD, state, &process_frame);
+ 	state->got_hdlc = 0;
+ 	return;
+@@ -116,7 +116,7 @@
+ 	modem_tx_init(&state->rxtxcmd, MODEM_V21, &hdlc_tx, 0);
+ 	modem_tx_context(&state->rxtxcmd, &state->txctrl);
+ /* 40 flags in the preamble, ~1s @ 300bps */
+-	hdlc_tx_init(&state->txctrl, 40, state->txcmdbuf, state->txcmdp);
++	hdlc_tx_init1(&state->txctrl, 40, state->txcmdbuf, state->txcmdp);
+ 	return;
+ }
+ 
+--- attrafax-0.9/src/faxing/t30tx.c	2010-02-10 16:05:26.000000000 +0200
++++ attrafax-0.9/src/faxing/t30tx.c	2010-07-08 20:17:55.000000000 +0300
+@@ -75,7 +75,7 @@
+ 	actlog(state->log, "init_rxpreamble\n");
+ 	modem_rx_init(&state->rxtxcmd, MODEM_V21, &hdlc_rx, 1);
+ 	modem_rx_context(&state->rxtxcmd, &state->rxctrl);
+-	hdlc_rx_init(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
++	hdlc_rx_init1(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
+ 			state->cmdbuf, MAXCMD, state, &process_frame);
+ 	state->got_hdlc = 0;
+ 	return;
+@@ -86,7 +86,7 @@
+ 	modem_tx_init(&state->rxtxcmd, MODEM_V21, &hdlc_tx, 0);
+ 	modem_tx_context(&state->rxtxcmd, &state->txctrl);
+ /* 40 flags in the preamble, ~1s @ 300bps */
+-	hdlc_tx_init(&state->txctrl, 40, state->txcmdbuf, state->txcmdp);
++	hdlc_tx_init1(&state->txctrl, 40, state->txcmdbuf, state->txcmdp);
+ 	if (state->sysmode != T30_T30) state->clear = 0;
+ 	return;
+ }
+@@ -398,7 +398,7 @@
+ 				return;
+ 			}
+ 			get_block(&state->ecm, &block, &bp);
+-			hdlc_tx_init(&state->ecmtx, 128, block, *bp);
++			hdlc_tx_init1(&state->ecmtx, 128, block, *bp);
+ 			init_txdoc_ecm(state);
+ 			state->txstate = T30_TX_DOC;
+ 			state->rxstate = T30_RX_IDLE;
+@@ -447,7 +447,7 @@
+ 		return;
+ 	}
+ 	get_block(&state->ecm, &block, &bp);
+-	hdlc_tx_init(&state->ecmtx, 128, block, *bp);
++	hdlc_tx_init1(&state->ecmtx, 128, block, *bp);
+ 	init_txdoc_ecm(state);
+ 	state->txstate = T30_TX_DOC;
+ 	state->rxstate = T30_RX_IDLE;
+@@ -523,7 +523,7 @@
+ 				return 1;
+ 			}
+ 			get_block(&state->ecm, &block, &bp);
+-			hdlc_tx_init(&state->ecmtx, 128, block, *bp);
++			hdlc_tx_init1(&state->ecmtx, 128, block, *bp);
+ 		}
+ 		init_txpreamble(state);
+ 		state->txstate = T30_TX_CTRL;
+@@ -537,7 +537,7 @@
+ 			return 1;
+ 		}
+ 		get_block(&state->ecm, &block, &bp);
+-		hdlc_tx_init(&state->ecmtx, 128, block, *bp);
++		hdlc_tx_init1(&state->ecmtx, 128, block, *bp);
+ 		init_txdoc_ecm(state);
+ 		state->txstate = T30_TX_DOC;
+ 		state->rxstate = T30_RX_IDLE;
+--- attrafax-0.9/src/faxing/t38_gate.c	2010-02-10 16:05:26.000000000 +0200
++++ attrafax-0.9/src/faxing/t38_gate.c	2010-07-08 20:17:55.000000000 +0300
+@@ -580,7 +580,7 @@
+ 	actlog(state->log, "init_rxpreamble\n");
+ 	modem_rx_init(&state->rxtxcmd, MODEM_V21, &hdlc_rx, 1);
+ 	modem_rx_context(&state->rxtxcmd, &state->rxctrl);
+-	hdlc_rx_init(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
++	hdlc_rx_init1(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
+ 			state->cmdbuf, MAXCMD, state, &process_frame);
+ 	hdlc_rx_set_octen_handler(&state->rxctrl, &octet_handler);
+ 	state->skip_frame = state->dis_detected = 0;
+@@ -978,7 +978,7 @@
+ 			}
+ /* we don't care about the prev. state anymore => initialise everything just to be on the safe side */
+ 			state->v21_preamble = 0;
+-			state->hdlc_rx_init = state->hdlc_tx_init = 0;
++			state->hdlc_rx_init = state->hdlc_tx_init1 = 0;
+ 			state->modem_indicator = -1;
+ 			state->doc_rx_init = state->doc_tx_init = state->tcf_rx_init = state->tcf_tx_init = 0;
+ 		}
+@@ -995,7 +995,7 @@
+ 			switch_state(state);
+ /* we don't care about the prev. state anymore => initialise everything just to be on the safe side */
+ 			state->v21_preamble = 0;
+-			state->hdlc_rx_init = state->hdlc_tx_init = 0;
++			state->hdlc_rx_init = state->hdlc_tx_init1 = 0;
+ 			state->modem_indicator = -1;
+ 			state->doc_rx_init = state->doc_tx_init = state->tcf_rx_init = state->tcf_tx_init = 0;
+ 		}
+@@ -1116,7 +1116,7 @@
+ 				actlog(state->log, "command received\n");
+ 				switch_state(state);
+ 			} else {
+-				hdlc_rx_init(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
++				hdlc_rx_init1(&state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
+ 						state->cmdbuf, MAXCMD, state, &process_frame);
+ 				hdlc_rx_set_octen_handler(&state->rxctrl, &octet_handler);
+ 				state->skip_frame = state->dis_detected = 0;
+@@ -1126,22 +1126,22 @@
+ 	case T38_GATE_TX_HDLC: /* transmit HDLC/V.21 to the PSTN line */
+ 		if (!state->v21_preamble) break; /* don't start anything unless a preamble is recv'ed */
+ 		if (check_timer(state->timer, &state->preamble_timer)) break; /* timer has not expired or has not been scheduled yet*/
+-		if (!state->hdlc_tx_init) { /* initialise the transmitter */
++		if (!state->hdlc_tx_init1) { /* initialise the transmitter */
+ 			init_txpreamble(state);
+-			state->hdlc_tx_init = 1;
++			state->hdlc_tx_init1 = 1;
+ 			actlog(state->log, "V.21 modem initialised for command transmission at %d\n", state->timer);
+ 			if (state->samples) fprintf(state->samples, "out_del_begin 65536\n");
+ 		}
+ 		if (state->ctrl_end) hdlc_dyntx_end(&state->txctrl);
+ 		if (state->ctrl_end && (!state->ctrl_ready)) { /* this is wrong. wait for the remote end to retransmit */
+ 			actlog(state->log, "T.38 HDLC error\n");
+-			state->v21_preamble = state->hdlc_tx_init = 0;
++			state->v21_preamble = state->hdlc_tx_init1 = 0;
+ 			break;
+ 		}
+ 		if ((l0 = modem_tx(&state->rxtxcmd, out, inlen)) < inlen) { /* command transmitted */
+ 			actlog(state->log, "command transmission end at %d\n", state->timer);
+ 			if (state->samples) fprintf(state->samples, "out_del_end 65536\n");
+-			state->v21_preamble = state->hdlc_tx_init = 0;
++			state->v21_preamble = state->hdlc_tx_init1 = 0;
+ 			cancel_timer(&state->preamble_timer);
+ 			if (state->dcn) {
+ 				set_next_state(state, T38_GATE_STATE_NULL);
+--- attrafax-0.9/src/faxing/t38_iaf.c	2010-01-29 16:14:12.000000000 +0200
++++ attrafax-0.9/src/faxing/t38_iaf.c	2010-07-08 20:17:55.000000000 +0300
+@@ -73,7 +73,7 @@
+ 	state->v21_preamble = 0;
+ 	state->from_fcs = 1;
+ 	state->ifp = (t38_ifp *) ifp;
+-	state->hdlc_rx_init = state->hdlc_tx_init = 0;
++	state->hdlc_rx_init = state->hdlc_tx_init1 = 0;
+ 	state->img_init = 0;
+ 	linit(&state->img);
+ 	
+--- attrafax-0.9/src/faxing/t38_modem.c	2010-02-10 16:05:26.000000000 +0200
++++ attrafax-0.9/src/faxing/t38_modem.c	2010-07-08 20:17:55.000000000 +0300
+@@ -93,7 +93,7 @@
+ void t38_modem_rx_reset(modem_t *state) {
+ 	t38_iaf *t38state = (t38_iaf *) state->t38context;
+ 
+-	t38state->hdlc_tx_init = 0;
++	t38state->hdlc_tx_init1 = 0;
+ 	return;
+ }
+ 
+@@ -201,7 +201,7 @@
+ 	if (state->modem_mode == MODEM_V21) { /* hdlc transmission */
+ 		if (!t38state->hdlc_rx_init) {
+ 			actlog(t38state->log, "t38_modem: t38_modem_tx: HDLC data tx\n");
+-			hdlc_rx_init(&t38state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
++			hdlc_rx_init1(&t38state->rxctrl, HDLC_FRAME_BEGIN_THRESHOLD, HDLC_FLAGS_TRESHOLD,
+ 					t38state->cmdbuf, MAXCMD, state, &process_frame);
+ 			hdlc_rx_set_octen_handler(&t38state->rxctrl, &octet_handler);
+ 			t38state->hdlc_rx_init = 1;
+@@ -313,10 +313,10 @@
+ 		}
+ 		if (!t38state->ctrl_ready) return len;
+ 		if (t38state->ctrl_end) {
+-			if (!t38state->hdlc_tx_init) {
++			if (!t38state->hdlc_tx_init1) {
+ /* 40 flags in the preamble, ~1s @ 300bps */
+-				hdlc_tx_init(&t38state->txctrl, 40, t38state->txcmdbuf, t38state->txcmdp);
+-				t38state->hdlc_tx_init = 1;
++				hdlc_tx_init1(&t38state->txctrl, 40, t38state->txcmdbuf, t38state->txcmdp);
++				t38state->hdlc_tx_init1 = 1;
+ 			}
+ 			do {
+ 				bit = hdlc_tx(&t38state->txctrl);
+@@ -324,7 +324,7 @@
+ 			} while (bit >= 0);
+ 			t38state->ctrl_end = 0;
+ 			t38state->ctrl_ready = 0;
+-			t38state->hdlc_tx_init = 0;
++			t38state->hdlc_tx_init1 = 0;
+ 			t38state->v21_preamble = 0;
+ 			for (t38state->txcmdp = 2, j = 0; j<MAXCMD; j++)
+ 				t38state->txcmdbuf[j] = HDLC_FLAG;
+--- attrafax-0.9/src/modems/v21rx.c	2010-01-29 16:14:12.000000000 +0200
++++ attrafax-0.9/src/modems/v21rx.c	2010-07-08 20:17:55.000000000 +0300
+@@ -85,11 +85,11 @@
+ 		if (!state->carrier) {
+ 			if (power > state->level_on) {
+ 				state->carrier = 1;
+-				fprintf(stderr, "CARRIER\n"); fflush(stderr);
++				fprintf(stderr, "V21: CARRIER\n"); fflush(stderr);
+ 			} else continue;
+ 		} else {
+ 			if (power < state->level_off) {
+-				fprintf(stderr, "NO CARRIER\n"); fflush(stderr);
++				fprintf(stderr, "V21: NO CARRIER\n"); fflush(stderr);
+ 				v21rx_init(state, state->putbit, (state->filter[0] == f_space2));
+ 				r = 0;
+ 				break;
+ 
+ 
