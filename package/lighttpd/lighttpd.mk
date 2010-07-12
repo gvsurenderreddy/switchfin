@@ -24,6 +24,7 @@ LIGHTTPD_SOURCE=$(LIGHTTPD_NAME).tar.gz
 LIGHTTPD_SITE=http://www.lighttpd.net/download
 LIGHTTPD_UNZIP=zcat
 LIGHTTPD_CONFIG=$(UCLINUX_KERNEL_SRC)/.config
+LUA_SRC=$(shell find $(BUILD_DIR)/uClinux-dist/user/lua -type d | grep /src)
 
 $(DL_DIR)/$(LIGHTTPD_SOURCE):
 	$(WGET) -P $(DL_DIR) $(LIGHTTPD_SITE)/$(LIGHTTPD_SOURCE)
@@ -34,19 +35,43 @@ $(LIGHTTPD_DIR)/.unpacked: $(DL_DIR)/$(LIGHTTPD_SOURCE)
 	touch $(LIGHTTPD_DIR)/.unpacked
 
 $(LIGHTTPD_DIR)/.configured: $(LIGHTTPD_DIR)/.unpacked
+ifneq ($(strip $(SF_PACKAGE_LUA)),y)
 	cd $(LIGHTTPD_DIR); \
 		./configure \
                 --host=bfin-linux-uclibc \
 		--build=i686-linux \
 		--disable-ipv6 \
 		--without-zlib \
-		--without-bzip2 \
-		--prefix=$(TARGET_DIR)
+		--without-bzip2
+else
+	cd $(LIGHTTPD_DIR); \
+                ./configure \
+                --host=bfin-linux-uclibc \
+                --build=i686-linux \
+                --disable-ipv6 \
+                --without-zlib \
+                --without-bzip2 \
+                --with-lua \
+                --prefix=$(TARGET_DIR) \
+                LUA_LIBS=$(LUA_SRC)/liblua.a LUA_CFLAGS=-I$(LUA_SRC)/
+
+endif
 	touch $(LIGHTTPD_DIR)/.configured
 
 lighttpd: $(LIGHTTPD_DIR)/.configured
 	$(MAKE) -C $(LIGHTTPD_DIR)
-	$(MAKE) -C $(LIGHTTPD_DIR) install
+	cp -vf $(LIGHTTPD_DIR)/src/lighttpd $(TARGET_DIR)/bin
+	cp -vf $(LIGHTTPD_DIR)/src/.libs/mod_access.so $(TARGET_DIR)/lib
+	cp -vf $(LIGHTTPD_DIR)/src/.libs/mod_cgi.so $(TARGET_DIR)/lib
+	-cp -vf $(LIGHTTPD_DIR)/src/.libs/mod_magnet.so $(TARGET_DIR)/lib
+	cp -vf $(LIGHTTPD_DIR)/src/.libs/mod_indexfile.so $(TARGET_DIR)/lib
+	cp -vf $(LIGHTTPD_DIR)/src/.libs/mod_dirlisting.so $(TARGET_DIR)/lib
+	cp -vf $(LIGHTTPD_DIR)/src/.libs/mod_staticfile.so $(TARGET_DIR)/lib
+	$(TARGET_STRIP) $(TARGET_DIR)/bin/lighttpd $(TARGET_DIR)/lib/mod_access.so \
+	$(TARGET_DIR)/lib/mod_cgi.so $(TARGET_DIR)/lib/mod_magnet.so \
+	$(TARGET_DIR)/lib/mod_indexfile.so $(TARGET_DIR)/lib/mod_dirlisting.so \
+	$(TARGET_DIR)/lib/mod_staticfile.so
+	-$(TARGET_STRIP) $(TARGET_DIR)/lib/mod_magnet.so
 	cp -vf package/lighttpd/lighttpd.conf $(TARGET_DIR)/etc
 
 lighttpd-configure: $(LIGHTTPD_DIR)/.configured
@@ -62,11 +87,20 @@ lighttpd-image:
 	mkdir -p $(TARGET_DIR)/etc/autorun
 	cp -fv package/lighttpd/lighttpd.sh $(TARGET_DIR)/etc/autorun
 	
+
+ifeq ($(strip $(SF_PACKAGE_LIGHTTPD)),y)
+lighttpd_: lighttpd 
+else
+lighttpd_:
+	rm -f $(TARGET_DIR)/bin/lighttpd
+	rm -f $(TARGET_DIR)/lib/mod_access.so $(TARGET_DIR)/lib/mod_cgi.so \
+	$(TARGET_DIR)/lib/mod_magnet.so $(TARGET_DIR)/lib/mod_indexfile.so \
+        $(TARGET_DIR)/lib/mod_dirlisting.so $(TARGET_DIR)/lib/mod_staticfile.so
+endif
+
 ################################################
 #
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_LIGHTTPD)),y)
-TARGETS+=lighttpd
-endif
+TARGETS+=lighttpd_
