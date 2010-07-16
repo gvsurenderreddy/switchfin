@@ -44,7 +44,7 @@ ASTERISK_SOURCE=$(ASTERISK_NAME).tar.gz
 ASTERISK_SITE=http://downloads.asterisk.org/pub/telephony/asterisk/releases
 ASTERISK_UNZIP=zcat
 
-APP_FAX_SITE=https://agx-ast-addons.svn.sASTERISK_NAMEourceforge.net/svnroot/agx-ast-addons/trunk
+APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
 APP_FAX_REV=69
 
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
