@@ -29,8 +29,11 @@ $(UW-IMAP_DIR)/.unpacked: $(DL_DIR)/$(UW-IMAP_SOURCE)
 	$(UW-IMAP_UNZIP) $(DL_DIR)/$(UW-IMAP_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	touch $(UW-IMAP_DIR)/.unpacked
 
-uw-imap: $(UW-IMAP_DIR)/.unpacked
+$(UW-IMAP_DIR)/.configured: $(UW-IMAP_DIR)/.unpacked
 	$(PATCH_KERNEL) $(UW-IMAP_DIR) package/uw-imap $(UW-IMAP_PATCH)
+	touch $(UW-IMAP_DIR)/.configured
+
+uw-imap: $(UW-IMAP_DIR)/.configured
 	$(MAKE) -C $(UW-IMAP_DIR) lnx IP=4 SSLTYPE=none CC=$(CC) LDFLAGS=$(LDFLAGS)
 
 uw-imap-clean:
