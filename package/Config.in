@@ -45,5 +45,6 @@ source "package/curl/Config.in"
 source "package/procwatch/Config.in"
 source "package/libtiff/Config.in"
 source "package/lua/Config.in"
+source "package/uw-imap/Config.in"
 endmenu
 

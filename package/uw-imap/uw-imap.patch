@@ -1,0 +1,141 @@
+diff -ru imap-2007e/Makefile imap-2007e/Makefile
+--- imap-2007e/Makefile	2008-06-04 11:43:35.000000000 -0700
++++ imap-2007e/Makefile	2010-07-17 03:13:02.186540202 -0700
+@@ -459,7 +459,7 @@
+ 	@echo You are building for traditional Linux.  Most modern Linux
+ 	@echo systems require that you build using make slx.
+ 	@echo Do you want to continue this build?  Type y or n please:
+-	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
++	#@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) exit 1;; esac'
+ 	@echo OK, I will remember that you really want to build for
+ 	@echo traditional Linux.  You will not see this message again.
+ 	@echo If you discover that you can not log in to the POP and IMAP
+@@ -602,7 +602,7 @@
+ 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 	@echo
+ 	@echo Do you want to continue this build anyway?  Type y or n please:
+-	@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) (make nonossl;exit 1);; esac'
++	#@$(SH) -c 'read x; case "$$x" in y) exit 0;; *) (make nonossl;exit 1);; esac'
+ 
+ nonossl:
+ 	@echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+diff -ru imap-2007e/src/dmail/Makefile imap-2007e/src/dmail/Makefile
+--- imap-2007e/src/dmail/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/dmail/Makefile	2010-07-17 03:10:25.878576650 -0700
+@@ -33,10 +33,10 @@
+ 
+ CC = `cat $C/CCTYPE`
+ CFLAGS = -I$C `cat $C/CFLAGS`
+-LDFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
++LFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
+ 
+ dmail: $(CCLIENTLIB) dmail.o dquota.o
+-	$(CC) $(CFLAGS) -o dmail dmail.o dquota.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o dmail dmail.o dquota.o $(LFLAGS)
+ 
+ dmail.o: $C/mail.h $C/misc.h $C/osdep.h dquota.h
+ 
+diff -ru imap-2007e/src/imapd/Makefile imap-2007e/src/imapd/Makefile
+--- imap-2007e/src/imapd/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/imapd/Makefile	2010-07-17 03:10:25.878576650 -0700
+@@ -48,12 +48,12 @@
+ CFLAGS = -I$C `cat $C/CFLAGS` $(NSBD) $(ENBD) -DANOFILE=\"$(ANO)\" \
+ 	-DALERTFILE=\"$(ALERT)\" -DNNTPFILE=\"$(NNTP)\" \
+ 	-DUSERALERTFILE=\"$(USERALERT)\" -DSHUTDOWNFILE=\"$(SHUTDOWN)\"
+-LDFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
++LFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
+ 
+ all:	imapd
+ 
+ imapd: $(CCLIENTLIB) imapd.o
+-	$(CC) $(CFLAGS) -o imapd imapd.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o imapd imapd.o $(LFLAGS)
+ 
+ imapd.o: $C/mail.h $C/misc.h $C/osdep.h
+ 
+diff -ru imap-2007e/src/ipopd/Makefile imap-2007e/src/ipopd/Makefile
+--- imap-2007e/src/ipopd/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/ipopd/Makefile	2010-07-17 03:10:25.894475205 -0700
+@@ -33,15 +33,15 @@
+ 
+ CC = `cat $C/CCTYPE`
+ CFLAGS = -I$C `cat $C/CFLAGS`
+-LDFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
++LFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
+ 
+ ipopd: ipop2d ipop3d
+ 
+ ipop2d: $(CCLIENTLIB) ipop2d.o
+-	$(CC) $(CFLAGS) -o ipop2d ipop2d.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o ipop2d ipop2d.o $(LFLAGS)
+ 
+ ipop3d: $(CCLIENTLIB) ipop3d.o
+-	$(CC) $(CFLAGS) -o ipop3d ipop3d.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o ipop3d ipop3d.o $(LFLAGS)
+ 
+ ipop2d.o: $C/mail.h $C/misc.h $C/osdep.h
+ 
+diff -ru imap-2007e/src/mailutil/Makefile imap-2007e/src/mailutil/Makefile
+--- imap-2007e/src/mailutil/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/mailutil/Makefile	2010-07-17 03:10:25.894475205 -0700
+@@ -33,10 +33,10 @@
+ 
+ CC = `cat $C/CCTYPE`
+ CFLAGS = -I$C `cat $C/CFLAGS`
+-LDFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
++LFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
+ 
+ mailutil: $(CCLIENTLIB) mailutil.o
+-	$(CC) $(CFLAGS) -o mailutil mailutil.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o mailutil mailutil.o $(LFLAGS)
+ 
+ mailutil.o: $C/mail.h $C/misc.h $C/osdep.h
+ 
+diff -ru imap-2007e/src/mtest/Makefile imap-2007e/src/mtest/Makefile
+--- imap-2007e/src/mtest/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/mtest/Makefile	2010-07-17 03:10:25.894475205 -0700
+@@ -33,12 +33,12 @@
+ 
+ CC = `cat $C/CCTYPE`
+ CFLAGS = -I$C `cat $C/CFLAGS`
+-LDFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
++LFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
+ 
+ all:	mtest
+ 
+ mtest: $(CCLIENTLIB) mtest.o
+-	$(CC) $(CFLAGS) -o mtest mtest.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o mtest mtest.o $(LFLAGS)
+ 
+ mtest.o: $C/mail.h $C/misc.h $C/osdep.h $C/rfc822.h $C/smtp.h $C/nntp.h
+ 
+diff -ru imap-2007e/src/osdep/unix/Makefile imap-2007e/src/osdep/unix/Makefile
+--- imap-2007e/src/osdep/unix/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/osdep/unix/Makefile	2010-07-17 03:10:25.906775615 -0700
+@@ -502,7 +502,8 @@
+ 	 SPOOLDIR=/var/spool \
+ 	 ACTIVEFILE=/var/lib/news/active \
+ 	 RSHPATH=/usr/bin/rsh \
+-	 BASECFLAGS="$(GCCCFLAGS)"
++	 BASECFLAGS="$(GCCCFLAGS)" \
++	 BASELDFLAGS="-lcrypt"
+ 
+ lyn:	# LynxOS
+ 	$(BUILD) `$(CAT) SPECIALS` OS=$@ \
+diff -ru imap-2007e/src/tmail/Makefile imap-2007e/src/tmail/Makefile
+--- imap-2007e/src/tmail/Makefile	2008-06-04 11:18:34.000000000 -0700
++++ imap-2007e/src/tmail/Makefile	2010-07-17 03:10:25.906775615 -0700
+@@ -33,10 +33,10 @@
+ 
+ CC = `cat $C/CCTYPE`
+ CFLAGS = -I$C `cat $C/CFLAGS`
+-LDFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
++LFLAGS = $(CCLIENTLIB) `cat $C/LDFLAGS`
+ 
+ tmail: $(CCLIENTLIB) tmail.o tquota.o
+-	$(CC) $(CFLAGS) -o tmail tmail.o tquota.o $(LDFLAGS)
++	$(CC) $(CFLAGS) -o tmail tmail.o tquota.o $(LFLAGS)
+ 
+ tmail.o: $C/mail.h $C/misc.h $C/osdep.h tquota.h
+ 
+Only in build_ip04/imap-2007e: .unpacked
