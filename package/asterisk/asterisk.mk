@@ -110,6 +110,10 @@ ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
 else
 	cp -v package/asterisk/$(ASTERISK_MAKEOPTS).makeopts $(ASTERISK_DIR)/menuselect.makeopts
 endif
+
+ifeq ($(strip $(SF_PACKAGE_UW-IMAP)),y)
+	sed 's/MENUSELECT_OPTS_app_voicemail=/MENUSELECT_OPTS_app_voicemail=IMAP_STORAGE/' $(ASTERISK_DIR)/menuselect.makeopts
+endif
 	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
