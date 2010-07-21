@@ -88,4 +88,12 @@ config SF_PACKAGE_NVFAX
 		'fax' extension. If a period of non-silence greater than 'mindur' ms, 
 		yet less than 'maxdur' ms is followed by silence at least 'sildur' ms 
 		then the app is aborted and jumps to the 'talk' extension. 
-		If all undetected, control will continue at the next priority. 
+		If all undetected, control will continue at the next priority.
+
+config SF_PACKAGE_DEVSTATE
+        bool "Devstate for Asterisk 1.4"
+        default n
+        depends SF_ASTERISK_1_4
+        help
+		The DEVICE_STATE function can be used to retrieve the device state from any device state provider.
+		is the current way to get a devices state.  

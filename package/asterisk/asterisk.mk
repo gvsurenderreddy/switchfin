@@ -96,6 +96,9 @@ ifeq ($(strip $(SF_PACKAGE_LUA)),y)
 	ln -sf $(SOURCES_DIR)/lua/pbx_lua.c $(ASTERISK_DIR)/pbx
 	ln -sf $(SOURCES_DIR)/lua/hashtab.h $(ASTERISK_DIR)/include/asterisk/
 endif
+ifeq ($(strip $(SF_PACKAGE_DEVSTATE)),y)
+	ln -sf $(SOURCES_DIR)/asterisk/func_devstate.c $(ASTERISK_DIR)/funcs		
+endif
 	touch $(ASTERISK_DIR)/.asterisk.1.4
 else
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
