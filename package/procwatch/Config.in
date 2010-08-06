@@ -14,6 +14,6 @@
 
 config SF_PACKAGE_PROCWATCH
 	bool "Procwatch"
-	default n
+	default y
 	help
 		Watches process and revives if needed
