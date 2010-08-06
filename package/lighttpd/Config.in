@@ -14,7 +14,6 @@
 
 config SF_PACKAGE_LIGHTTPD
 	bool "lighttpd"
-	depends (!SF_PACKAGE_ASTERISKGUI && !SF_PACKAGE_VOIPTEL-GUI)
-	default y
+	default n
 	help
 		Light Web Server
