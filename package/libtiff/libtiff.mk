@@ -38,6 +38,9 @@ libtiff: $(LIBTIFF_DIR)/.configured
 ifeq ($(strip $(SF_PACKAGE_TIFF2PDF)),y)
 	cp -f $(LIBTIFF_DIR)/tools/.libs/tiff2pdf $(TARGET_DIR)/bin/
 endif
+ifeq ($(strip $(SF_PACKAGE_FAX2TIFF)),y)
+	cp -f $(LIBTIFF_DIR)/tools/.libs/fax2tiff $(TARGET_DIR)/bin/
+endif
 
 
 	cp -f $(LIBTIFF_DIR)/libtiff/.libs/libtiff.so.3 $(TARGET_DIR)/lib
