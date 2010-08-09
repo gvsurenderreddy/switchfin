@@ -17,9 +17,3 @@ config SF_PACKAGE_TIFF2PDF
 	default n
 	help
 		Add Tiff to PDF support
-
-config SF_PACKAGE_FAX2TIFF
-	bool "FAX2TIFF"
-	default n
-	help
-		Used to convert attrafax files to tiff

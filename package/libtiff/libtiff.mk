@@ -35,11 +35,14 @@ libtiff: $(LIBTIFF_DIR)/.configured
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffconf.h $(STAGING_DIR)/usr/include/
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffio.h $(STAGING_DIR)/usr/include/
 	cp -f $(LIBTIFF_DIR)/libtiff/tiffvers.h $(STAGING_DIR)/usr/include/
+
 ifeq ($(strip $(SF_PACKAGE_TIFF2PDF)),y)
 	cp -f $(LIBTIFF_DIR)/tools/.libs/tiff2pdf $(TARGET_DIR)/bin/
 endif
-ifeq ($(strip $(SF_PACKAGE_FAX2TIFF)),y)
+
+ifeq ($(strip $(SF_PACKAGE_ATTRAFAX)),y)
 	cp -f $(LIBTIFF_DIR)/tools/.libs/fax2tiff $(TARGET_DIR)/bin/
+	cp -f $(LIBTIFF_DIR)/tools/.libs/tiffcp $(TARGET_DIR)/bin/
 endif
 
 

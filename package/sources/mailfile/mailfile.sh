@@ -38,24 +38,43 @@ echo '' >> $tmpfile
 echo $body | sed 's/\/n/\n/g' >> $tmpfile
 echo '' >> $tmpfile
 
+#find fax encoding
+if echo $1*g3|grep 2D >/dev/null; then
+	sz=2
+else
+	sz=1
+fi
+
+#convert to tiff files
+for i in $1*g3; do 
+	fax2tiff -3 -$sz -o $i.tiff $i
+	rm -f $i
+done
+
+#combine tiff files
+tiffcp $1*.tiff /tmp/$1.tiff
+rm -f $1*tiff
+
 #tiff file
 echo '--------------060502030501040302050009' >> $tmpfile
 if [ "$3" == "pdf" ] && [ -f "/bin/tiff2pdf" ]; then
-  echo 'Content-Type: image/'$3';' >> $tmpfile
-  echo ' name="'${1%.*}'.'pdf'"' >> $tmpfile
+  echo 'Content-Type: application/'$3';' >> $tmpfile
+  echo ' name="'$1'.'pdf'"' >> $tmpfile
   echo 'Content-Transfer-Encoding: base64' >> $tmpfile
   echo 'Content-Disposition: attachment;' >> $tmpfile
-  echo ' filename="'${1%.*}'.'pdf'"' >> $tmpfile
-  tiff2pdf $1 -c "SwitchFin PBX" -o ${1%.*}.pdf
-  uuencode -m ${1%.*}.pdf ${1%.*}.pdf | sed '1d$d' >> $tmpfile
-  rm ${1%.*}.pdf
+  echo ' filename="'$1.pdf'"' >> $tmpfile
+  tiff2pdf /tmp/$1.tiff -c "SwitchFin PBX" -o /tmp/$1.pdf
+  echo '' >> $tmpfile
+  uuencode -m /tmp/$1.pdf /tmp/$1.pdf | sed '1d$d' >> $tmpfile
+  rm /tmp/$1.pdf
 else
   echo 'Content-Type: image/tiff;' >> $tmpfile
   echo ' name="'$1'"' >> $tmpfile
   echo 'Content-Transfer-Encoding: base64' >> $tmpfile
   echo 'Content-Disposition: attachment;' >> $tmpfile
-  echo ' filename="'$1'"' >> $tmpfile
-  uuencode -m $1 $1 | sed '1d$d' >> $tmpfile 
+  echo ' filename="'$1.tiff'"' >> $tmpfile
+  echo '' >> $tmpfile
+  uuencode -m /tmp/$1.tiff /tmp/$1.tiff | sed '1d$d' >> $tmpfile 
 fi
 
 #email footer
@@ -67,4 +86,4 @@ cat $tmpfile | ssmtp $2
 
 #clean the tiff and tmp file
 rm $tmpfile
-rm $1
+rm /tmp/$1.tiff
