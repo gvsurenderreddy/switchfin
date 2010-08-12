@@ -68,7 +68,7 @@ romfs::
 	#gzip -dc defaults.tgz | ( cd $(ROMFSDIR) ; tar xvf - )
 	#gzip -dc mini-sounds.tgz | ( cd $(ROMFSDIR)/var/lib/asterisk/sounds ; tar xvf - )
 
-	echo "`svnversion $(ROMFSDIR)/../../ | cut -d: -f2 | tr -d [:alpha:]` -- `date`" > $(ROMFSDIR)/etc/version	
+	echo "rev. `svnversion $(ROMFSDIR)/../../ | cut -d: -f2 | tr -d [:alpha:]` -- `date`" > $(ROMFSDIR)/etc/version
 ifeq ($(CONFIG_BLACKFIN_INSTALL_UCLINUX_CONFIG),y)
 	gzip -9c $(ROOTDIR)/config/.config > $(ROMFSDIR)/root/uclinux-config.gz
 endif
