@@ -143,65 +143,6 @@
  	depends on MTD_NAND_BF5XX
  	help
  	  Enable the use of the BF5XX's internal ECC generator when
---- uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2010-04-19 00:30:50.000000000 +0300
-+++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2010-04-19 00:31:53.000000000 +0300
-@@ -33,6 +33,7 @@
- #include <linux/delay.h>
- #include <linux/platform_device.h>
- #include <linux/irq.h>
-+#include <linux/string.h>
- 
- #include <asm/delay.h>
- #include <asm/irq.h>
-@@ -1184,6 +1185,9 @@
- 	int iosize;
- 	int i;
- 	u32 id_val;
-+	char *ptr = NULL;
-+	char *ptr_end;
-+	char ethaddr[17];
- 
- 	/* Init network device */
- 	ndev = alloc_etherdev(sizeof(struct board_info));
-@@ -1296,7 +1300,7 @@
- #endif
- 
- 	dm9000_reset(db);
--
-+	
- 	/* try multiple times, DM9000 sometimes gets the read wrong */
- 	for (i = 0; i < 8; i++) {
- 		id_val  = ior(db, DM9000_VIDL);
-@@ -1378,6 +1382,29 @@
- 			ndev->dev_addr[i] = ior(db, i+DM9000_PAR);
- 	}
- 
-+
-+        if (!is_valid_ether_addr(ndev->dev_addr)) {
-+                /* try reading from boot command line */
-+		
-+                mac_src = "command line";
-+		
-+		if(pdev->id==0)
-+			ptr = strstr(boot_command_line, "ethaddr=");
-+		else
-+			ptr = strstr(boot_command_line, "thaddr1=");
-+
-+		if(ptr){	
-+			memcpy(ethaddr, ptr + 8, 17 * sizeof(char));
-+               		printk(KERN_INFO "ethaddr parsed from commandline: %s\n", ethaddr);
-+               		ptr_end = ethaddr;
-+               		for (i = 0; i < 6; i++) {
-+                       		ndev->dev_addr[i] = simple_strtol(ptr_end, &ptr_end, 16) |  
-+					  simple_strtol(ptr_end, &ptr_end, 16) <<4;
-+				ptr_end++; /* skip ":" in  ethaddr */
-+			}
-+        	}
-+	}
-+
- 	if (!is_valid_ether_addr(ndev->dev_addr))
- 		dev_warn(db->dev, "%s: Invalid ethernet MAC address. Please "
- 			 "set using ifconfig\n", ndev->name);
 --- uClinux-dist/linux-2.6.x/arch//blackfin/mach-bf533/boards/Kconfig_orig	2010-05-05 13:05:41.000000000 +0300
 +++ uClinux-dist/linux-2.6.x/arch//blackfin/mach-bf533/boards/Kconfig	2010-05-05 13:06:23.000000000 +0300
 @@ -4,37 +4,37 @@
@@ -270,3 +211,117 @@
  	help
  	  Core support for IP04/IP04 open hardware IP-PBX.
  
+--- uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2009-01-08 10:58:03.000000000 +0200
++++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2010-08-12 15:51:32.000000000 +0300
+@@ -33,6 +33,7 @@
+ #include <linux/delay.h>
+ #include <linux/platform_device.h>
+ #include <linux/irq.h>
++#include <linux/string.h>
+ 
+ #include <asm/delay.h>
+ #include <asm/irq.h>
+@@ -758,7 +759,10 @@
+ 	if (db->tx_pkt_cnt > 1)
+ 		return 1;
+ 
+-	spin_lock_irqsave(&db->lock, flags);
++//	spin_lock_irqsave(&db->lock, flags);
++	netif_stop_queue(dev);
++	/* Disable all interrupts */
++	iow(db, DM9000_IMR, IMR_PAR);
+ 
+ 	/* Move data to DM9000 TX RAM */
+ 	writeb(DM9000_MWCMD, db->io_addr);
+@@ -783,11 +787,17 @@
+ 		netif_stop_queue(dev);
+ 	}
+ 
+-	spin_unlock_irqrestore(&db->lock, flags);
++//	spin_unlock_irqrestore(&db->lock, flags);
+ 
+ 	/* free this SKB */
+ 	dev_kfree_skb(skb);
+ 
++	/* Re-enable resource check */
++	if (db->tx_pkt_cnt == 1)
++		netif_wake_queue(dev);
++
++	/* Re-enable interrupt */
++	iow(db, DM9000_IMR, IMR_PAR | IMR_PTM | IMR_PRM);
+ 	return 0;
+ }
+ 
+@@ -931,12 +941,13 @@
+ 	board_info_t *db = dev->priv;
+ 	int int_status;
+ 	u8 reg_save;
++	unsigned long flags;
+ 
+ 	dm9000_dbg(db, 3, "entering %s\n", __func__);
+ 
+ 	/* A real interrupt coming */
+ 
+-	spin_lock(&db->lock);
++	spin_lock_irqsave(&db->lock, flags);
+ 
+ 	/* Save previous register address */
+ 	reg_save = readb(db->io_addr);
+@@ -972,7 +983,7 @@
+ 	/* Restore previous register address */
+ 	writeb(reg_save, db->io_addr);
+ 
+-	spin_unlock(&db->lock);
++	spin_unlock_irqrestore(&db->lock, flags);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -1184,6 +1195,9 @@
+ 	int iosize;
+ 	int i;
+ 	u32 id_val;
++	char *ptr = NULL;
++	char *ptr_end;
++	char ethaddr[17];
+ 
+ 	/* Init network device */
+ 	ndev = alloc_etherdev(sizeof(struct board_info));
+@@ -1296,7 +1310,7 @@
+ #endif
+ 
+ 	dm9000_reset(db);
+-
++	
+ 	/* try multiple times, DM9000 sometimes gets the read wrong */
+ 	for (i = 0; i < 8; i++) {
+ 		id_val  = ior(db, DM9000_VIDL);
+@@ -1378,6 +1392,29 @@
+ 			ndev->dev_addr[i] = ior(db, i+DM9000_PAR);
+ 	}
+ 
++
++        if (!is_valid_ether_addr(ndev->dev_addr)) {
++                /* try reading from boot command line */
++		
++                mac_src = "command line";
++		
++		if(pdev->id==0)
++			ptr = strstr(boot_command_line, "ethaddr=");
++		else
++			ptr = strstr(boot_command_line, "thaddr1=");
++
++		if(ptr){	
++			memcpy(ethaddr, ptr + 8, 17 * sizeof(char));
++               		printk(KERN_INFO "ethaddr parsed from commandline: %s\n", ethaddr);
++               		ptr_end = ethaddr;
++               		for (i = 0; i < 6; i++) {
++                       		ndev->dev_addr[i] = simple_strtol(ptr_end, &ptr_end, 16) |  
++					  simple_strtol(ptr_end, &ptr_end, 16) <<4;
++				ptr_end++; /* skip ":" in  ethaddr */
++			}
++        	}
++	}
++
+ 	if (!is_valid_ether_addr(ndev->dev_addr))
+ 		dev_warn(db->dev, "%s: Invalid ethernet MAC address. Please "
+ 			 "set using ifconfig\n", ndev->name);
