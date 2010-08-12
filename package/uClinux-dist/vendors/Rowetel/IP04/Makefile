@@ -6,8 +6,6 @@
 include $(LINUX_CONFIG)
 include $(CONFIG_CONFIG)
 
-VERSIONSTR=UI2.20
-
 ROMFS_DIRS-y = bin etc etc/dhcpc home lib mnt mnt/mmc proc sys usr var root home tmp var/run var/lib/misc persistent
 ROMFS_DIRS-y += var/run/asterisk var/log var/lock var/lib var/lib/asterisk/sounds var/tmp
 ROMFS_DIRS-y +=  var/lib/asterisk/static-http var/spool var/spool/asterisk var/spool/asterisk/outgoing
@@ -51,8 +49,8 @@ romfs::
 	for f in $(WEB_FILES-y) ; do \
 		$(ROMFSINST) ../common/$$f /home/httpd/$$f ; \
 	done
-
-	echo "$(VERSIONSTR) -- `date`" > $(ROMFSDIR)/etc/version
+		
+	echo "`svnversion $(ROMFSDIR)/../../ | cut -d: -f2 | tr -d [:alpha:]` -- `date`" > $(ROMFSDIR)/etc/version
 ifeq ($(CONFIG_BLACKFIN_INSTALL_UCLINUX_CONFIG),y)
 	gzip -9c $(ROOTDIR)/config/.config > $(ROMFSDIR)/root/uclinux-config.gz
 	gzip -9c $(ROOTDIR)/.config > $(ROMFSDIR)/root/vendor-board-config.gz
