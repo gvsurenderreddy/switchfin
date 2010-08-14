@@ -79,9 +79,9 @@
  int getrate(int);
  float getunit(float);
  
-diff -ur attrafax-0.9/include/internal/common/eq.h attrafax-0.9-fxp/include/internal/common/eq.h
+diff -ur attrafax-0.9/include/internal/common/eq.h attrafax-0.9fxp/include/internal/common/eq.h
 --- attrafax-0.9/include/internal/common/eq.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/common/eq.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/common/eq.h	2010-08-04 23:42:22.000000000 +0300
 @@ -33,18 +33,19 @@
  #define EQ_NP_MAX 31
  
@@ -108,10 +108,10 @@ diff -ur attrafax-0.9/include/internal/common/eq.h attrafax-0.9-fxp/include/inte
  void eq_setd(eq_state *, float);
  
  #endif
-Only in attrafax-0.9-fxp/include/internal/common: fastmath.h
-diff -ur attrafax-0.9/include/internal/faxing/hdlc.h attrafax-0.9-fxp/include/internal/faxing/hdlc.h
+Only in attrafax-0.9fxp/include/internal/common: fastmath.h
+diff -ur attrafax-0.9/include/internal/faxing/hdlc.h attrafax-0.9fxp/include/internal/faxing/hdlc.h
 --- attrafax-0.9/include/internal/faxing/hdlc.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/faxing/hdlc.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/faxing/hdlc.h	2010-08-04 23:42:22.000000000 +0300
 @@ -171,14 +171,14 @@
  int hdlc_deframe(int *, unsigned char *, int, unsigned char *, int);
  int hdlc_deframe_cp_bad(int *, unsigned char *, int, unsigned char *, int);
@@ -129,9 +129,9 @@ diff -ur attrafax-0.9/include/internal/faxing/hdlc.h attrafax-0.9-fxp/include/in
  int hdlc_tx(void *);
  
  void hdlc_dyntx_init(hdlc_tx_state *, int, unsigned short *, int *);
-diff -ur attrafax-0.9/include/internal/faxing/t38.h attrafax-0.9-fxp/include/internal/faxing/t38.h
+diff -ur attrafax-0.9/include/internal/faxing/t38.h attrafax-0.9fxp/include/internal/faxing/t38.h
 --- attrafax-0.9/include/internal/faxing/t38.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/faxing/t38.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/faxing/t38.h	2010-08-04 23:42:22.000000000 +0300
 @@ -75,7 +75,7 @@
  	hdlc_rx_state rxctrl;
  	hdlc_tx_state txctrl;
@@ -150,9 +150,9 @@ diff -ur attrafax-0.9/include/internal/faxing/t38.h attrafax-0.9-fxp/include/int
  	int flags_ind_tx;
  	int skip_frame, dis_detected, dis_counter;
  	int got_hdlc;
-diff -ur attrafax-0.9/include/internal/modems/stage.h attrafax-0.9-fxp/include/internal/modems/stage.h
+diff -ur attrafax-0.9/include/internal/modems/stage.h attrafax-0.9fxp/include/internal/modems/stage.h
 --- attrafax-0.9/include/internal/modems/stage.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/modems/stage.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/modems/stage.h	2010-08-04 23:42:22.000000000 +0300
 @@ -29,7 +29,7 @@
  #include "internal/common/complex.h"
  
@@ -162,9 +162,9 @@ diff -ur attrafax-0.9/include/internal/modems/stage.h attrafax-0.9-fxp/include/i
  
  static const rxstage_f FAILURE = (rxstage_f)-1;
  static const rxstage_f PARK = (rxstage_f)-2;
-diff -ur attrafax-0.9/include/internal/modems/v17slicer.h attrafax-0.9-fxp/include/internal/modems/v17slicer.h
+diff -ur attrafax-0.9/include/internal/modems/v17slicer.h attrafax-0.9fxp/include/internal/modems/v17slicer.h
 --- attrafax-0.9/include/internal/modems/v17slicer.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/modems/v17slicer.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/modems/v17slicer.h	2010-08-04 23:42:22.000000000 +0300
 @@ -27,6 +27,6 @@
  
  #include "internal/common/complex.h"
@@ -173,9 +173,9 @@ diff -ur attrafax-0.9/include/internal/modems/v17slicer.h attrafax-0.9-fxp/inclu
 +int slicer(int, complexi);
  
  #endif
-diff -ur attrafax-0.9/include/internal/modems/v17txrx.h attrafax-0.9-fxp/include/internal/modems/v17txrx.h
+diff -ur attrafax-0.9/include/internal/modems/v17txrx.h attrafax-0.9fxp/include/internal/modems/v17txrx.h
 --- attrafax-0.9/include/internal/modems/v17txrx.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/modems/v17txrx.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/modems/v17txrx.h	2010-08-04 23:42:22.000000000 +0300
 @@ -81,13 +81,13 @@
  	v17_sstate scr, dscr;
  	v17_dstate diff;
@@ -201,9 +201,9 @@ diff -ur attrafax-0.9/include/internal/modems/v17txrx.h attrafax-0.9-fxp/include
  } v17rx_state;
  
  int v17rx(v17rx_state *, const signed short *, int);
-diff -ur attrafax-0.9/include/internal/modems/v17v29rxfilter.h attrafax-0.9-fxp/include/internal/modems/v17v29rxfilter.h
+diff -ur attrafax-0.9/include/internal/modems/v17v29rxfilter.h attrafax-0.9fxp/include/internal/modems/v17v29rxfilter.h
 --- attrafax-0.9/include/internal/modems/v17v29rxfilter.h	2010-01-29 16:18:03.000000000 +0200
-+++ attrafax-0.9-fxp/include/internal/modems/v17v29rxfilter.h	2010-08-04 23:42:22.000000000 +0300
++++ attrafax-0.9fxp/include/internal/modems/v17v29rxfilter.h	2010-08-04 23:42:22.000000000 +0300
 @@ -1,9 +1,9 @@
  
  
@@ -15077,3 +15077,2006 @@ diff -ur attrafax-0.9/include/internal/modems/v17v29rxfilter.h attrafax-0.9-fxp/
  	for (j=0; j<_V27TERCONST_ALEN; j++) state->ang[j] = 0.0f;
  	state->p = 0;
  	
+--- attrafax-0.9/include/internal/common/complex.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/common/complex.h	2010-08-14 11:17:32.000000000 +0300
+@@ -51,6 +51,7 @@
+ 
+ #define mkz(Re, Im)		{ (Re), (Im) }
+ #define Re1			mkz(1.0f, 0.0f)
++#define Re1i                    mkz(1024, 1024)
+ #define Im1			mkz(0.0f, 1.0f)
+ #define C0			mkz(0.0f, 0.0f)
+ #define C0i			mkz(0, 0)
+--- attrafax-0.9/include/internal/common/cval.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/common/cval.h	2010-08-14 11:19:25.000000000 +0300
+@@ -32,6 +32,7 @@
+ 
+ #ifdef _USE_CVAL_R1
+ static complex _Cr1 = Re1;
++static complexi _Cr1i = Re1i;
+ #endif
+ 
+ #ifdef _USE_CVAL_C0
+--- attrafax-0.9/include/internal/modems/stage.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/stage.h	2010-08-14 12:46:07.000000000 +0300
+@@ -18,6 +18,10 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+@@ -28,7 +32,7 @@
+ 
+ #include "internal/common/complex.h"
+ 
+-typedef complex (*txstage_f)(void *);
++typedef complexi (*txstage_f)(void *);
+ typedef int (*rxstage_f)(void *, complexi);
+ 
+ static const rxstage_f FAILURE = (rxstage_f)-1;
+--- attrafax-0.9/include/internal/modems/v17constellation.h	2010-01-29 16:18:03.000000000 +0200
++++ attrafax-0.9/include/internal/modems/v17constellation.h	2010-08-14 12:46:42.000000000 +0300
+@@ -18,265 +18,269 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+-
+ #ifndef _V17CONSTELLATION_
+ #define _V17CONSTELLATION_
+ 
+ #include "internal/common/complex.h"
+ 
+-static const complex constellation14400[128] = {
+-	mkz(-8.0f, -3.0f),
+-	mkz(9.0f, 2.0f),
+-	mkz(2.0f, -9.0f),
+-	mkz(-3.0f, 8.0f),
+-	mkz(8.0f, 3.0f),
+-	mkz(-9.0f, -2.0f),
+-	mkz(-2.0f, 9.0f),
+-	mkz(3.0f, -8.0f),
+-	mkz(-8.0f, 1.0f),
+-	mkz(9.0f, -2.0f),
+-	mkz(-2.0f, -9.0f),
+-	mkz(1.0f, 8.0f),
+-	mkz(8.0f, -1.0f),
+-	mkz(-9.0f, 2.0f),
+-	mkz(2.0f, 9.0f),
+-	mkz(-1.0f, -8.0f),
+-	mkz(-4.0f, -3.0f),
+-	mkz(5.0f, 2.0f),
+-	mkz(2.0f, -5.0f),
+-	mkz(-3.0f, 4.0f),
+-	mkz(4.0f, 3.0f),
+-	mkz(-5.0f, -2.0f),
+-	mkz(-2.0f, 5.0f),
+-	mkz(3.0f, -4.0f),
+-	mkz(-4.0f, 1.0f),
+-	mkz(5.0f, -2.0f),
+-	mkz(-2.0f, -5.0f),
+-	mkz(1.0f, 4.0f),
+-	mkz(4.0f, -1.0f),
+-	mkz(-5.0f, 2.0f),
+-	mkz(2.0f, 5.0f),
+-	mkz(-1.0f, -4.0f),
+-	mkz(4.0f, -3.0f),
+-	mkz(-3.0f, 2.0f),
+-	mkz(2.0f, 3.0f),
+-	mkz(-3.0f, -4.0f),
+-	mkz(-4.0f, 3.0f),
+-	mkz(3.0f, -2.0f),
+-	mkz(-2.0f, -3.0f),
+-	mkz(3.0f, 4.0f),
+-	mkz(4.0f, 1.0f),
+-	mkz(-3.0f, -2.0f),
+-	mkz(-2.0f, 3.0f),
+-	mkz(1.0f, -4.0f),
+-	mkz(-4.0f, -1.0f),
+-	mkz(3.0f, 2.0f),
+-	mkz(2.0f, -3.0f),
+-	mkz(-1.0f, 4.0f),
+-	mkz(0.0f, -3.0f),
+-	mkz(1.0f, 2.0f),
+-	mkz(2.0f, -1.0f),
+-	mkz(-3.0f, 0.0f),
+-	mkz(0.0f, 3.0f),
+-	mkz(-1.0f, -2.0f),
+-	mkz(-2.0f, 1.0f),
+-	mkz(3.0f, 0.0f),
+-	mkz(0.0f, 1.0f),
+-	mkz(1.0f, -2.0f),
+-	mkz(-2.0f, -1.0f),
+-	mkz(1.0f, 0.0f),
+-	mkz(0.0f, -1.0f),
+-	mkz(-1.0f, 2.0f),
+-	mkz(2.0f, 1.0f),
+-	mkz(-1.0f, 0.0f),
+-	mkz(8.0f, -3.0f),
+-	mkz(-7.0f, 2.0f),
+-	mkz(2.0f, 7.0f),
+-	mkz(-3.0f, -8.0f),
+-	mkz(-8.0f, 3.0f),
+-	mkz(7.0f, -2.0f),
+-	mkz(-2.0f, -7.0f),
+-	mkz(3.0f, 8.0f),
+-	mkz(8.0f, 1.0f),
+-	mkz(-7.0f, -2.0f),
+-	mkz(-2.0f, 7.0f),
+-	mkz(1.0f, -8.0f),
+-	mkz(-8.0f, -1.0f),
+-	mkz(7.0f, 2.0f),
+-	mkz(2.0f, -7.0f),
+-	mkz(-1.0f, 8.0f),
+-	mkz(-4.0f, -7.0f),
+-	mkz(5.0f, 6.0f),
+-	mkz(6.0f, -5.0f),
+-	mkz(-7.0f, 4.0f),
+-	mkz(4.0f, 7.0f),
+-	mkz(-5.0f, -6.0f),
+-	mkz(-6.0f, 5.0f),
+-	mkz(7.0f, -4.0f),
+-	mkz(-4.0f, 5.0f),
+-	mkz(5.0f, -6.0f),
+-	mkz(-6.0f, -5.0f),
+-	mkz(5.0f, 4.0f),
+-	mkz(4.0f, -5.0f),
+-	mkz(-5.0f, 6.0f),
+-	mkz(6.0f, 5.0f),
+-	mkz(-5.0f, -4.0f),
+-	mkz(4.0f, -7.0f),
+-	mkz(-3.0f, 6.0f),
+-	mkz(6.0f, 3.0f),
+-	mkz(-7.0f, -4.0f),
+-	mkz(-4.0f, 7.0f),
+-	mkz(3.0f, -6.0f),
+-	mkz(-6.0f, -3.0f),
+-	mkz(7.0f, 4.0f),
+-	mkz(4.0f, 5.0f),
+-	mkz(-3.0f, -6.0f),
+-	mkz(-6.0f, 3.0f),
+-	mkz(5.0f, -4.0f),
+-	mkz(-4.0f, -5.0f),
+-	mkz(3.0f, 6.0f),
+-	mkz(6.0f, -3.0f),
+-	mkz(-5.0f, 4.0f),
+-	mkz(0.0f, -7.0f),
+-	mkz(1.0f, 6.0f),
+-	mkz(6.0f, -1.0f),
+-	mkz(-7.0f, 0.0f),
+-	mkz(0.0f, 7.0f),
+-	mkz(-1.0f, -6.0f),
+-	mkz(-6.0f, 1.0f),
+-	mkz(7.0f, 0.0f),
+-	mkz(0.0f, 5.0f),
+-	mkz(1.0f, -6.0f),
+-	mkz(-6.0f, -1.0f),
+-	mkz(5.0f, 0.0f),
+-	mkz(0.0f, -5.0f),
+-	mkz(-1.0f, 6.0f),
+-	mkz(6.0f, 1.0f),
+-	mkz(-5.0f, 0.0f)
++//FxP: constelations scaled 2^10
++static const complexi constellation14400[128] = {
++	mkz(-8.0*1024, -3.0*1024),
++	mkz(9.0*1024, 2.0*1024),
++	mkz(2.0*1024, -9.0*1024),
++	mkz(-3.0*1024, 8.0*1024),
++	mkz(8.0*1024, 3.0*1024),
++	mkz(-9.0*1024, -2.0*1024),
++	mkz(-2.0*1024, 9.0*1024),
++	mkz(3.0*1024, -8.0*1024),
++	mkz(-8.0*1024, 1.0*1024),
++	mkz(9.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -9.0*1024),
++	mkz(1.0*1024, 8.0*1024),
++	mkz(8.0*1024, -1.0*1024),
++	mkz(-9.0*1024, 2.0*1024),
++	mkz(2.0*1024, 9.0*1024),
++	mkz(-1.0*1024, -8.0*1024),
++	mkz(-4.0*1024, -3.0*1024),
++	mkz(5.0*1024, 2.0*1024),
++	mkz(2.0*1024, -5.0*1024),
++	mkz(-3.0*1024, 4.0*1024),
++	mkz(4.0*1024, 3.0*1024),
++	mkz(-5.0*1024, -2.0*1024),
++	mkz(-2.0*1024, 5.0*1024),
++	mkz(3.0*1024, -4.0*1024),
++	mkz(-4.0*1024, 1.0*1024),
++	mkz(5.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -5.0*1024),
++	mkz(1.0*1024, 4.0*1024),
++	mkz(4.0*1024, -1.0*1024),
++	mkz(-5.0*1024, 2.0*1024),
++	mkz(2.0*1024, 5.0*1024),
++	mkz(-1.0*1024, -4.0*1024),
++	mkz(4.0*1024, -3.0*1024),
++	mkz(-3.0*1024, 2.0*1024),
++	mkz(2.0*1024, 3.0*1024),
++	mkz(-3.0*1024, -4.0*1024),
++	mkz(-4.0*1024, 3.0*1024),
++	mkz(3.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -3.0*1024),
++	mkz(3.0*1024, 4.0*1024),
++	mkz(4.0*1024, 1.0*1024),
++	mkz(-3.0*1024, -2.0*1024),
++	mkz(-2.0*1024, 3.0*1024),
++	mkz(1.0*1024, -4.0*1024),
++	mkz(-4.0*1024, -1.0*1024),
++	mkz(3.0*1024, 2.0*1024),
++	mkz(2.0*1024, -3.0*1024),
++	mkz(-1.0*1024, 4.0*1024),
++	mkz(0.0*1024, -3.0*1024),
++	mkz(1.0*1024, 2.0*1024),
++	mkz(2.0*1024, -1.0*1024),
++	mkz(-3.0*1024, 0.0*1024),
++	mkz(0.0*1024, 3.0*1024),
++	mkz(-1.0*1024, -2.0*1024),
++	mkz(-2.0*1024, 1.0*1024),
++	mkz(3.0*1024, 0.0*1024),
++	mkz(0.0*1024, 1.0*1024),
++	mkz(1.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -1.0*1024),
++	mkz(1.0*1024, 0.0*1024),
++	mkz(0.0*1024, -1.0*1024),
++	mkz(-1.0*1024, 2.0*1024),
++	mkz(2.0*1024, 1.0*1024),
++	mkz(-1.0*1024, 0.0*1024),
++	mkz(8.0*1024, -3.0*1024),
++	mkz(-7.0*1024, 2.0*1024),
++	mkz(2.0*1024, 7.0*1024),
++	mkz(-3.0*1024, -8.0*1024),
++	mkz(-8.0*1024, 3.0*1024),
++	mkz(7.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -7.0*1024),
++	mkz(3.0*1024, 8.0*1024),
++	mkz(8.0*1024, 1.0*1024),
++	mkz(-7.0*1024, -2.0*1024),
++	mkz(-2.0*1024, 7.0*1024),
++	mkz(1.0*1024, -8.0*1024),
++	mkz(-8.0*1024, -1.0*1024),
++	mkz(7.0*1024, 2.0*1024),
++	mkz(2.0*1024, -7.0*1024),
++	mkz(-1.0*1024, 8.0*1024),
++	mkz(-4.0*1024, -7.0*1024),
++	mkz(5.0*1024, 6.0*1024),
++	mkz(6.0*1024, -5.0*1024),
++	mkz(-7.0*1024, 4.0*1024),
++	mkz(4.0*1024, 7.0*1024),
++	mkz(-5.0*1024, -6.0*1024),
++	mkz(-6.0*1024, 5.0*1024),
++	mkz(7.0*1024, -4.0*1024),
++	mkz(-4.0*1024, 5.0*1024),
++	mkz(5.0*1024, -6.0*1024),
++	mkz(-6.0*1024, -5.0*1024),
++	mkz(5.0*1024, 4.0*1024),
++	mkz(4.0*1024, -5.0*1024),
++	mkz(-5.0*1024, 6.0*1024),
++	mkz(6.0*1024, 5.0*1024),
++	mkz(-5.0*1024, -4.0*1024),
++	mkz(4.0*1024, -7.0*1024),
++	mkz(-3.0*1024, 6.0*1024),
++	mkz(6.0*1024, 3.0*1024),
++	mkz(-7.0*1024, -4.0*1024),
++	mkz(-4.0*1024, 7.0*1024),
++	mkz(3.0*1024, -6.0*1024),
++	mkz(-6.0*1024, -3.0*1024),
++	mkz(7.0*1024, 4.0*1024),
++	mkz(4.0*1024, 5.0*1024),
++	mkz(-3.0*1024, -6.0*1024),
++	mkz(-6.0*1024, 3.0*1024),
++	mkz(5.0*1024, -4.0*1024),
++	mkz(-4.0*1024, -5.0*1024),
++	mkz(3.0*1024, 6.0*1024),
++	mkz(6.0*1024, -3.0*1024),
++	mkz(-5.0*1024, 4.0*1024),
++	mkz(0.0*1024, -7.0*1024),
++	mkz(1.0*1024, 6.0*1024),
++	mkz(6.0*1024, -1.0*1024),
++	mkz(-7.0*1024, 0.0*1024),
++	mkz(0.0*1024, 7.0*1024),
++	mkz(-1.0*1024, -6.0*1024),
++	mkz(-6.0*1024, 1.0*1024),
++	mkz(7.0*1024, 0.0*1024),
++	mkz(0.0*1024, 5.0*1024),
++	mkz(1.0*1024, -6.0*1024),
++	mkz(-6.0*1024, -1.0*1024),
++	mkz(5.0*1024, 0.0*1024),
++	mkz(0.0*1024, -5.0*1024),
++	mkz(-1.0*1024, 6.0*1024),
++	mkz(6.0*1024, 1.0*1024),
++	mkz(-5.0*1024, 0.0*1024)
+ };
+ 
+-static const complex constellation12000[64] = {
+-	mkz(7.0f, 1.0f),
+-	mkz(-5.0f, -1.0f),
+-	mkz(-1.0f, 5.0f),
+-	mkz(1.0f, -7.0f),
+-	mkz(-7.0f, -1.0f),
+-	mkz(5.0f, 1.0f),
+-	mkz(1.0f, -5.0f),
+-	mkz(-1.0f, 7.0f),
+-	mkz(3.0f, -3.0f),
+-	mkz(-1.0f, 3.0f),
+-	mkz(3.0f, 1.0f),
+-	mkz(-3.0f, -3.0f),
+-	mkz(-3.0f, 3.0f),
+-	mkz(1.0f, -3.0f),
+-	mkz(-3.0f, -1.0f),
+-	mkz(3.0f, 3.0f),
+-	mkz(7.0f, -7.0f),
+-	mkz(-5.0f, 7.0f),
+-	mkz(7.0f, 5.0f),
+-	mkz(-7.0f, -7.0f),
+-	mkz(-7.0f, 7.0f),
+-	mkz(5.0f, -7.0f),
+-	mkz(-7.0f, -5.0f),
+-	mkz(7.0f, 7.0f),
+-	mkz(-1.0f, -7.0f),
+-	mkz(3.0f, 7.0f),
+-	mkz(7.0f, -3.0f),
+-	mkz(-7.0f, 1.0f),
+-	mkz(1.0f, 7.0f),
+-	mkz(-3.0f, -7.0f),
+-	mkz(-7.0f, 3.0f),
+-	mkz(7.0f, -1.0f),
+-	mkz(3.0f, 5.0f),
+-	mkz(-1.0f, -5.0f),
+-	mkz(-5.0f, 1.0f),
+-	mkz(5.0f, -3.0f),
+-	mkz(-3.0f, -5.0f),
+-	mkz(1.0f, 5.0f),
+-	mkz(5.0f, -1.0f),
+-	mkz(-5.0f, 3.0f),
+-	mkz(-1.0f, 1.0f),
+-	mkz(3.0f, -1.0f),
+-	mkz(-1.0f, -3.0f),
+-	mkz(1.0f, 1.0f),
+-	mkz(1.0f, -1.0f),
+-	mkz(-3.0f, 1.0f),
+-	mkz(1.0f, 3.0f),
+-	mkz(-1.0f, -1.0f),
+-	mkz(-5.0f, 5.0f),
+-	mkz(7.0f, -5.0f),
+-	mkz(-5.0f, -7.0f),
+-	mkz(5.0f, 5.0f),
+-	mkz(5.0f, -5.0f),
+-	mkz(-7.0f, 5.0f),
+-	mkz(5.0f, 7.0f),
+-	mkz(-5.0f, -5.0f),
+-	mkz(-5.0f, -3.0f),
+-	mkz(7.0f, 3.0f),
+-	mkz(3.0f, -7.0f),
+-	mkz(-3.0f, 5.0f),
+-	mkz(5.0f, 3.0f),
+-	mkz(-7.0f, -3.0f),
+-	mkz(-3.0f, 7.0f),
+-	mkz(3.0f, -5.0f),
++static const complexi constellation12000[64] = {
++	mkz(7.0*1024, 1.0*1024),
++	mkz(-5.0*1024, -1.0*1024),
++	mkz(-1.0*1024, 5.0*1024),
++	mkz(1.0*1024, -7.0*1024),
++	mkz(-7.0*1024, -1.0*1024),
++	mkz(5.0*1024, 1.0*1024),
++	mkz(1.0*1024, -5.0*1024),
++	mkz(-1.0*1024, 7.0*1024),
++	mkz(3.0*1024, -3.0*1024),
++	mkz(-1.0*1024, 3.0*1024),
++	mkz(3.0*1024, 1.0*1024),
++	mkz(-3.0*1024, -3.0*1024),
++	mkz(-3.0*1024, 3.0*1024),
++	mkz(1.0*1024, -3.0*1024),
++	mkz(-3.0*1024, -1.0*1024),
++	mkz(3.0*1024, 3.0*1024),
++	mkz(7.0*1024, -7.0*1024),
++	mkz(-5.0*1024, 7.0*1024),
++	mkz(7.0*1024, 5.0*1024),
++	mkz(-7.0*1024, -7.0*1024),
++	mkz(-7.0*1024, 7.0*1024),
++	mkz(5.0*1024, -7.0*1024),
++	mkz(-7.0*1024, -5.0*1024),
++	mkz(7.0*1024, 7.0*1024),
++	mkz(-1.0*1024, -7.0*1024),
++	mkz(3.0*1024, 7.0*1024),
++	mkz(7.0*1024, -3.0*1024),
++	mkz(-7.0*1024, 1.0*1024),
++	mkz(1.0*1024, 7.0*1024),
++	mkz(-3.0*1024, -7.0*1024),
++	mkz(-7.0*1024, 3.0*1024),
++	mkz(7.0*1024, -1.0*1024),
++	mkz(3.0*1024, 5.0*1024),
++	mkz(-1.0*1024, -5.0*1024),
++	mkz(-5.0*1024, 1.0*1024),
++	mkz(5.0*1024, -3.0*1024),
++	mkz(-3.0*1024, -5.0*1024),
++	mkz(1.0*1024, 5.0*1024),
++	mkz(5.0*1024, -1.0*1024),
++	mkz(-5.0*1024, 3.0*1024),
++	mkz(-1.0*1024, 1.0*1024),
++	mkz(3.0*1024, -1.0*1024),
++	mkz(-1.0*1024, -3.0*1024),
++	mkz(1.0*1024, 1.0*1024),
++	mkz(1.0*1024, -1.0*1024),
++	mkz(-3.0*1024, 1.0*1024),
++	mkz(1.0*1024, 3.0*1024),
++	mkz(-1.0*1024, -1.0*1024),
++	mkz(-5.0*1024, 5.0*1024),
++	mkz(7.0*1024, -5.0*1024),
++	mkz(-5.0*1024, -7.0*1024),
++	mkz(5.0*1024, 5.0*1024),
++	mkz(5.0*1024, -5.0*1024),
++	mkz(-7.0*1024, 5.0*1024),
++	mkz(5.0*1024, 7.0*1024),
++	mkz(-5.0*1024, -5.0*1024),
++	mkz(-5.0*1024, -3.0*1024),
++	mkz(7.0*1024, 3.0*1024),
++	mkz(3.0*1024, -7.0*1024),
++	mkz(-3.0*1024, 5.0*1024),
++	mkz(5.0*1024, 3.0*1024),
++	mkz(-7.0*1024, -3.0*1024),
++	mkz(-3.0*1024, 7.0*1024),
++	mkz(3.0*1024, -5.0*1024),
+ };
+ 
+-static const complex constellation9600[32] = {
+-	mkz(-8.0f, 2.0f),
+-	mkz(-6.0f, -4.0f),
+-	mkz(-4.0f, 6.0f),
+-	mkz(2.0f, 8.0f),
+-	mkz(8.0f, -2.0f),
+-	mkz(6.0f, 4.0f),
+-	mkz(4.0f, -6.0f),
+-	mkz(-2.0f, -8.0f),
+-	mkz(0.0f, 2.0f),
+-	mkz(-6.0f, 4.0f),
+-	mkz(4.0f, 6.0f),
+-	mkz(2.0f, 0.0f),
+-	mkz(0.0f, -2.0f),
+-	mkz(6.0f, -4.0f),
+-	mkz(-4.0f, -6.0f),
+-	mkz(-2.0f, 0.0f),
+-	mkz(0.0f, -6.0f),
+-	mkz(2.0f, -4.0f),
+-	mkz(-4.0f, -2.0f),
+-	mkz(-6.0f, 0.0f),
+-	mkz(0.0f, 6.0f),
+-	mkz(-2.0f, 4.0f),
+-	mkz(4.0f, 2.0f),
+-	mkz(6.0f, 0.0f),
+-	mkz(8.0f, 2.0f),
+-	mkz(2.0f, 4.0f),
+-	mkz(4.0f, -2.0f),
+-	mkz(2.0f, -8.0f),
+-	mkz(-8.0f, -2.0f),
+-	mkz(-2.0f, -4.0f),
+-	mkz(-4.0f, 2.0f),
+-	mkz(-2.0f, 8.0f)
++static const complexi constellation9600[32] = {
++	mkz(-8.0*1024, 2.0*1024),
++	mkz(-6.0*1024, -4.0*1024),
++	mkz(-4.0*1024, 6.0*1024),
++	mkz(2.0*1024, 8.0*1024),
++	mkz(8.0*1024, -2.0*1024),
++	mkz(6.0*1024, 4.0*1024),
++	mkz(4.0*1024, -6.0*1024),
++	mkz(-2.0*1024, -8.0*1024),
++	mkz(0.0*1024, 2.0*1024),
++	mkz(-6.0*1024, 4.0*1024),
++	mkz(4.0*1024, 6.0*1024),
++	mkz(2.0*1024, 0.0*1024),
++	mkz(0.0*1024, -2.0*1024),
++	mkz(6.0*1024, -4.0*1024),
++	mkz(-4.0*1024, -6.0*1024),
++	mkz(-2.0*1024, 0.0*1024),
++	mkz(0.0*1024, -6.0*1024),
++	mkz(2.0*1024, -4.0*1024),
++	mkz(-4.0*1024, -2.0*1024),
++	mkz(-6.0*1024, 0.0*1024),
++	mkz(0.0*1024, 6.0*1024),
++	mkz(-2.0*1024, 4.0*1024),
++	mkz(4.0*1024, 2.0*1024),
++	mkz(6.0*1024, 0.0*1024),
++	mkz(8.0*1024, 2.0*1024),
++	mkz(2.0*1024, 4.0*1024),
++	mkz(4.0*1024, -2.0*1024),
++	mkz(2.0*1024, -8.0*1024),
++	mkz(-8.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -4.0*1024),
++	mkz(-4.0*1024, 2.0*1024),
++	mkz(-2.0*1024, 8.0*1024)
+ };
+ 
+-static const complex constellation7200[16] = {
+-	mkz(6.0f, -6.0f),
+-	mkz(-2.0f, 6.0f),
+-	mkz(6.0f, 2.0f),
+-	mkz(-6.0f, -6.0f),
+-	mkz(-6.0f, 6.0f),
+-	mkz(2.0f, -6.0f),
+-	mkz(-6.0f, -2.0f),
+-	mkz(6.0f, 6.0f),
+-	mkz(-2.0f, 2.0f),
+-	mkz(6.0f, -2.0f),
+-	mkz(-2.0f, -6.0f),
+-	mkz(2.0f, 2.0f),
+-	mkz(2.0f, -2.0f),
+-	mkz(-6.0f, 2.0f),
+-	mkz(2.0f, 6.0f),
+-	mkz(-2.0f, -2.0f)
++static const complexi constellation7200[16] = {
++	mkz(6.0*1024, -6.0*1024),
++	mkz(-2.0*1024, 6.0*1024),
++	mkz(6.0*1024, 2.0*1024),
++	mkz(-6.0*1024, -6.0*1024),
++	mkz(-6.0*1024, 6.0*1024),
++	mkz(2.0*1024, -6.0*1024),
++	mkz(-6.0*1024, -2.0*1024),
++	mkz(6.0*1024, 6.0*1024),
++	mkz(-2.0*1024, 2.0*1024),
++	mkz(6.0*1024, -2.0*1024),
++	mkz(-2.0*1024, -6.0*1024),
++	mkz(2.0*1024, 2.0*1024),
++	mkz(2.0*1024, -2.0*1024),
++	mkz(-6.0*1024, 2.0*1024),
++	mkz(2.0*1024, 6.0*1024),
++	mkz(-2.0*1024, -2.0*1024)
+ };
+ 
+ #endif
+--- attrafax-0.9/include/internal/modems/v17slicer.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v17slicer.h	2010-08-14 12:47:23.000000000 +0300
+@@ -18,10 +18,13 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+-
+ #ifndef _V17SLICER_
+ #define _V17SLICER_
+ 
+--- attrafax-0.9/include/internal/modems/v17txrx.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v17txrx.h	2010-08-14 12:43:08.000000000 +0300
+@@ -18,6 +18,10 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+@@ -58,9 +62,9 @@
+ 	v17_dstate diff;
+ 	int pacc, ph, ploop;
+ 	float gain;
+-	complex fbuf[_V17CONST_FLEN];
++	complexi fbuf[_V17CONST_FLEN]; //FxP: values scaled 2^10
+ 	int p;
+-	complex baud;
++	complexi baud; //FxP: value scaled 2^10
+ 	getbit_f getbit;
+ 	void *context;
+ } v17tx_state;
+--- attrafax-0.9/include/internal/modems/v17v29rxfilter.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v17v29rxfilter.h	2010-08-14 14:02:33.000000000 +0300
+@@ -34,7 +34,7 @@
+ #define L       144
+ 
+ //FxP filter scaled to fit in 2^14
+-static const float f[N*L+1] = {
++static const int f[N*L+1] = {
+ 35,
+ 34,
+ 33,
+--- attrafax-0.9/include/internal/modems/v17v29txfilter.h	2010-01-29 16:18:03.000000000 +0200
++++ attrafax-0.9/include/internal/modems/v17v29txfilter.h	2010-08-14 12:43:54.000000000 +0300
+@@ -17,54 +17,59 @@
+  *
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ * Foundation, Inc, 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+ 
+ #define DN	41
+-#define dfGAIN	9.9302558521e+00f
++#define dfGAIN	162697 //FxP: scaled 2^14
+ 
+-static float df[DN] = {
+-	4.2441325942e-02f,
+-	4.0254818594e-02f,
+-	2.6718191327e-02f,
+-	1.3810230973e-03f,
+-	-3.3946159035e-02f,
+-	-7.5026365057e-02f,
+-	-1.1540978635e-01f,
+-	-1.4703962978e-01f,
+-	-1.6119996251e-01f,
+-	-1.4969513265e-01f,
+-	-1.0610329554e-01f,
+-	-2.6921409040e-02f,
+-	8.7578756558e-02f,
+-	2.3293328640e-01f,
+-	4.0060122847e-01f,
+-	5.7863247521e-01f,
+-	7.5282865047e-01f,
+-	9.0826274029e-01f,
+-	1.0309661086e+00f,
+-	1.1095611787e+00f,
+-	1.1366197646e+00f,
+-	1.1095611787e+00f,
+-	1.0309661086e+00f,
+-	9.0826274029e-01f,
+-	7.5282865047e-01f,
+-	5.7863247521e-01f,
+-	4.0060122847e-01f,
+-	2.3293328640e-01f,
+-	8.7578756558e-02f,
+-	-2.6921409040e-02f,
+-	-1.0610329554e-01f,
+-	-1.4969513265e-01f,
+-	-1.6119996251e-01f,
+-	-1.4703962978e-01f,
+-	-1.1540978635e-01f,
+-	-7.5026365057e-02f,
+-	-3.3946159035e-02f,
+-	1.3810230973e-03f,
+-	2.6718191327e-02f,
+-	4.0254818594e-02f,
+-	4.2441325942e-02f
++//FxP: filter scaled 2^14
++static int df[DN] = {
++	695,
++	660,
++	438,
++	23,
++	-556,
++	-1229,
++	-1891,
++	-2409,
++	-2641,
++	-2453,
++	-1738,
++	-441,
++	1435,
++	3816,
++	6563,
++	9480,
++	12334,
++	14881,
++	16891,
++	18179,
++	18622,
++	18179,
++	16891,
++	14881,
++	12334,
++	9480,
++	6563,
++	3816,
++	1435,
++	-441,
++	-1738,
++	-2453,
++	-2641,
++	-2409,
++	-1891,
++	-1229,
++	-556,
++	23,
++	438,
++	660,
++	695
+ };
+--- attrafax-0.9/include/internal/modems/v21txrx.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v21txrx.h	2010-08-14 12:49:12.000000000 +0300
+@@ -18,10 +18,13 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+-
+ #ifndef _V21TXRX_
+ #define _V21TXRX_
+ 
+--- attrafax-0.9/include/internal/modems/v27ter2400rxfilter.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v27ter2400rxfilter.h	2010-08-14 14:03:47.000000000 +0300
+@@ -33,7 +33,7 @@
+ #define N	27
+ #define L	12
+ 
+-static const float f[N*L+1] = {
++static const int f[N*L+1] = {
+ 679	,
+ 688	,
+ 695	,
+--- attrafax-0.9/include/internal/modems/v27ter2400txfilter.h	2010-01-29 16:18:03.000000000 +0200
++++ attrafax-0.9/include/internal/modems/v27ter2400txfilter.h	2010-08-14 14:01:22.000000000 +0300
+@@ -18,94 +18,99 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+ 
+ #define DN	81
+-#define dfGAIN	1.9818800716e+01f
++#define dfGAIN	162355 //FxP gain scaled 2^13
+ 
++//FxP filter scaled 2^13
+ /* -r `echo '1200/(2*24000)' | bc -l` 0.5 81 -l */
+-static float df[DN] = {
+-	4.2440974566e-02f,
+-	4.2661353251e-02f,
+-	4.0254504871e-02f,
+-	3.4981850192e-02f,
+-	2.6717983650e-02f,
+-	1.5468047722e-02f,
+-	1.3809667269e-03f,
+-	-1.5242286226e-02f,
+-	-3.3946051848e-02f,
+-	-5.4123440516e-02f,
+-	-7.5026117741e-02f,
+-	-9.5780408547e-02f,
+-	-1.1540945289e-01f,
+-	-1.3286088742e-01f,
+-	-1.4703928298e-01f,
+-	-1.5684234338e-01f,
+-	-1.6119967804e-01f,
+-	-1.5911280948e-01f,
+-	-1.4969497259e-01f,
+-	-1.3220921245e-01f,
+-	-1.0610329482e-01f,
+-	-7.1040009153e-02f,
+-	-2.6921567819e-02f,
+-	2.6093017258e-02f,
+-	8.7578472932e-02f,
+-	1.5684234382e-01f,
+-	2.3293293982e-01f,
+-	3.1465616239e-01f,
+-	4.0060089458e-01f,
+-	4.8917231921e-01f,
+-	5.7863222688e-01f,
+-	6.6714510188e-01f,
+-	7.5282854192e-01f,
+-	8.3380638535e-01f,
+-	9.0826279524e-01f,
+-	9.7449548991e-01f,
+-	1.0309663151e+00f,
+-	1.0763474269e+00f,
+-	1.1095614918e+00f,
+-	1.1298145099e+00f,
+-	1.1366201160e+00f,
+-	1.1298145099e+00f,
+-	1.1095614918e+00f,
+-	1.0763474269e+00f,
+-	1.0309663151e+00f,
+-	9.7449548991e-01f,
+-	9.0826279524e-01f,
+-	8.3380638535e-01f,
+-	7.5282854192e-01f,
+-	6.6714510188e-01f,
+-	5.7863222688e-01f,
+-	4.8917231921e-01f,
+-	4.0060089458e-01f,
+-	3.1465616239e-01f,
+-	2.3293293982e-01f,
+-	1.5684234382e-01f,
+-	8.7578472932e-02f,
+-	2.6093017258e-02f,
+-	-2.6921567819e-02f,
+-	-7.1040009153e-02f,
+-	-1.0610329482e-01f,
+-	-1.3220921245e-01f,
+-	-1.4969497259e-01f,
+-	-1.5911280948e-01f,
+-	-1.6119967804e-01f,
+-	-1.5684234338e-01f,
+-	-1.4703928298e-01f,
+-	-1.3286088742e-01f,
+-	-1.1540945289e-01f,
+-	-9.5780408547e-02f,
+-	-7.5026117741e-02f,
+-	-5.4123440516e-02f,
+-	-3.3946051848e-02f,
+-	-1.5242286226e-02f,
+-	1.3809667269e-03f,
+-	1.5468047722e-02f,
+-	2.6717983650e-02f,
+-	3.4981850192e-02f,
+-	4.0254504871e-02f,
+-	4.2661353251e-02f,
+-	4.2440974566e-02f
++static int df[DN] = {
++	348,
++	349,
++	330,
++	287,
++	219,	
++	127,
++	11,
++	-125,
++	-278,
++	-443,
++	-615,
++	-785,
++	-945,
++	-1088,
++	-1205,
++	-1285,
++	-1321,
++	-1303,
++	-1226,
++	-1083,
++	-869,
++	-582,
++	-221,
++	214,
++	717,
++	1285,
++	1908,
++	2578,
++	3282,
++	4007,
++	4740,
++	5465,
++	6167,
++	6831,
++	7440,
++	7983,
++	8446,
++	8817,
++	9090,
++	9255,
++	9311,
++	9255,
++	9090,
++	8817,
++	8446,
++	7983,
++	7440,
++	6831,
++	6167,
++	5465,
++	4740,
++	4007,
++	3282,
++	2578,
++	1908,
++	1285,
++	717,
++	214,
++	-221,
++	-582,
++	-869,
++	-1083,
++	-1226,
++	-1303,
++	-1321,
++	-1285,
++	-1205,
++	-1088,
++	-945,
++	-785,
++	-615,
++	-443,
++	-278,
++	-125,
++	11,
++	127,
++	219,
++	287,
++	330,
++	349,
++	348
+ };
+--- attrafax-0.9/include/internal/modems/v27ter4800rxfilter.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v27ter4800rxfilter.h	2010-08-14 14:04:25.000000000 +0300
+@@ -33,7 +33,7 @@
+ #define N	27
+ #define L	8
+ 
+-static const float f[N*L+1] = {
++static const int f[N*L+1] = {
+ -303	,
+ -314	,
+ -320	,
+--- attrafax-0.9/include/internal/modems/v27ter4800txfilter.h	2010-01-29 16:18:03.000000000 +0200
++++ attrafax-0.9/include/internal/modems/v27ter4800txfilter.h	2010-08-14 14:01:31.000000000 +0300
+@@ -18,43 +18,48 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+-
+-#define sfGAIN	4.9607861256f
++#define sfGAIN	81278 //FxP gain scaled 2^14
+ #define SN	31
+ 
+-static float sf[SN] = {
+-	3.0314951873e-03f,
+-	-1.3403215613e-02f,
+-	-1.9447728088e-02f,
+-	-5.3888046965e-03f,
+-	2.2816335022e-02f,
+-	4.2441444177e-02f,
+-	2.6718247641e-02f,
+-	-3.3946208482e-02f,
+-	-1.1540990104e-01f,
+-	-1.6120005028e-01f,
+-	-1.0610328622e-01f,
+-	8.7578855264e-02f,
+-	4.0060133736e-01f,
+-	7.5282868214e-01f,
+-	1.0309660372e+00f,
+-	1.1366196464e+00f,
+-	1.0309660372e+00f,
+-	7.5282868214e-01f,
+-	4.0060133736e-01f,
+-	8.7578855264e-02f,
+-	-1.0610328622e-01f,
+-	-1.6120005028e-01f,
+-	-1.1540990104e-01f,
+-	-3.3946208482e-02f,
+-	2.6718247641e-02f,
+-	4.2441444177e-02f,
+-	2.2816335022e-02f,
+-	-5.3888046965e-03f,
+-	-1.9447728088e-02f,
+-	-1.3403215613e-02f,
+-	3.0314951873e-03f
++
++//FxP filter scaled 2^14
++static int sf[SN] = {
++	50,
++	-220,
++	-319,
++	-88,
++	374,
++	695,
++	438,
++	-556,
++	-1891,
++	-2641,
++	-1738,
++	1435,
++	6563,
++	12334,
++	16891,
++	18622,
++	16891,
++	12334,
++	6563,
++	1435,
++	-1738,
++	-2641,
++	-1891,
++	-556,
++	438,
++	695,
++	374,
++	-88,
++	-319,
++	-220,
++	50
+ };
+--- attrafax-0.9/include/internal/modems/v27tertxrx.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v27tertxrx.h	2010-08-14 13:31:20.000000000 +0300
+@@ -18,10 +18,13 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+-
+ #ifndef _V27TERTXRX_
+ #define _V27TERTXRX_
+ 
+@@ -44,9 +47,9 @@
+ 	v27ter_sstate scr;
+ 	int pacc, ph;
+ 	float gain;
+-	complex fbuf[_V27TERCONST_FLEN];
++	complexi fbuf[_V27TERCONST_FLEN];
+ 	int p;
+-	complex baud;
++	complexi baud;
+ 	getbit_f getbit;
+ 	void *context;
+ } v27tertx_state;
+--- attrafax-0.9/include/internal/modems/v29txrx.h	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/include/internal/modems/v29txrx.h	2010-08-14 14:12:04.000000000 +0300
+@@ -18,10 +18,13 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+-
+ #ifndef _V29TXRX_
+ #define _V29TXRX_
+ 
+@@ -42,13 +45,13 @@
+ 	int cons_state, symbol, end;
+ 	txstage_f stage;
+ 	int rate;
+-	const complex *AB, *CD;
++	const complexi *AB, *CD;
+ 	v29_sstate scr, rnd;
+ 	int pacc, ph, ploop;
+ 	float gain;
+-	complex fbuf[_V29CONST_FLEN];
++	complexi fbuf[_V29CONST_FLEN]; //FxP: values scaled 2^10
+ 	int p;
+-	complex baud;
++	complexi baud;		       //FxP: value scaled 2^10
+ 	getbit_f getbit;
+ 	void *context;
+ } v29tx_state;
+--- attrafax-0.9/src/modems/v17tx.c	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/src/modems/v17tx.c	2010-08-14 13:15:58.000000000 +0300
+@@ -23,7 +23,6 @@
+  * The modem is much faster on the CPU without floating point support now.
+  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  *
+- * Note that V29 transmitter is kept floating point as it is already fast.
+  * Can be optimized later 
+ */
+ 
+@@ -42,12 +41,13 @@
+ #include "internal/modems/v17txrx.h"
+ #include "internal/modems/v17constellation.h"
+ 
+-static const complex ABCD_seq[4] = {
+-	mkz(-6.0f, -2.0f), mkz(2.0f, -6.0f), mkz(6.0f, 2.0f), mkz(-2.0f, 6.0f)
++//FxP: constelations scaled 2^10
++static const complexi ABCD_seq[4] = {
++	mkz(-6.0*1024, -2.0*1024), mkz(2.0*1024, -6.0*1024), mkz(6.0*1024, 2.0*1024), mkz(-2.0*1024, 6.0*1024)
+ };
+ 
+-static const complex CDBA_seq[4] = {
+-	mkz(6.0f, 2.0f), mkz(-2.0f, 6.0f), mkz(2.0f, -6.0f), mkz(-6.0f, -2.0f)
++static const complexi CDBA_seq[4] = {
++	mkz(6.0*1024, 2.0*1024), mkz(-2.0*1024, 6.0*1024), mkz(2.0*1024, -6.0*1024), mkz(-6.0*1024, -2.0*1024)
+ };
+ 
+ static const int diffe[16][2] = {
+@@ -64,15 +64,15 @@
+ 	{ 2, 0, 3, 1 }
+ };
+ 
+-static complex tep(void *_state);
+-static complex silence(void *_state);
+-static complex abcd(void *_state);
+-static complex cdba(void *_state);
+-static complex bri(void *_state);
+-static complex ones(void *_state);
+-static complex running(void *_state);
+-static complex end1(void *_state);
+-static complex end2(void *_state);
++static complexi tep(void *_state);
++static complexi silence(void *_state);
++static complexi abcd(void *_state);
++static complexi cdba(void *_state);
++static complexi bri(void *_state);
++static complexi ones(void *_state);
++static complexi running(void *_state);
++static complexi end1(void *_state);
++static complexi end2(void *_state);
+ 
+ static void diff_enc(v17_dstate *state, int q1, int q2, int *y1, int *y2) {
+ 	q1 = ((q1 << 3) | (q2 << 2) | (state->y1 << 1) | state->y2) & 15;
+@@ -136,7 +136,7 @@
+ 	default: \
+ 		fprintf(stderr, "Bad rate - %d\n", state->rate); \
+ 		fflush(stderr); \
+-		return _C0; \
++		return _C0i; \
+ 	}
+ 
+ #define SEGtep1	468
+@@ -148,7 +148,8 @@
+ #define SEGEND1	32 
+ #define SEGEND2	48
+ 
+-static complex tep(void *_state) {
++static complexi tep(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -156,10 +157,11 @@
+ 		state->stage = &silence;
+ 		state->symbol = 0;
+ 	}
+-	return _Cr1;
++	return _Cr1i;
+ }
+ 
+-static complex silence(void *_state) {
++static complexi silence(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -167,10 +169,11 @@
+ 		state->stage = &abcd;
+ 		state->symbol = 0;
+ 	}
+-	return _C0;
++	return _C0i;
+ }
+ 
+-static complex abcd(void *_state) {
++static complexi abcd(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -181,7 +184,8 @@
+ 	return ABCD_seq[(state->bpABABp++) & 1];
+ }
+ 
+-static complex cdba(void *_state) {
++static complexi cdba(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -195,7 +199,8 @@
+ 	return CDBA_seq[state->bpABABp];
+ }
+ 
+-static complex bri(void *_state) {
++static complexi bri(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	int t0;
+ 	
+@@ -213,7 +218,8 @@
+ 	return CDBA_seq[state->bpABABp];
+ }
+ 
+-static complex ones(void *_state) {
++static complexi ones(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	int t0, q1, q2, y0, y1, y2;
+ 	
+@@ -225,14 +231,16 @@
+ 	GENERATE(scramble(&state->scr, 1));
+ }
+ 
+-static complex running(void *_state) {
++static complexi running(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	int t0, q1, q2, y0, y1, y2;
+ 	
+ 	GENERATE(getbit(state));
+ }
+ 
+-static complex end1(void *_state) {
++static complexi end1(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	int t0, q1, q2, y0, y1, y2;
+ 	
+@@ -244,38 +252,40 @@
+ 	GENERATE(scramble(&state->scr, 1));
+ }
+ 
+-static complex end2(void *_state) {
++static complexi end2(void *_state) {
++//FxP: return value scaled 2^10
+ 	v17tx_state *state = (v17tx_state *)_state;
+ 	
+ 	state->symbol++;
+ 	if (state->symbol == SEGEND2) state->end = 1;
+-	return _C0;
++	return _C0i;
+ }
+ 
+ #include "internal/modems/v17v29txfilter.h"
+ 
+-static void cput(v17tx_state *state, complex z) {
++static void cput(v17tx_state *state, complexi z) {
++//FxP: z scaled 2^10
+ 	state->fbuf[state->p] = state->fbuf[state->p + DN] = z;
+ 	state->p = (state->p + 1) % DN;
+ 	return;
+ }
+ 
+-static complex cfir(v17tx_state *state) {
+-	complex acc, t0;
++static complexi cfir(v17tx_state *state) {
++//FxP: return value scaled 2^10
++	complexi acc, t0;
+ 	int j;
+ 
+-	for (j=0, acc=_C0; j<DN; j++) {
++	for (j=0, acc=_C0i; j<DN; j++) {
+ 		scale2(t0, state->fbuf[j+state->p], df[j]);
+ 		add2(acc, t0);
+ 	}
+ 	scale(acc, 1.0f/dfGAIN);
+-	return acc;
++	return acc;			//FxP result seems to match the constelation points 2^10 scaled.
+ }
+ 
+ int v17tx(v17tx_state *state, signed short *s, int len) {
+ 	int j, k;
+-	complex t0, t1;
+-	complexi t1_;
++	complexi t0, t1;
+ 
+ 	for (j=0; j<len; j++) {
+ 		if (state->end) goto eot;
+@@ -287,11 +297,10 @@
+ 			cput(state, state->baud);
+ 			if (!k) t0 = cfir(state);
+ 		}
+-		t1_= csynth(state->pacc); //FxP we get t1_ 2^10 scaled. The transmitter we will 
+-		scale2_pow2r(t1,t1_,10);  //keep floating as it is simple enought. //So lets descale	
++		t1= csynth(state->pacc); //FxP we get t1 2^10 scaled.
+ 		con(t1);
+ 		state->pacc += state->ph;
+-		s[j] = (signed short)(pseudosc(t0, t1) * state->gain);
++		s[j] = (signed short)(pseudosc(t0, t1) * state->gain); //FxP state->gain is 2^-20 scaled so s is not scaled.
+ 	}
+ 	return len;
+ eot:
+@@ -316,11 +325,11 @@
+ 	state->scr.sreg = 3067349u;
+ 	state->pacc = 0;
+ 	state->ph = getrate(_V17CONST_CF)/_V17CONST_SPS;
+-	state->baud = _C0;
++	state->baud = _C0i;
+ 	for (j=0; j<_V17CONST_FLEN; j++)
+-		state->fbuf[j] = _C0;
++		state->fbuf[j] = _C0i;
+ 	state->p = 0;
+-	state->gain = 1260.0f;
++	state->gain = 1260.0f/1048576.0f; //FxP state->gain is 2^-20 scaled
+ 	state->tcm.t0 = state->tcm.t1 = state->tcm.t2 = 0U;
+ 	state->bpABABp = state->shc = 0U;
+ 	return;
+--- attrafax-0.9/src/modems/v21tx.c	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/src/modems/v21tx.c	2010-08-14 13:22:11.000000000 +0300
+@@ -40,7 +40,7 @@
+ 			if ((bit = (*(state->getbit))(state->context)) < 0)
+ 				goto eob;
+ 		}
+-		s[j] = (signed short)(rsynthcos(state->pacc) * 10); //Penev
++		s[j] = (signed short)(rsynthcos(state->pacc) * 10); //FxP rsynthcos is already 2^10 scaled
+ 		state->pacc += state->fph[bit];
+ 	}
+ 	state->bit = bit;
+--- attrafax-0.9/src/modems/v27tertx2400.c	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/src/modems/v27tertx2400.c	2010-08-14 14:09:12.000000000 +0300
+@@ -42,22 +42,23 @@
+ 
+ #include "internal/modems/v27tertxrx.h"
+ 
+-static const complex constellation[4] = {
+-	mkz(1.0f, 0.0f),
+-	mkz(0.0f, 1.0f),
+-	mkz(-1.0f, 0.0f),
+-	mkz(0.0f, -1.0f),
++//FxP: constelations scaled 2^10
++static const complexi constellation[4] = {
++	mkz(1024, 0),
++	mkz(0, 1024),
++	mkz(-1024, 0),
++	mkz(0, -1024),
+ };
+ 
+ static const int considx[4] = { 0, 1, 3, 2 };
+ 
+-static complex tep(void *_state);
+-static complex silence(void *_state);
+-static complex ph0(void *_state);
+-static complex scr(void *_state);
+-static complex ones(void *_state);
+-static complex running(void *_state);
+-static complex end(void *_state);
++static complexi tep(void *_state);
++static complexi silence(void *_state);
++static complexi ph0(void *_state);
++static complexi scr(void *_state);
++static complexi ones(void *_state);
++static complexi running(void *_state);
++static complexi end(void *_state);
+ 
+ static int scramble(v27ter_sstate *state, int bit) {
+ 	int t0;
+@@ -97,7 +98,8 @@
+ #define SEG5	8
+ #define SEGEND	128
+ 
+-static complex tep(void *_state) {
++static complexi tep(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -105,10 +107,11 @@
+ 		state->stage = &silence;
+ 		state->symbol = 0;
+ 	}
+-	return _Cr1;
++	return _Cr1i;
+ }
+ 
+-static complex silence(void *_state) {
++static complexi silence(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -116,10 +119,11 @@
+ 		state->stage = &ph0;
+ 		state->symbol = 0;
+ 	}
+-	return _C0;
++	return _C0i;
+ }
+ 
+-static complex ph0(void *_state) {
++static complexi ph0(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -130,7 +134,8 @@
+ 	return constellation[state->cons_state = (state->cons_state + 2) & 3];
+ }
+ 
+-static complex scr(void *_state) {
++static complexi scr(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+@@ -143,7 +148,8 @@
+ 	return constellation[state->cons_state = (state->cons_state + bit) & 3];
+ }
+ 
+-static complex ones(void *_state) {
++static complexi ones(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+@@ -155,14 +161,16 @@
+ 	GENERATE(scramble(&state->scr, 1));
+ }
+ 
+-static complex running(void *_state) {
++static complexi running(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+ 	GENERATE(getbit(state));
+ }
+ 
+-static complex end(void *_state) {
++static complexi end(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+@@ -173,28 +181,29 @@
+ 
+ #include "internal/modems/v27ter2400txfilter.h"
+ 
+-static void cput(v27tertx_state *state, complex z) {
++static void cput(v27tertx_state *state, complexi z) {
++//FxP: z is scaled 2^10
+ 	state->fbuf[state->p] = state->fbuf[state->p + DN] = z;
+ 	state->p = (state->p + 1) % DN;
+ 	return;
+ }
+ 
+-static complex cfir(v27tertx_state *state) {
+-	complex acc, t0;
++static complexi cfir(v27tertx_state *state) {
++//FxP: return value scaled 2^10
++	complexi acc, t0;
+ 	int j;
+ 
+-	for (j=0, acc=_C0; j<DN; j++) {
++	for (j=0, acc=_C0i; j<DN; j++) {
+ 		scale2(t0, state->fbuf[j+state->p], df[j]);
+ 		add2(acc, t0);
+ 	}
+ 	scale(acc, 1.0f/dfGAIN);
+-	return acc;
++	return acc;		//FxP result seems to match the constelation points 2^10 scaled.
+ }
+ 
+ int v27tertx2400(v27tertx_state *state, signed short *s, int len) {
+ 	int j, k;
+-	complex t0, t1;
+-	complexi t1_;
++	complexi t0, t1;
+ 	
+ 	for (j=0; j<len; j++) {
+ 		if (state->end) goto eot;
+@@ -207,11 +216,10 @@
+ 			if (!k) t0 = cfir(state);
+ 		}
+ 
+-                t1_= csynth(state->pacc); //FxP we get t1_ 2^10 scaled. The transmitter we will
+-                scale2_pow2r(t1,t1_,10);  //keep floating as it is simple enought. So lets descale
++                t1= csynth(state->pacc); //FxP we get t1 2^10 scaled.
+ 		state->pacc += state->ph;
+ 		con(t1);
+-		s[j] = (signed short)(pseudosc(t0, t1) * state->gain);
++		s[j] = (signed short)(pseudosc(t0, t1) * state->gain); //FxP state->gain is 2^-20 scaled so s is not scaled.
+ 	}
+ 	return len;
+ eot:
+@@ -232,11 +240,11 @@
+ 	state->scr.scnt32 = 0u;
+ 	state->pacc = 0;
+ 	state->ph = getrate(_V27TERCONST_CF)/_V27TERCONST_SPS;
+-	state->baud = _C0;
++	state->baud = _C0i;
+ 	for (j=0; j<_V27TERCONST_FLEN; j++)
+-		state->fbuf[j] = _C0;
++		state->fbuf[j] = _C0i;
+ 	state->p = 0;
+-	state->gain = 6486.0f;
++	state->gain = 6486.0f/1048576.0f; //FxP state->gain is 2^-20 scaled
+ 	return;
+ }
+ 
+--- attrafax-0.9/src/modems/v27tertx4800.c	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/src/modems/v27tertx4800.c	2010-08-14 14:10:02.000000000 +0300
+@@ -41,26 +41,27 @@
+ 
+ #include "internal/modems/v27tertxrx.h"
+ 
+-static const complex constellation[8] = {
+-	mkz(1.0f, 0.0f),
+-	mkz((float)M_SQRT2/2.0f, (float)M_SQRT2/2.0f),
+-	mkz(0.0f, 1.0f),
+-	mkz(-(float)M_SQRT2/2.0f, (float)M_SQRT2/2.0f),
+-	mkz(-1.0f, 0.0f),
+-	mkz(-(float)M_SQRT2/2.0f, -(float)M_SQRT2/2.0f),
+-	mkz(0.0f, -1.0f),
+-	mkz((float)M_SQRT2/2.0f, -(float)M_SQRT2/2.0f)
++//FxP: constelations scaled 2^10
++static const complexi constellation[8] = {
++	mkz(1024, 0),
++	mkz((float)M_SQRT2/2.0f*1024, (float)M_SQRT2/2.0f*1024),
++	mkz(0, 1024),
++	mkz(-(float)M_SQRT2/2.0f*1024, (float)M_SQRT2/2.0f*1024),
++	mkz(-1024, 0),
++	mkz(-(float)M_SQRT2/2.0f*1024, -(float)M_SQRT2/2.0f*1024),
++	mkz(0, -1024),
++	mkz((float)M_SQRT2/2.0f*1024, -(float)M_SQRT2/2.0f*1024)
+ };
+ 
+ static const int considx[8] = { 1, 0, 2, 3, 6, 7, 5, 4 };
+ 
+-static complex tep(void *_state);
+-static complex silence(void *_state);
+-static complex ph0(void *_state);
+-static complex scr(void *_state);
+-static complex ones(void *_state);
+-static complex running(void *_state);
+-static complex end(void *_state);
++static complexi tep(void *_state);
++static complexi silence(void *_state);
++static complexi ph0(void *_state);
++static complexi scr(void *_state);
++static complexi ones(void *_state);
++static complexi running(void *_state);
++static complexi end(void *_state);
+ 
+ static int scramble(v27ter_sstate *state, int bit) {
+ 	int t0;
+@@ -101,7 +102,8 @@
+ #define SEG5	8
+ #define SEGEND	128
+ 
+-static complex tep(void *_state) {
++static complexi tep(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -109,10 +111,11 @@
+ 		state->stage = &silence;
+ 		state->symbol = 0;
+ 	}
+-	return _Cr1;
++	return _Cr1i;
+ }
+ 
+-static complex silence(void *_state) {
++static complexi silence(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -120,10 +123,11 @@
+ 		state->stage = &ph0;
+ 		state->symbol = 0;
+ 	}
+-	return _C0;
++	return _C0i;
+ }
+ 
+-static complex ph0(void *_state) {
++static complexi ph0(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -134,7 +138,8 @@
+ 	return constellation[state->cons_state = (state->cons_state + 4) & 7];
+ }
+ 
+-static complex scr(void *_state) {
++static complexi scr(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+@@ -147,7 +152,8 @@
+ 	return constellation[state->cons_state = (state->cons_state + bit) & 7];
+ }
+ 
+-static complex ones(void *_state) {
++static complexi ones(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+@@ -159,14 +165,16 @@
+ 	GENERATE(scramble(&state->scr, 1));
+ }
+ 
+-static complex running(void *_state) {
++static complexi running(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+ 	GENERATE(getbit(state));
+ }
+ 
+-static complex end(void *_state) {
++static complexi end(void *_state) {
++//FxP: return value scaled 2^10
+ 	v27tertx_state *state = (v27tertx_state *)_state;
+ 	int bit;
+ 	
+@@ -177,24 +185,25 @@
+ 
+ #include "internal/modems/v27ter4800txfilter.h"
+ 
+-static complex cfilter(v27tertx_state *state, complex z) {
+-	complex acc, t0;
++static complexi cfilter(v27tertx_state *state, complexi z) {
++//FxP: z and return value scaled 2^10
++	complexi acc, t0;
+ 	int j;
+ 
+ 	state->fbuf[state->p] = state->fbuf[state->p + SN] = z;
+ 	state->p = (state->p + 1) % SN;
+-	for (j=0, acc=_C0; j<SN; j++) {
++	for (j=0, acc=_C0i; j<SN; j++) {
+ 		scale2(t0, state->fbuf[j+state->p], sf[j]);
+ 		add2(acc, t0);
+ 	}
+-	scale(acc, 1.0f/sfGAIN);
++	scale(acc, 1.0f/sfGAIN); 	//FxP result seems to match the constelation points 2^10 scaled.
+ 	return acc;
+ }
+ 
+ int v27tertx(v27tertx_state *state, signed short *s, int len) {
+ 	int j;
+-	complex t0, t1;
+-	complexi t1_;	
++	complexi t0, t1;
++	
+ 	for (j=0; j<len; j++) {
+ 		if (state->end) goto eot;
+ 		if ((state->ploop += 1) >= 5) {
+@@ -202,11 +211,10 @@
+ 			state->ploop -= 5;
+ 		}
+ 		t0 = cfilter(state, state->baud);
+-                t1_= csynth(state->pacc); //FxP we get t1_ 2^10 scaled. The transmitter we will
+-                scale2_pow2r(t1,t1_,10);  //keep floating as it is simple enought. So lets descale
++                t1= csynth(state->pacc); //FxP we get t1_ 2^10 scaled.
+ 		state->pacc += state->ph;
+ 		con(t1);
+-		s[j] = (signed short)(pseudosc(t0, t1) * state->gain);
++		s[j] = (signed short)(pseudosc(t0, t1) * state->gain); 	//FxP state->gain is 2^-20 scaled so s is not scaled.
+ 	}
+ 	return len;
+ eot:
+@@ -227,11 +235,11 @@
+ 	state->scr.scnt32 = 0u;
+ 	state->pacc = 0;
+ 	state->ph = getrate(_V27TERCONST_CF)/_V27TERCONST_SPS;
+-	state->baud = _C0;
++	state->baud = _C0i;
+ 	for (j=0; j<_V27TERCONST_FLEN; j++)
+-		state->fbuf[j] = _C0;
++		state->fbuf[j] = _C0i;
+ 	state->p = 0;
+-	state->gain = 6486.0f;
++	state->gain = 6486.0f/1048576.0f; //FxP state->gain is 2^-20 scaled
+ 	return;
+ }
+ 
+--- attrafax-0.9/src/modems/v29tx.c	2010-08-14 14:29:38.000000000 +0300
++++ attrafax-0.9/src/modems/v29tx.c	2010-08-14 14:14:37.000000000 +0300
+@@ -22,9 +22,6 @@
+  * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
+  * The modem is much faster on the CPU without floating point support now.
+  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+- *
+- * Note that V29 transmitter is kept floating point as it is already fast.
+- * Can be optimized later
+  */
+ 
+ 
+@@ -41,85 +38,88 @@
+ 
+ #include "internal/modems/v29txrx.h"
+ 
+-static const complex constellations[4][8] = {
++//FxP: constelations scaled 2^10
++static const complexi constellations[4][8] = {
+ 	{
+-		mkz(3.0f, 0.0f),
+-		mkz(1.5f*(float)M_SQRT2, 1.5f*(float)M_SQRT2),
+-		mkz(0.0f, 3.0f),
+-		mkz(-1.5f*(float)M_SQRT2, 1.5f*(float)M_SQRT2),
+-		mkz(-3.0f, 0.0f),
+-		mkz(-1.5f*(float)M_SQRT2, -1.5f*(float)M_SQRT2),
+-		mkz(0.0f, -3.0f),
+-		mkz(1.5f*(float)M_SQRT2, -1.5f*(float)M_SQRT2)
++		mkz(3*1024, 0),
++		mkz(1.5f*(float)M_SQRT2*1024, 1.5f*(float)M_SQRT2*1024),
++		mkz(0, 3*1024),
++		mkz(-1.5f*(float)M_SQRT2*1024, 1.5f*(float)M_SQRT2*1024),
++		mkz(-3*1024, 0),
++		mkz(-1.5f*(float)M_SQRT2*1024, -1.5f*(float)M_SQRT2*1024),
++		mkz(0, -3*1024),
++		mkz(1.5f*(float)M_SQRT2*1024, -1.5f*(float)M_SQRT2*1024)
+ 	}, {
+-		mkz((float)M_SQRT2, 0.0f),
+-		mkz(1.0f, 1.0f),
+-		mkz(0.0f, (float)M_SQRT2),
+-		mkz(-1.0f, 1.0f),
+-		mkz(-(float)M_SQRT2, 0.0f),
+-		mkz(-1.0f, -1.0f),
+-		mkz(0.0f, (float)-M_SQRT2),
+-		mkz(1.0f, -1.0f)
++		mkz((float)M_SQRT2*1024, 0),
++		mkz(1024, 1024),
++		mkz(0, (float)M_SQRT2*1024),
++		mkz(-1024, 1024),
++		mkz(-(float)M_SQRT2*1024, 0),
++		mkz(-1024, -1024),
++		mkz(0, (float)-M_SQRT2*1024),
++		mkz(1024, -1024)
+ 	}, {
+-		mkz(5.0f, 0.0f),
+-		mkz(2.5f*(float)M_SQRT2, 2.5f*(float)M_SQRT2),
+-		mkz(0.0f, 5.0f),
+-		mkz(-2.5f*(float)M_SQRT2, 2.5f*(float)M_SQRT2),
+-		mkz(-5.0f, 0.0f),
+-		mkz(-2.5f*(float)M_SQRT2, -2.5f*(float)M_SQRT2),
+-		mkz(0.0f, -5.0f),
+-		mkz(2.5f*(float)M_SQRT2, -2.5f*(float)M_SQRT2)
++		mkz(5*1024, 0),
++		mkz(2.5f*(float)M_SQRT2*1024, 2.5f*(float)M_SQRT2*1024),
++		mkz(0, 5*1024),
++		mkz(-2.5f*(float)M_SQRT2*1024, 2.5f*(float)M_SQRT2*1024),
++		mkz(-5*1024, 0),
++		mkz(-2.5f*(float)M_SQRT2*1024, -2.5f*(float)M_SQRT2*1024),
++		mkz(0, -5*1024),
++		mkz(2.5f*(float)M_SQRT2*1024, -2.5f*(float)M_SQRT2*1024)
+ 	}, {
+-		mkz(3.0f*(float)M_SQRT2, 0.0f),
+-		mkz(3.0f, 3.0f),
+-		mkz(0.0f, 3.0f*(float)M_SQRT2),
+-		mkz(-3.0f, 3.0f),
+-		mkz(-3.0f*(float)M_SQRT2, 0.0f),
+-		mkz(-3.0f, -3.0f),
+-		mkz(0.0f, -3.0f*(float)M_SQRT2),
+-		mkz(3.0f, -3.0f)
++		mkz(3.0f*(float)M_SQRT2*1024, 0),
++		mkz(3*1024, 3*1024),
++		mkz(0, 3.0f*(float)M_SQRT2*1024),
++		mkz(-3*1024, 3*1024),
++		mkz(-3.0f*(float)M_SQRT2*1024, 0),
++		mkz(-3*1024, -3*1024),
++		mkz(0, -3.0f*(float)M_SQRT2*1024),
++		mkz(3*1024, -3*1024)
+ 	}
+ };
+ 
+ static const int considx[8] = { 1, 0, 2, 3, 6, 7, 5, 4 };
+ 
++//FxP: constelations scaled 2^10
++
+ /* ABCD @ 9600bps */
+-static const complex AB9600[2] = {
+-	mkz(-3.0f, 0.0f),
+-	mkz(3.0f, -3.0f)
++static const complexi AB9600[2] = {
++	mkz(-3*1024, 0),
++	mkz(3*1024, -3*1024)
+ };
+-static const complex CD9600[2] = {
+-	mkz(3.0f, 0.0f),
+-	mkz(-3.0f, 3.0f)
++static const complexi CD9600[2] = {
++	mkz(3*1024, 0),
++	mkz(-3*1024, 3*1024)
+ };
+ 
+ /* ABCD @ 7200bps */
+-static const complex AB7200[2] = {
+-	mkz(-3.0f, 0.0f),
+-	mkz(1.0f, -1.0f)
++static const complexi AB7200[2] = {
++	mkz(-3*1024, 0),
++	mkz(1024, -1024)
+ };
+-static const complex CD7200[2] = {
+-	mkz(3.0f, 0.0f),
+-	mkz(-1.0f, 1.0f)
++static const complexi CD7200[2] = {
++	mkz(3*1024, 0),
++	mkz(-1024, 1024)
+ };
+ 
+ /* ABCD @ 4800bps */
+-static const complex AB4800[2] = {
+-	mkz(-3.0f, 0.0f),
+-	mkz(0.0f, -3.0f)
++static const complexi AB4800[2] = {
++	mkz(-3*1024, 0),
++	mkz(0, -3*1024)
+ };
+-static const complex CD4800[2] = {
+-	mkz(3.0f, 0.0f),
+-	mkz(0.0f, 3.0f)
++static const complexi CD4800[2] = {
++	mkz(3*1024, 0),
++	mkz(0, 3*1024)
+ };
+ 
+-static complex tep(void *_state);
+-static complex silence(void *_state);
+-static complex ab(void *_state);
+-static complex cdcd(void *_state);
+-static complex ones(void *_state);
+-static complex running(void *_state);
+-static complex end(void *_state);
++static complexi tep(void *_state);
++static complexi silence(void *_state);
++static complexi ab(void *_state);
++static complexi cdcd(void *_state);
++static complexi ones(void *_state);
++static complexi running(void *_state);
++static complexi end(void *_state);
+ 
+ static int scramble(v29_sstate *state, int bit) {
+ 	int b0;
+@@ -165,7 +165,8 @@
+ #define SEG4	48
+ #define SEGEND	128
+ 
+-static complex tep(void *_state) {
++static complexi tep(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -173,10 +174,11 @@
+ 		state->stage = &silence;
+ 		state->symbol = 0;
+ 	}
+-	return _Cr1;
++	return _Cr1i;
+ }
+ 
+-static complex silence(void *_state) {
++static complexi silence(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -184,10 +186,11 @@
+ 		state->stage = &ab;
+ 		state->symbol = 0;
+ 	}
+-	return _C0;
++	return _C0i;
+ }
+ 
+-static complex ab(void *_state) {
++static complexi ab(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -198,7 +201,8 @@
+ 	return state->AB[(state->symbol-1) & 1];
+ }
+ 
+-static complex cdcd(void *_state) {
++static complexi cdcd(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	
+ 	state->symbol++;
+@@ -209,7 +213,8 @@
+ 	return state->CD[rnd(&state->rnd)];
+ }
+ 
+-static complex ones(void *_state) {
++static complexi ones(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	int q1, q2, q3, q4;
+ 	
+@@ -221,14 +226,16 @@
+ 	GENERATE(scramble(&state->scr, 1));
+ }
+ 
+-static complex running(void *_state) {
++static complexi running(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	int q1, q2, q3, q4;
+ 	
+ 	GENERATE(getbit(state));
+ }
+ 
+-static complex end(void *_state) {
++static complexi end(void *_state) {
++//FxP: return value scaled 2^10
+ 	v29tx_state *state = (v29tx_state *)_state;
+ 	int q1, q2, q3, q4;
+ 	
+@@ -239,28 +246,29 @@
+ 
+ #include "internal/modems/v17v29txfilter.h"
+ 
+-static void cput(v29tx_state *state, complex z) {
++static void cput(v29tx_state *state, complexi z) {
++//FxP: z  scaled 2^10
+ 	state->fbuf[state->p] = state->fbuf[state->p + DN] = z;
+ 	state->p = (state->p + 1) % DN;
+ 	return;
+ }
+ 
+-static complex cfir(v29tx_state *state) {
+-	complex acc, t0;
++static complexi cfir(v29tx_state *state) {
++//FxP: return value scaled 2^10
++	complexi acc, t0;
+ 	int j;
+ 
+-	for (j=0, acc=_C0; j<DN; j++) {
++	for (j=0, acc=_C0i; j<DN; j++) {
+ 		scale2(t0, state->fbuf[j+state->p], df[j]);
+ 		add2(acc, t0);
+ 	}
+ 	scale(acc, 1.0f/dfGAIN);
+-	return acc;
++	return acc;			//FxP result seems to match the constelation points 2^10 scaled.
+ }
+ 
+ int v29tx(v29tx_state *state, signed short *s, int len) {
+ 	int j, k;
+-	complex t0, t1;
+-	complexi t1_;
++	complexi t0, t1;
+ 	for (j=0; j<len; j++) {
+ 		if (state->end) goto eot;
+ 		for (k=2; k>=0; k--) {
+@@ -271,8 +279,7 @@
+ 			cput(state, state->baud);
+ 			if (!k) t0 = cfir(state);
+ 		}
+-		t1_= csynth(state->pacc); //FxP we get t1_ 2^10 scaled. The transmitter we will 
+-		scale2_pow2r(t1,t1_,10);  //keep floating as it is simple enought. //So lets descale	
++		t1= csynth(state->pacc); //FxP we get t1_ 2^10 scaled.
+ 		state->pacc += state->ph;
+ 		con(t1);
+ 		s[j] = (signed short)(pseudosc(t0, t1) * state->gain);
+@@ -313,11 +320,11 @@
+ 	state->rnd.sreg = 0x2au;
+ 	state->pacc = 0;
+ 	state->ph = getrate(_V29CONST_CF)/_V29CONST_SPS;
+-	state->baud = _C0;
++	state->baud = _C0i;
+ 	for (j=0; j<_V29CONST_FLEN; j++)
+-		state->fbuf[j] = _C0;
++		state->fbuf[j] = _C0i;
+ 	state->p = 0;
+-	state->gain = 2000.0f;
++	state->gain = 2000.0f/1048576.0f; //FxP state->gain is 2^-20 scaled
+ 	return;
+ }
+ 
+--- attrafax-0.9/src/modules/app_t30txfax.c	2010-01-29 16:14:12.000000000 +0200
++++ attrafax-0.9/src/modules/app_t30txfax.c	2010-08-14 14:20:04.000000000 +0300
+@@ -61,6 +61,8 @@
+ 	int argc;
+ 	int txok, page_num;
+ 	char buf[16];
++	unsigned int cycles_start;
++	
+ 		
+ 	u = ast_module_user_add(chan);
+ 

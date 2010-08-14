@@ -12,7 +12,7 @@
 
 config SF_PACKAGE_ATTRAFAX
 	bool "attrafax"
-	default n
+	default y
 	depends on (SF_ASTERISK_1_4)
 	help
 		Attrafax solution consists of a T.30/T.38 stack, with an Asterisk interface including gatewaying support.
