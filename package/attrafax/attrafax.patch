@@ -17080,3 +17080,175 @@ diff -ur attrafax-0.9/include/internal/modems/v17v29rxfilter.h attrafax-0.9fxp/i
  		
  	u = ast_module_user_add(chan);
  
+--- attrafax-0.9/src/modems/v17slicer.c	2010-08-14 14:27:29.000000000 +0300
++++ attrafax-0.9/src/modems/v17slicer.c	2010-08-15 09:31:42.000000000 +0300
+@@ -18,6 +18,10 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02111-1301  USA
++ *
++ * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
++ * The modem is much faster on the CPU without floating point support now.
++ * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+  */
+ 
+ 
+@@ -31,7 +35,9 @@
+ #include "internal/modems/v17slicer.h"
+ #include "internal/modems/v17constellation.h"
+ 
+-static const complex rlattice = mkz(1.0f, 1.0f);
++#define MAX_INT         2147483647
++
++static const complexi rlattice = mkz(1, 1); //FxP scaled 2^0 
+ 
+ static int slicer14400[25][25] = {
+ 	{    -2,    -2,    -2,    -2,    -6,    -7,    -8,    -9,   -10,   -11,   -12,   -13,   -14,   -15,   -16,   -17,   -18,   -19,   -20,   -21,   -22,    -3,    -3,    -3,    -3, },
+@@ -1226,27 +1232,26 @@
+ };
+ 
+ #ifndef HAVE_RINT
+-static double rint(double x) {
+-	double fx, ix, ax = fabs(x), s = _copysign(1.0, x);
+-	
+-	fx = modf(ax, &ix);
+-	if (fx > 0.5) ix += 1.0;
+-	return ix * s;
++static int rint(int x) {
++//FxP: x is scaled 2^10 the result is descaled
++	if(x>0) return (x+512)/1024; 
++	else	return (x-512)/1024;
+ }
+ #endif
+ 
+-static int nearest(int rate, int set, complex z) {
+-	complex t0, t1;
+-	float len = HUGE_VALF, t;
++static int nearest(int rate, int set, complexi z) {
++//FxP: z is scaled 2^10
++	complexi t0, t1;
++	float len = MAX_INT, t;
+ 	int j, data=0;
+ 
+ 	set = -set - 2;
+ 	switch (rate) {
+ 	case 14400:
+ 		for (j=1; j <= near14400[set][0]; j++) {
+-			mul3(t1, constellation14400[near14400[set][j]], rlattice);
++			mul3(t1, constellation14400[near14400[set][j]], rlattice); //FxP t1 is 2^10 scaled 
+ 			sub3(t0, t1, z);
+-			if ((t = mag(t0)) < len) {
++			if ((t = magsq(t0)) < len) {	//FxP no need to take sqr
+ 				len = t;
+ 				data = near14400[set][j];
+ 			}
+@@ -1254,8 +1259,8 @@
+ 		break;
+ 	case 12000:
+ 		for (j=1; j <= near12000[set][0]; j++) {
+-			sub3(t0, constellation12000[near12000[set][j]], z);
+-			if ((t = mag(t0)) < len) {
++			sub3(t0, constellation12000[near12000[set][j]], z);	    //FxP t0 is 2^10 scaled	
++			if ((t = magsq(t0)) < len) {	//FxP no need to take sqr
+ 				len = t;
+ 				data = near12000[set][j];
+ 			}
+@@ -1263,9 +1268,9 @@
+ 		break;
+ 	case 9600:
+ 		for (j=1; j <= near9600[set][0]; j++) {
+-			mul3(t1, constellation9600[near9600[set][j]], rlattice);
++			mul3(t1, constellation9600[near9600[set][j]], rlattice);    //FxP t1 is 2^10 scaled
+ 			sub3(t0, t1, z);
+-			if ((t = mag(t0)) < len) {
++			if ((t = magsq(t0)) < len) {	//FxP no need to take sqr
+ 				len = t;
+ 				data = near9600[set][j];
+ 			}
+@@ -1273,8 +1278,8 @@
+ 		break;
+ 	case 7200:
+ 		for (j=1; j <= near7200[set][0]; j++) {
+-			sub3(t0, constellation7200[near7200[set][j]], z);
+-			if ((t = mag(t0)) < len) {
++			sub3(t0, constellation7200[near7200[set][j]], z);	    //FxP t0 is 2^10 scaled
++			if ((t = magsq(t0)) < len) {	//FxP no need to take sqr
+ 				len = t;
+ 				data = near7200[set][j];
+ 			}
+@@ -1287,12 +1292,10 @@
+ int slicer(int rate, complexi z) {
+ //FxP z 2^10 scaled
+ 	int i, j, data=0;
+-	complex z_;
+-	scale2_pow2r(z_, z,10); //FxP lets descale z for now. Can be optimized 
+ 
+ /* slicerRATE[row][column] */
+-	i = (int)rint((double)Re(z_)); /* column */
+-	j = (int)rint((double)Im(z_)); /* row */
++	i = rint(Re(z)); /* column */
++	j = rint(Im(z)); /* row */
+ 	switch (rate) {
+ 	case 14400:
+ 		if (i < -12) i = -12;
+@@ -1302,7 +1305,7 @@
+ 		i += 12;
+ 		j += 12;
+ 		if (slicer14400[j][i] < 0)
+-			data = nearest(rate, slicer14400[j][i], z_);
++			data = nearest(rate, slicer14400[j][i], z);
+ 		else data = slicer14400[j][i];
+ 		break;
+ 	case 12000:
+@@ -1313,7 +1316,7 @@
+ 		i += 8;
+ 		j += 8;
+ 		if (slicer12000[j][i] < 0)
+-			data = nearest(rate, slicer12000[j][i], z_);
++			data = nearest(rate, slicer12000[j][i], z);
+ 		else data = slicer12000[j][i];
+ 		break;
+ 	case 9600:
+@@ -1324,7 +1327,7 @@
+ 		i += 12;
+ 		j += 12;		
+ 		if (slicer9600[j][i] < 0)
+-			data = nearest(rate, slicer9600[j][i], z_);
++			data = nearest(rate, slicer9600[j][i], z);
+ 		else data = slicer9600[j][i];
+ 		break;
+ 	case 7200:
+@@ -1335,7 +1338,7 @@
+ 		i += 8;
+ 		j += 8;
+ 		if (slicer7200[j][i] < 0)
+-			data = nearest(rate, slicer7200[j][i], z_);
++			data = nearest(rate, slicer7200[j][i], z);
+ 		else data = slicer7200[j][i];
+ 		break;
+ 	default:
+--- attrafax-0.9/src/modems/v27tertx2400.c	2010-08-14 14:27:29.000000000 +0300
++++ attrafax-0.9/src/modems/v27tertx2400.c	2010-08-15 08:24:45.000000000 +0300
+@@ -22,10 +22,6 @@
+  * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
+  * The modem is much faster on the CPU without floating point support now.
+  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+- *
+- * Note that V29 transmitter is kept floating point as it is already fast.
+- * Can be optimized later
+-	 
+ */
+ 
+ 
+--- attrafax-0.9/src/modems/v27tertx4800.c	2010-08-14 14:27:29.000000000 +0300
++++ attrafax-0.9/src/modems/v27tertx4800.c	2010-08-15 08:25:08.000000000 +0300
+@@ -22,9 +22,6 @@
+  * Dimitar Penev: 4 Aug. 2010 modified to integer arythmetic.
+  * The modem is much faster on the CPU without floating point support now.
+  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
+- *
+- * Note that V29 transmitter is kept floating point as it is already fast.
+- * Can be optimized later
+  */
+ 
+ 
