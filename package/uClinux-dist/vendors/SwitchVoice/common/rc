@@ -19,7 +19,7 @@ else
 fi
 mknod /dev/ubi_ctrl c 10 63
 ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=$vidhdroffset
-mknod /dev/ubi0 c 253 0
+mknod /dev/ubi0 c 254 0
 ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
 if [ -z "$ubivol" ]; then
 	ubidetach /dev/ubi_ctrl --mtdn=3
