@@ -172,7 +172,7 @@ static struct bfin5xx_spi_chip spi_flash_chip_info = {
 };
 #endif
 
-#if defined(CONFIG_SPI_MMC) || defined(CONFIG_SPI_MMC_MODULE)
+#if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
 static struct bfin5xx_spi_chip spi_mmc_chip_info = {
 //CPOL (Clock Polarity)
 // 0 - Active high SCK
@@ -188,6 +188,7 @@ static struct bfin5xx_spi_chip spi_mmc_chip_info = {
 //MT	.ctl_reg = 0x1000,		// CPOL=0,CPHA=0,Sandisk 1G work
         .enable_dma = 0,		// if 1 - block!!!
         .bits_per_word = 8,
+        .cs_gpio = GPIO_PF5,
 //MT	.cs_change_per_word = 0,
 };
 #endif
@@ -209,9 +210,9 @@ static struct spi_board_info bfin_spi_board_info[] __initdata = {
         },
 #endif
 
-#if defined(CONFIG_SPI_MMC) || defined(CONFIG_SPI_MMC_MODULE)
+#if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
         {
-                .modalias = "spi_mmc_dummy",
+                .modalias = "mmc_spi",
                 .max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
                 .bus_num = 0,
                 .chip_select = 0,
@@ -219,32 +220,41 @@ static struct spi_board_info bfin_spi_board_info[] __initdata = {
                 .controller_data = &spi_mmc_chip_info,
                 .mode = SPI_MODE_3,
         },
-        {
-                .modalias = "spi_mmc",
-                .max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
-                .bus_num = 0,
-                .chip_select = CONFIG_SPI_MMC_CS_CHAN,
-                .platform_data = NULL,
-                .controller_data = &spi_mmc_chip_info,
-                .mode = SPI_MODE_3,
-        },
 #endif
 };
 
-/* SPI controller data */
-static struct bfin5xx_spi_master spi_bfin_master_info = {
-	.num_chipselect = 8,
-	.enable_dma = 1,  /* master has the ability to do dma transfer */
-	.pin_req = {P_SPI0_SCK, P_SPI0_MISO, P_SPI0_MOSI, 0},
+/* SPI (0) */
+static struct resource bfin_spi0_resource[] = {
+        [0] = {
+                .start = SPI0_REGBASE,
+                .end   = SPI0_REGBASE + 0xFF,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = CH_SPI,
+                .end   = CH_SPI,
+                .flags = IORESOURCE_IRQ,
+        }
 };
 
-static struct platform_device spi_bfin_master_device = {
-	.name = "bfin-spi-master",
-	.id = 0, /* Bus number */
-	.dev = {
-		.platform_data = &spi_bfin_master_info, /* Passed to driver */
-	},
+
+/* MASTER INFO */
+static struct bfin5xx_spi_master bfin_spi0_info = {
+        .num_chipselect = 8,
+        .enable_dma = 1,  /* master has the ability to do dma transfer */
+        .pin_req = {P_SPI0_SCK, P_SPI0_MISO, P_SPI0_MOSI, 0},
 };
+/* MASTER DEVICE */
+static struct platform_device bfin_spi0_device = {
+        .name = "bfin-spi",
+        .id = 0, /* Bus number */
+        .num_resources = ARRAY_SIZE(bfin_spi0_resource),
+        .resource = bfin_spi0_resource,
+        .dev = {
+                .platform_data = &bfin_spi0_info, /* Passed to driver */
+        },
+};
+
 #endif  /* spi master and devices */
 
 #if defined(CONFIG_SERIAL_BFIN) || defined(CONFIG_SERIAL_BFIN_MODULE)
@@ -313,7 +323,7 @@ static struct platform_device *ip0x_devices[] __initdata = {
 #endif
 
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-	&spi_bfin_master_device,
+	&bfin_spi0_device,
 #endif
 
 #if defined(CONFIG_SERIAL_BFIN) || defined(CONFIG_SERIAL_BFIN_MODULE)
