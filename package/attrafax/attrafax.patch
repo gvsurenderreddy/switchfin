@@ -16523,3 +16523,27 @@ diff -urP attrafax-0.9/src/common/fastmath.c attrafax-0.9-fxp/src/common/fastmat
 +    		return (1.27323954*x - 0.405284735*x*x);
 +}
 +
+diff -urP attrafax-0.9/src/modules/app_t38rxfax.c attrafax-0.9-fxp/src/modules/app_t38rxfax.c
+--- attrafax-0.9/src/modules/app_t38rxfax.c	2010-08-21 02:42:17.000000000 +0300
++++ attrafax-0.9-fxp/src/modules/app_t38rxfax.c	2010-08-22 03:20:04.000000000 +0300
+@@ -197,7 +197,7 @@
+ 			err = 0.0;
+ 		}
+ 
+-		if ((!t38_mode) && (chan->should_reinvite==-1)) {
++		if ((!t38_mode) && (chan->should_reinvite==-1) || !strcasecmp(chan->tech->type,"DAHDI")) {
+ 			ast_verbose ("%s: Failed switching to T.38 mode on channel <%s>\n", app, chan->name);
+ 			result=0;
+ 			pbx_builtin_setvar_helper(chan, "T38REINVITE", "failed");
+diff -urP attrafax-0.9/src/modules/app_t38rxfaxp.c attrafax-0.9-fxp/src/modules/app_t38rxfaxp.c
+--- attrafax-0.9/src/modules/app_t38rxfaxp.c	2010-08-21 02:42:17.000000000 +0300
++++ attrafax-0.9-fxp/src/modules/app_t38rxfaxp.c	2010-08-22 03:25:33.000000000 +0300
+@@ -186,7 +186,7 @@
+ 			break;
+ 		} 
+ 		if (!t) continue; 
+-		if ((!t38_mode) && (chan->t38_mode_active)) {
++		if ((!t38_mode) && (chan->t38_mode_active) || !strcasecmp(chan->tech->type,"DAHDI")) {
+ 			ast_verbose ("%s: switching to T.38 mode on channel <%s>\n", app, chan->name);
+ 			t38_mode = 1;
+ 		}
