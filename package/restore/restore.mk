@@ -1,23 +1,17 @@
 
 RESTORE_SOURCE=restore
-RESTORE_DIR=$(DL_DIR)/$(RESTORE_SOURCE)
 RESTORE_VERSION=trunk
 RESTORE_WORKING=$(BUILD_DIR)/$(RESTORE_SOURCE)
 
 
-$(RESTORE_DIR):
-	mkdir $(RESTORE_DIR)
-	cp $(SOURCES_DIR)/restore.c $(RESTORE_DIR)
-	cp -rf $(SOURCES_DIR)/Makefile.restore $(RESTORE_DIR)/Makefile
-
-$(RESTORE_WORKING)/.unpacked: $(RESTORE_DIR)
-	rm -rf $(RESTORE_WORKING)
-	cp -R $(RESTORE_DIR) $(RESTORE_WORKING)
-	#-find $(RESTORE_WORKING) -type d -name .svn | xargs rm -rf
+$(RESTORE_WORKING)/.unpacked:
+	mkdir $(RESTORE_WORKING)
+	cp $(SOURCES_DIR)/restore/restore.c $(RESTORE_WORKING)
+	cp -rf $(SOURCES_DIR)/restore/Makefile.restore $(RESTORE_WORKING)/Makefile
 	touch $(RESTORE_WORKING)/.unpacked
 
 $(RESTORE_WORKING)/.configured: $(RESTORE_WORKING)/.unpacked
-	touch $(RESTORE_DIR)/.configured
+	touch $(RESTORE_WORKING)/.configured
 
 
 restore: $(RESTORE_WORKING)/.configured
@@ -38,6 +32,9 @@ restore-clean:
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_FX08)),y)
+ifeq ($(strip $(SF_IP04)),y)
+TARGETS+=restore
+endif
+ifeq ($(strip $(SF_FX08)),y) 
 TARGETS+=restore
 endif

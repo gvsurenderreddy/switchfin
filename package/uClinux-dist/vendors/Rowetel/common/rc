@@ -61,17 +61,6 @@ fi
 rm -f /persistent/imageupdate/uImage >/dev/null 2>/dev/null
 rm -f /persistent/imageupdate/.clear_persistent >/dev/null 2>/dev/null
 
-# start checking restore
-modprobe restore
-if [ -f /proc/rs ]
-then
-    if [ -n "`grep "s1" /proc/rs`" ]
-    then
-        rm -rf /persistent/.unpacked
-        echo 1 > /proc/rsc
-    fi
-fi
-
 if [ -f /persistent/.unpacked ]; then
 	echo "We already have unpacked default configuration..."
 else
@@ -98,6 +87,23 @@ fi
 for filename in `ls /persistent/etc/`; do
         ln -sf /persistent/etc/$filename /etc/
 done
+
+#### Reset button function.
+echo "Checking if the reset button is pressed"
+modprobe restore
+if [ -f /proc/rs ] ; then
+        if [ -n "`grep "s0" /proc/rs`" ] ; then
+                count=1
+                while true ; do
+                        count=`expr $count + 1`
+                        echo `expr $count % 2` > /proc/sys_led
+                        sleep 1
+                        if [ -n "`grep "s1" /proc/rs`" ] ; then
+                                /etc/on_reset_released.sh
+                        fi
+                done
+        fi
+fi
 
 # Mount Asterisk var/lib/asterisk/ as persistent
 for dirname in `ls /persistent/var/lib/asterisk/`; do
