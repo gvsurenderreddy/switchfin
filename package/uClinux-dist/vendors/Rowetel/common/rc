@@ -132,6 +132,7 @@ then
            echo "the card has been already formatted"
         fi
         [ ! -d /mnt/sd/asterisk ] && mkdir /mnt/sd/asterisk
+	[ ! -d /mnt/sd/monitor ] && mkdir /mnt/sd/monitor
         echo "[directories]" > /etc/asterisk/asterisk.conf
         echo "astlogdir => /mnt/sd/asterisk" >> /etc/asterisk/asterisk.conf
         [ ! -d /mnt/sd/asterisk/cdr-csv ] && mkdir /mnt/sd/asterisk/cdr-csv
@@ -192,5 +193,10 @@ fi
 ln -sf /persistent/sounds/moh /var/lib/asterisk/
 ln -sf /persistent/sounds/meetme /var/spool/asterisk/
 ln -sf /persistent/sounds/voicemail /var/spool/asterisk/
-ln -sf /persistent/sounds/monitor /var/spool/asterisk/
+if [ -d /mnt/sd/monitor ]
+then
+	ln -sf /mnt/sd/monitor /var/spool/asterisk/	
+else
+	ln -sf /persistent/sounds/monitor /var/spool/asterisk/
+fi
 cat /etc/motd
