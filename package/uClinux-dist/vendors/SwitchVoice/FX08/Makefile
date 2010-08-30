@@ -23,7 +23,7 @@ INODES   = 1024
 ROMFS_DIRS-y = bin etc etc/dhcpc home lib mnt proc sys usr var root home tmp var/run var/lib/misc
 ETC_FILES-y = \
 	filesystems group host.conf inetd.conf issue mime.types \
-	modprobe.conf motd passwd protocols services  tux-bf.gif
+	modprobe.conf motd passwd protocols services  tux-bf.gif inadyn.conf
 
 ROMFS_DIRS = bin dev etc etc/dhcpc home lib persistent
 ROMFS_DIRS += mnt mnt/flash /mnt/spiflash /mnt/mmc /mnt/mmc1

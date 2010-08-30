@@ -12,7 +12,7 @@ ROMFS_DIRS-y +=  var/lib/asterisk/static-http var/spool var/spool/asterisk var/s
 
 ETC_FILES-y = \
 	filesystems group mime.types modprobe.conf motd \
-	rc rpc TZ tux-bf.gif fstab  mime.types
+	rc rpc TZ tux-bf.gif fstab  mime.types inadyn.conf
 WEB_FILES-y =
 
 ETC_FILES-$(CONFIG_NET) += hosts host.conf protocols services
