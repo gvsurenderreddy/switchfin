@@ -1,5 +1,5 @@
 config SF_PACKAGE_INADYN
 	bool "inadyn"
-	default n
+	default y
 	help
 		inadyn is a client for 'open' name servers. That is, it let the user have an Internet recognized name for his machine by transferring to him some control over a name server that he does not manage. Some of the services that are offered by those open name servers are free of charge, and work even when the client machine does not have a static IP. The name servers that are supported by inayn are: http://www.dyndns.org and http://freedns.afraid.org 
