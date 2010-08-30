@@ -1,0 +1,33 @@
+#!/bin/hush
+# Start up file for INADYN
+
+
+USERNAME=`cat /etc/inadyn.conf | grep USERNAME | cut -f2 -d= | tr -d " "`
+PASSWORD=`cat /etc/inadyn.conf | grep PASSWORD | cut -f2 -d= | tr -d " "`
+DOMAIN=`cat /etc/inadyn.conf | grep DOMAIN | cut -f2 -d= | tr -d " "`
+
+case $1 in
+	start) tmp=`ps -aux | grep "inadyn -u" | grep -v grep`
+	       if test -n "$tmp"; then; echo "Inadyn already loaded"; exit 0;  fi;		
+	       inadyn -u $USERNAME -p $PASSWORD -a $DOMAIN &;;
+	stop) ps -aux | grep "inadyn -u" | grep -v grep | cut -c 1-5 | xargs kill -9;
+	      if [ "$?" -eq "0" ]; then
+		  echo "[Inadyn stopped]"
+	      fi;;
+	restart) ps -aux | grep "inadyn -u" | grep -v grep | cut -c 1-5 | xargs kil
+	         if [ "$?" -eq "0" ]; then
+			echo "[Inadyn stopped]"
+		 fi;
+		 inadyn -u $USERNAME -p $PASSWORD -a $DOMAIN &;;
+	enable) rm -f /persistent/etc/rc.d/S56inadyn; 
+	        ln -s /persistent/etc/init.d/inadyn /persistent/etc/rc.d/S56inadyn;;
+	disable) rm -f /persistent/etc/rc.d/S56inadyn;;
+        *) echo 'Syntax: /etc/init.d/inadyn [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
+esac
