@@ -7,4 +7,4 @@
 #* * * * * root /bin/touch /etc/config/crontab
 0 * * * * root /bin/hush /etc/rotatecdr.sh
 1 * * * * root /bin/hush /etc/cleanps.sh
-* 24 * * * root /bin/hush /etc/mem.sh
+#* 0 * * * root /bin/hush /etc/mem.sh
