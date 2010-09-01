@@ -38,10 +38,8 @@ asterisk-gui-source: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 
 
 $(ASTERISKGUI_DIR)/.unpacked: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
-	rm -rf $(ASTERISKGUI_DIR)
 	cp -R $(DL_DIR)/$(ASTERISKGUI_UNPACKED) $(ASTERISKGUI_DIR)
 	touch $(ASTERISKGUI_DIR)/.unpacked
-
 
 $(ASTERISKGUI_DIR)/.configured: $(ASTERISKGUI_DIR)/.unpacked
 	touch $(ASTERISKGUI_DIR)/.configured
@@ -50,17 +48,20 @@ gui_check_prev_ver:
 ifeq ($(strip $(SF_ASTERISK_GUI_3_0)),y)
 	if test -d $(BUILD_DIR)/asterisk-gui-4.0; then \
 		rm -rf $(BUILD_DIR)/asterisk-gui-4.0/; \
-		rm -rf $(TARGET_DIR)/var/lib/asterisk/; \
 	fi
+	rm -rf $(TARGET_DIR)/var/lib/asterisk/
+	rm -rf $(BUILD_DIR)/asterisk-gui-3.0/
 endif
 ifeq ($(strip $(SF_ASTERISK_GUI_4_0)),y)
 	if test -d $(BUILD_DIR)/asterisk-gui-3.0; then \
 		rm -rf $(BUILD_DIR)/asterisk-gui-3.0/; \
-		rm -rf $(TARGET_DIR)/var/lib/asterisk/; \
 	fi
+	rm -rf $(TARGET_DIR)/var/lib/asterisk/
+	rm -rf $(BUILD_DIR)/asterisk-gui-4.0/
 endif
 
 asterisk-gui: gui_check_prev_ver $(ASTERISKGUI_DIR)/.configured
+	svn up $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 	-find $(ASTERISKGUI_DIR) -type d -name .svn | xargs rm -rf
 	#mkdir -p $(TARGET_DIR)/etc/scripts
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk
@@ -92,3 +93,4 @@ asterisk-gui-dirclean:
 ifeq ($(strip $(SF_PACKAGE_ASTERISKGUI)),y)
 TARGETS+=asterisk-gui
 endif
+
