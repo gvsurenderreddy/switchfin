@@ -47,8 +47,7 @@
  *  5 Mar. 2010 Dimitar Penev Modified for DAHDI
  * 18 Mar. 2010 Dimitar Penev included IP01 support 
  * for use in Switchfin, based on the previous work done by Atcom
- * 01 Sep. 2010 Dimitar Penev added GSM1 support 	
- * 
+ * 	
  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
  */
 
@@ -273,7 +272,19 @@ static struct fxo_mode {
 
 /* ------------------------ Blackfin -------------------------*/
 
-#include "GSM_module_SPI.h"//yn
+/* Modified by Alex Tao */
+#ifdef CONFIG_4FX_SPI_INTERFACE
+#define SPI_BAUDS   5  /* 12.5 MHz for 100MHz system clock    */
+#define SPI_NCSA    3  /* nCS bit for SPI data                */
+#define SPI_NCSB    12 /* nCS bit for SPI mux                 */
+#else
+#ifdef CONFIG_4FX_SPORT_INTERFACE
+#define SPI_BAUDS   4  /* 13.4 MHz for 133MHz system clock    */
+/* Use other PF signals */
+#define SPI_NCSA    8    /* Simulate SPORT interface as SPI */
+#define SPI_NCSB    9
+#endif
+#endif
 
 #define RESET_BIT   4  /* GPIO bit tied to nRESET on Si chips */
 
@@ -327,19 +338,12 @@ static struct fxo_mode {
 
 #define MOD_TYPE_FXS	0
 #define MOD_TYPE_FXO	1
-#define MOD_TYPE_GSM    2 //added YN
 
 #define MINPEGTIME	10 * 8		/* 30 ms peak to peak gets us no more than 100 Hz */
 #define PEGTIME		50 * 8		/* 50ms peak to peak gets us rings of 10 Hz or more */
 #define PEGCOUNT	5		/* 5 cycles of pegging means RING */
 
 #define NUM_CAL_REGS 12
-
-int outgoing_call_state=0;// YN
-int incomming_call_state=0;// YN
-
-//Used for resheduling the TDM 8-bit slots
-static int card2TDMslot_mapping[NUM_CARDS];// YN
 
 struct calregs {
 	unsigned char vals[NUM_CAL_REGS];
@@ -407,19 +411,6 @@ struct wcfxs {
 	struct dahdi_chan *_chans[NUM_CARDS];
 };
 
-//YN =>from here
-inline void __wcfxs_setcard(struct wcfxs *wc, int card);
-
-static char *SIM_pin="3700";
-static char SIM_Enter_string[20]="at+cpin=\"";
-
-static int debug = 0;
-static void wait_just_a_bit(int foo);
-
-//Must be included after the wcfxs structure definition
-#include "gsm_module.c"
-
-//<=to here
 
 struct wcfxs_desc {
 	char *name;
@@ -443,6 +434,7 @@ int wcfxs_proc_read(char *buf, char **start, off_t offset,
 		    int count, int *eof, void *data);
 #endif
 
+static int debug = 0;
 static int robust = 0;
 static int timingonly = 0;
 static int lowpower = 0;
@@ -459,7 +451,8 @@ static int reg5, reg12, loop_i, line_v;
 
 static int wcfxs_init_ok = 0;
 
-static int wcfxs_init_proslic(struct wcfxs *wc, int card,int TDM_channel_offset, int fast , int manual, int sane);
+static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast , int manual, int sane);
+static void wait_just_a_bit(int foo);
 
 #ifdef AUDIO_RINGCHECK
 static inline void ring_check(struct wcfxs *wc, int card)
@@ -525,39 +518,37 @@ int ilogdma = 0;
 int serialnum = 0;
 int notzero=0;
 
-//Modified YN
-//TDM slots are resheduled according to card2TDMslot_mapping
 static inline void wcfxs_transmitprep(struct wcfxs *wc, u8 *writechunk)
 {
 	int x;
-	//static u8 temp[8]={255,137,128,137,255,9,0,9};
 
 	/* Calculate Transmission */
 	dahdi_transmit(&wc->span);
 
 	for (x=0;x<DAHDI_CHUNKSIZE;x++) {
 		if (wc->cardflag & (1 << 7))
-			writechunk[8*x+card2TDMslot_mapping[7]] = wc->chans[7].writechunk[x];//YN
+			writechunk[8*x+7] = wc->chans[7].writechunk[x];
 		if (wc->cardflag & (1 << 6))
-			writechunk[8*x+card2TDMslot_mapping[6]] = wc->chans[6].writechunk[x];//YN
+			writechunk[8*x+6] = wc->chans[6].writechunk[x];
 		if (wc->cardflag & (1 << 5))
-			writechunk[8*x+card2TDMslot_mapping[5]] = wc->chans[5].writechunk[x];//YN
+			writechunk[8*x+5] = wc->chans[5].writechunk[x];
 		if (wc->cardflag & (1 << 4))
-			writechunk[8*x+card2TDMslot_mapping[4]] = wc->chans[4].writechunk[x];//YN
+			writechunk[8*x+4] = wc->chans[4].writechunk[x];
+
 		if (wc->cardflag & (1 << 3))
-			writechunk[8*x+card2TDMslot_mapping[3]] = wc->chans[3].writechunk[x];//YN
+			writechunk[8*x+3] = wc->chans[3].writechunk[x];
 		if (wc->cardflag & (1 << 2))
-			writechunk[8*x+card2TDMslot_mapping[2]] = wc->chans[2].writechunk[x];//YN
+			writechunk[8*x+2] = wc->chans[2].writechunk[x];
 		if (wc->cardflag & (1 << 1))
-			writechunk[8*x+card2TDMslot_mapping[1]] = wc->chans[1].writechunk[x];//YN
+			writechunk[8*x+1] = wc->chans[1].writechunk[x];
 		if (wc->cardflag & (1 << 0)) {
-			writechunk[8*x+card2TDMslot_mapping[0]] = wc->chans[0].writechunk[x];//YN
+			writechunk[8*x+0] = wc->chans[0].writechunk[x];
+			//writechunk[8*x+0] = DAHDI_LIN2MU(sw[swi++]);
+			//if (swi == 6) swi = 0;
 		}
 	}
 }
 
-//Modified YN
-//TDM slots are resheduled according to card2TDMslot_mapping
 static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 {
 	int x;
@@ -566,21 +557,22 @@ static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 	//memset(readchunk, 0, 64);
 	for (x=0;x<DAHDI_CHUNKSIZE;x++) {
 		if (wc->cardflag & (1 << 7))
-			wc->chans[7].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[7]];//YN
+			wc->chans[7].readchunk[x] = readchunk[8*x+7];
 		if (wc->cardflag & (1 << 6))
-			wc->chans[6].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[6]];//YN
+			wc->chans[6].readchunk[x] = readchunk[8*x+6];
 		if (wc->cardflag & (1 << 5))
-			wc->chans[5].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[5]];//YN
+			wc->chans[5].readchunk[x] = readchunk[8*x+5];
 		if (wc->cardflag & (1 << 4))
-			wc->chans[4].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[4]];//YN
+			wc->chans[4].readchunk[x] = readchunk[8*x+4];
+
 		if (wc->cardflag & (1 << 3))
-			wc->chans[3].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[3]];//YN
+			wc->chans[3].readchunk[x] = readchunk[8*x+3];
 		if (wc->cardflag & (1 << 2))
-			wc->chans[2].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[2]];//YN
+			wc->chans[2].readchunk[x] = readchunk[8*x+2];
 		if (wc->cardflag & (1 << 1))
-			wc->chans[1].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[1]];//YN
+			wc->chans[1].readchunk[x] = readchunk[8*x+1];
 		if (wc->cardflag & (1 << 0))
-			wc->chans[0].readchunk[x] = readchunk[8*x+card2TDMslot_mapping[0]];//YN
+			wc->chans[0].readchunk[x] = readchunk[8*x+0];
 	}
 #ifdef AUDIO_RINGCHECK
 	for (x=0;x<wc->cards;x++)
@@ -598,7 +590,8 @@ static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
 }
 
 /* we have only one card at the moment */
-inline void __wcfxs_setcard(struct wcfxs *wc, int card)
+
+static inline void __wcfxs_setcard(struct wcfxs *wc, int card)
 {
 	if (wc->curcard != card) {
 #ifndef SF_IP01
@@ -989,7 +982,7 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 					printk("wcfxs: Card %d Going off hook\n", card);
 				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 				if (robust)
-					wcfxs_init_proslic(wc, card,card2TDMslot_mapping[card], 1, 0, 1);//YN
+					wcfxs_init_proslic(wc, card, 1, 0, 1);
 				wc->mod.fxs.oldrxhook[card] = 1;
 			
 			} else if (wc->mod.fxs.oldrxhook[card] && !wc->mod.fxs.debouncehook[card]) {
@@ -1013,7 +1006,7 @@ static inline void wcfxs_proslic_recheck_sanity(struct wcfxs *wc, int card)
 	res = wcfxs_getreg(wc, card, 8);
 	if (res) {
 		printk("Ouch, part reset, quickly restoring reality (%d)\n", card);
-		wcfxs_init_proslic(wc, card,card2TDMslot_mapping[card],1, 0, 1);
+		wcfxs_init_proslic(wc, card, 1, 0, 1);
 	} else {
 		res = wcfxs_getreg(wc, card, 64);
 		if (!res && (res != wc->mod.fxs.lasttxhook[card])) {
@@ -1072,17 +1065,10 @@ static void work_interrupt_processing(struct work_struct *test) {
               if (!(wc->intcount & 0xfc))
                 wcfxs_proslic_recheck_sanity(wc, x);
 #endif
-	    }
-	    else {
-			if ((wc->modtype[x] == MOD_TYPE_FXO) && (port_type[x] != 'G')) {
+            } else if (wc->modtype[x] == MOD_TYPE_FXO) {
               	/* ring detection, despite name */
             	wcfxs_voicedaa_check_hook(wc, x); 
             }
-			else{
-				if (wc->modtype[x] == MOD_TYPE_FXO) 
-					wcfxs_gsm_control(wc, x); 
-			}
-		 }
           }
 
 #ifdef DR_DONT_NEED
@@ -1418,8 +1404,7 @@ static void wait_just_a_bit(int foo)
 	schedule_timeout(foo);
 }
 
-//YN TDM_channel_offset parameter added
-static int wcfxs_init_voicedaa(struct wcfxs *wc, int card, int TDM_channel_offset, int fast, int manual, int sane)//YN
+static int wcfxs_init_voicedaa(struct wcfxs *wc, int card, int fast, int manual, int sane)
 {
 	unsigned char reg16=0, reg26=0, reg30=0, reg31=0;
 	long newjiffies;
@@ -1463,9 +1448,9 @@ static int wcfxs_init_voicedaa(struct wcfxs *wc, int card, int TDM_channel_offse
 	wcfxs_setreg(wc, card, 31, reg31);
 
 	/* Set Transmit/Receive timeslot */
-	wcfxs_setreg(wc, card, 34, ((TDM_channel_offset) * 8)+1);//YN // YN moved to +1 from FSYNC
+	wcfxs_setreg(wc, card, 34, (card) * 8);
 	wcfxs_setreg(wc, card, 35, 0x00);
-	wcfxs_setreg(wc, card, 36, ((TDM_channel_offset) * 8)+1);//YN // YN moved to +1 from FSYNC
+	wcfxs_setreg(wc, card, 36, (card) * 8);
 	wcfxs_setreg(wc, card, 37, 0x00);
 
 	/* Enable ISO-Cap */
@@ -1517,8 +1502,7 @@ static int wcfxs_init_voicedaa(struct wcfxs *wc, int card, int TDM_channel_offse
 	return 0;
 }
 
-//YN TDM_channel_offset parameter added
-static int wcfxs_init_proslic(struct wcfxs *wc, int card, int TDM_channel_offset,int fast, int manual, int sane)
+static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast, int manual, int sane)
 {
 
 	unsigned short tmp[5];
@@ -1651,9 +1635,9 @@ static int wcfxs_init_proslic(struct wcfxs *wc, int card, int TDM_channel_offset
 
     wcfxs_setreg(wc, card, 1, 0x28);
  	// U-Law 8-bit interface
-    wcfxs_setreg(wc, card, 2, ((TDM_channel_offset) * 8)+1);    // Tx Start count low byte  0  // YN moved to +1 from FSYNC
+    wcfxs_setreg(wc, card, 2, (card) * 8);    // Tx Start count low byte  0
     wcfxs_setreg(wc, card, 3, 0);    // Tx Start count high byte 0
-    wcfxs_setreg(wc, card, 4, ((TDM_channel_offset) * 8)+1);    // Rx Start count low byte  0  //YN moved to +1 from FSYNC
+    wcfxs_setreg(wc, card, 4, (card) * 8);    // Rx Start count low byte  0
     wcfxs_setreg(wc, card, 5, 0);    // Rx Start count high byte 0
     wcfxs_setreg(wc, card, 18, 0xff);     // clear all interrupt
     wcfxs_setreg(wc, card, 19, 0xff);
@@ -1726,7 +1710,7 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 		       transfers, not sure why we need to modify state of
 		       SLIC here?
 		    */
-		    wc->mod.fxs.idletxhookstate[chan->chanpos - 1] = 0x2; /* OHT mode when idle */
+		    wc->mod.fxs.idletxhookstate[chan->chanpos - 1] = 0x2;
 		
 		    if (wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x1) {
 				// Apply the change if appropriate 
@@ -1835,11 +1819,8 @@ static int wcfxs_close(struct dahdi_chan *chan)
 static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 {
 	struct wcfxs *wc = chan->pvt;
-	size_t len;// YN
-	char GSM_Call_string[30]="atd";// YN
-
 	int reg=0;
-	if((wc->modtype[chan->chanpos - 1] == MOD_TYPE_FXO)&& (port_type[chan->chanpos - 1] != 'G')) {
+	if (wc->modtype[chan->chanpos - 1] == MOD_TYPE_FXO) {
 		/* XXX Enable hooksig for FXO XXX */
 		switch(txsig) {
 		case DAHDI_TXSIG_START:
@@ -1858,35 +1839,20 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 		default:
 			printk("wcfxo: Can't set tx state to %d\n", txsig);
 		}
-	} 
-	if (wc->modtype[chan->chanpos - 1] == MOD_TYPE_FXS) {//YN
+	} else {
 		switch(txsig) {
 		case DAHDI_TXSIG_ONHOOK:
-			//incomming_call_state 0, initial state+first ring, 1, ringing, 2 conversastion 				
-			if(incomming_call_state==2) {//During call 
-					GSM_send(wc,chan->chanpos - 1,"ath");//was GSM_send(wc,0,"ath");
-					incomming_call_state=0;//Initial state
-			}
-
 			wcfxs_set_led(wc, chan->chanpos, FX_LED_GREEN);
 			if (debug)
 			    printk("DAHDI_TXSIG_ONHOOK FXS %d\n", chan->chanpos - 1);
 			switch(chan->sig) {
 			case DAHDI_SIG_EM:
-				if (debug)
-			    		printk("DAHDI_SIG_EM FXS %d\n", chan->chanpos - 1);
 			case DAHDI_SIG_FXOKS:
-				if (debug)
-			    		printk("DAHDI_SIG_FXOKS FXS %d\n", chan->chanpos - 1);
 			case DAHDI_SIG_FXOLS:
-				if (debug)
-			    		printk("DAHDI_SIG_FXOLS FXS %d\n", chan->chanpos - 1);
 			        //wc->mod.fxs.lasttxhook[chan->chanpos-1] = 1; /* power off audio paths */
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = wc->mod.fxs.idletxhookstate[chan->chanpos-1];
 				break;
 			case DAHDI_SIG_FXOGS:
-				if (debug)
-			    		printk("DAHDI_SIG_FXOGS %d\n", chan->chanpos - 1);
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = 3;
 				break;
 			}
@@ -1897,15 +1863,9 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 			    printk("DAHDI_TXSIG_OFFHOOK FXS %d\n", chan->chanpos - 1);
 			switch(chan->sig) {
 			case DAHDI_SIG_EM:
-				if (debug)
-			    		printk("DAHDI_SIG_EM FXS %d\n", chan->chanpos - 1);
-
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = 5;
 				break;
 			default:
-				if (debug)
-			    		printk("default detected %d\n", chan->chanpos - 1);
-
 				wc->mod.fxs.lasttxhook[chan->chanpos-1] = wc->mod.fxs.idletxhookstate[chan->chanpos-1];
 				break;
 			}
@@ -1923,62 +1883,6 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 			break;
 		default:
 			printk("wcfxs: Can't set tx state to %d\n", txsig);
-		}
-
-		if (debug)
-			printk("Setting FXS hook state to %d (%02x)\n", txsig, reg);
-
-#if 1
-		wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos-1]);
-#endif
-	}
-	if ((wc->modtype[chan->chanpos - 1] == MOD_TYPE_FXO) && (port_type[chan->chanpos - 1] == 'G')) {//YN
-		/* XXX Enable hooksig for GSM */
-		switch(txsig) {
-		case DAHDI_TXSIG_START:
-			if (debug)
-			    printk("DAHDI_TXSIG_START GSM %d\n", chan->chanpos - 1);
-			if(strlen(chan->txdialbuf)!=0){
-				// The line below is necessary when we call and the other side is BUSY
-				// Without this line -> blank signal is received
-				chan->rxhooksig = DAHDI_RXSIG_OFFHOOK;// YN
-				//Generate the GSM calling number string
-				strcpy(GSM_Call_string,"atd");
-				if (debug)
-					printk("chan->txdialbuf => %s\n",chan->txdialbuf);
-				strcat(GSM_Call_string,chan->txdialbuf);
-				len=strlen( GSM_Call_string);
-				GSM_Call_string[len-1]=0;//There is a "w" char which must be removed
-				strcat(GSM_Call_string,";");
-				if (debug)
-					printk("GSM string => %s\n",GSM_Call_string);
-				
-				if((outgoing_call_state==0)&&(incomming_call_state==0)){
-					GSM_send(wc,chan->chanpos - 1,GSM_Call_string);//"atd0899359529;");
-					outgoing_call_state=1;
-				}
-				break;
-			}
-		case DAHDI_TXSIG_OFFHOOK:
-			if(incomming_call_state==1){//During ringing DAHDI gives OFFHOOK
-					incomming_call_state=2;
-					GSM_send(wc,chan->chanpos - 1,"ata");//was GSM_send(wc,0,"ata");//Answer the call
-			}
-			if (debug)
-			    printk("DAHDI_TXSIG_OFFHOOK GSM %d\n", chan->chanpos - 1);
-			wc->mod.fxo.offhook[chan->chanpos - 1] = 1;
-			break;
-		case DAHDI_TXSIG_ONHOOK:
-			if(outgoing_call_state==2) {
-					GSM_send(wc,chan->chanpos - 1,"ath");//was GSM_send(wc,0,"ath");//hangup for GSM
-					outgoing_call_state=0;
-			}
-			if (debug)
-			    printk("DAHDI_TXSIG_ONHOOK GSM %d\n", chan->chanpos - 1);
-			wc->mod.fxo.offhook[chan->chanpos - 1] = 0;
-			break;
-		default:
-			printk("wcfxo: Can't set tx state to %d (GSM)\n", txsig);
 		}
 #if 1
 		if (debug) {
@@ -2037,18 +1941,10 @@ static void wcfxs_post_initialize(struct wcfxs *wc)
 	/* Finalize signalling  */
 	for (x=0;x<wc->cards;x++) {
 		if (wc->cardflag & (1 << x)) {
-			switch(wc->modtype[x])
-			{
-				case MOD_TYPE_FXO:
-					wc->chans[x].sigcap = DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS | DAHDI_SIG_SF | DAHDI_SIG_CLEAR;
-					break;
-				case MOD_TYPE_FXS: 
-					wc->chans[x].sigcap = DAHDI_SIG_FXOKS | DAHDI_SIG_FXOLS | DAHDI_SIG_FXOGS | DAHDI_SIG_SF | DAHDI_SIG_EM | DAHDI_SIG_CLEAR;			
-					break;
-				case MOD_TYPE_GSM://Added YN
-					wc->chans[x].sigcap = DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS | DAHDI_SIG_SF | DAHDI_SIG_CLEAR;
-					break;
-			}
+			if (wc->modtype[x] == MOD_TYPE_FXO)
+				wc->chans[x].sigcap = DAHDI_SIG_FXSKS | DAHDI_SIG_FXSLS | DAHDI_SIG_SF | DAHDI_SIG_CLEAR;
+			else
+				wc->chans[x].sigcap = DAHDI_SIG_FXOKS | DAHDI_SIG_FXOLS | DAHDI_SIG_FXOGS | DAHDI_SIG_SF | DAHDI_SIG_EM | DAHDI_SIG_CLEAR;
 		}
 	}
 }
@@ -2080,7 +1976,12 @@ int wcfxs_proc_read(char *buf, char **start, off_t off,
 static int wcfxs_hardware_init(struct wcfxs *wc)
 {
 	/* Hardware stuff */
-	unsigned char x,TDM_channel_offset;
+	unsigned char x;
+#ifdef	MULTI_SPI_FRAMEWORK
+	char          port_type[8];
+#else
+	char          port_type[FX_MAX_PORTS];
+#endif
         int           i;
 
 #ifdef CONFIG_4FX_SPI_INTERFACE
@@ -2115,7 +2016,6 @@ static int wcfxs_hardware_init(struct wcfxs *wc)
 
 #ifdef MULTI_SPI_FRAMEWORK
 	multi_spi_auto_detect(port_type);
-        gsm_auto_detect(wc,port_type, RESET_BIT);//added YN
 
 	for(i=0; i<multi_spi_board_size(); i++) {
 	  printk("port: %d port_type: %c\n", i+1, port_type[i]);
@@ -2123,8 +2023,6 @@ static int wcfxs_hardware_init(struct wcfxs *wc)
 	
 #else
 	fx_auto_detect(port_type, RESET_BIT);
-        gsm_auto_detect(wc,port_type, RESET_BIT);//added YN
-
 	for(i=0; i<FX_MAX_PORTS; i++) {
 	  printk("port: %d port_type: %c\n", i+1, port_type[i]);
 	}
@@ -2138,97 +2036,54 @@ static int wcfxs_hardware_init(struct wcfxs *wc)
 #endif
 	/* configure daughter cards */
 
-	// YN Initialization of an array (resheduling TDM slots)
-	memset(card2TDMslot_mapping, -1, sizeof(card2TDMslot_mapping));//Initially no slot is occupied!
-
-	
-	//YN
-	//Since the TDM slot of the GSM module is not configurable we must allow
-	//it to take the first and second TDM slots. For this purpose we must
-	//check if a GSM module is available  and assign the first TDM slots to it.
-	TDM_channel_offset=0;
-	for (x=0;x<wc->cards;x++) {
-		if (port_type[x] == 'G') {
-			//Init GSM
-			if (!(Initialize_GSM_module(wc,x))){
-
-				wc->modtype[x]=MOD_TYPE_FXO;//WAS MOD_TYPE_GSM
-			
-				//Each GSM channel occupies two TDM slots (16-bit word!).
-				//Since we will use companding only the first 8 bits are meaningful. 
-				//The second 8 bits will however also be occupied!
-				TDM_channel_offset=2;//The next available TDM slot. 
-				card2TDMslot_mapping[x]=0;//Slot number occupied
-				wc->cardflag |= (1 << x);//YN This port is registered with zaptel
-				printk("Module %d - GSM : TDM slot %d\n",x,card2TDMslot_mapping[x]);//YN
-				break;//Only one GSM Module is allowed!
-			}
-			else{
-				printk("Module %d: FAILED GSM\n", x);
-			}
-		}//end of port_type[x]=='G'
-	}//end for
-	//bfin_write_FIO_FLAG_S(1<<14);//for test only
-
 	for (x=0;x<wc->cards;x++) {
 	  int sane=0,ret=0,readi=0;
 
 	  if (port_type[x] == 'O') {
-	    if (!(ret = wcfxs_init_voicedaa(wc, x,TDM_channel_offset, 0, 0, sane))) {// changed YN
-	      wc->cardflag |= (1 << x);//YN
-	      printk("Module %d: Installed -- AUTO FXO (%s mode), TDM slot %d\n",x, fxo_modes[_opermode].name,TDM_channel_offset);//YN
-	      card2TDMslot_mapping[x]=TDM_channel_offset;
-	    } //end if (!...
-	    else
+	    if (!(ret = wcfxs_init_voicedaa(wc, x, 0, 0, sane))) {
+	      wc->cardflag |= (1 << x);
+	      printk("Module %d: Installed -- AUTO FXO (%s mode)\n",x, fxo_modes[_opermode].name);
+	    } else
 	      printk("Module %d: Not installed\n", x);
-	   TDM_channel_offset++; 
- 	   continue;
-	  }//end port_type[x]=='O'
-	  //else {
-	  if (port_type[x] == 'S') {
+	  }
+	  else {
 		
 	    sane=0;
 	    /* Init with Automatic Calibaration */
-	    if (!(ret = wcfxs_init_proslic(wc, x,TDM_channel_offset, 0, 0, sane))) {//changed YN
-	      wc->cardflag |= (1 << x);//YN
-	      card2TDMslot_mapping[x]=TDM_channel_offset;//added YN
+	    if (!(ret = wcfxs_init_proslic(wc, x, 0, 0, sane))) {
+	      wc->cardflag |= (1 << x);
 	      if (debug) {
 		readi = wcfxs_getreg(wc,x,LOOP_I_LIMIT);
 		printk("Proslic module %d loop current is %dmA\n",x,
 		       ((readi*3)+20));
-	      }//end debug
-	      printk("Module %d: Installed -- AUTO FXS, TDM slot %d\n",x,TDM_channel_offset);
-	      TDM_channel_offset++;//YN
-	    } //end if(!(ret=...
+	      }
+	      printk("Module %d: Installed -- AUTO FXS\n",x);
+	    } 
 	    else 
 	    {
 	          if(ret != -2) 
 		   {
 			sane=1;
 			/* Init with Manual Calibration */
-			if (!wcfxs_init_proslic(wc, x,TDM_channel_offset, 0, 1, sane)) 
+			if (!wcfxs_init_proslic(wc, x, 0, 1, sane)) 
 			{
-				wc->cardflag |= (1 << x);//YN
-				card2TDMslot_mapping[x]=TDM_channel_offset;//Added YN
+				wc->cardflag |= (1 << x);
                             if (debug) 
 				{
                                    readi = wcfxs_getreg(wc,x,LOOP_I_LIMIT);
                                     printk("Proslic module %d loop current is %dmA\n",x,
                                     ((readi*3)+20));
-                            }//end debug
-				printk("Module %d: Installed -- MANUAL FXS, TDM slot %d\n",x,TDM_channel_offset);
-				TDM_channel_offset++;//added YN
-			} //end if(!wcfxs_init....
+                            }
+				printk("Module %d: Installed -- MANUAL FXS\n",x);
+			} 
 			else 
 			{
 				printk("Module %d: FAILED FXS (%s)\n", x, fxshonormode ? fxo_modes[_opermode].name : "FCC");
-			} //end else
-		  } //end (ret!=-2
-	    } //end else
-	  }//end if (port_type[x] == 'S') 
-	//TDM_channel_offset++;
-	}//end for (x=0;x<wc->cards;x++) 
-
+			} 
+		  } 
+	    } 
+	  }
+	}
 
 	/* Return error if nothing initialized okay. */
 	if (!wc->cardflag && !timingonly) {
@@ -2372,7 +2227,7 @@ static void __exit wcfxs_cleanup(void)
 	}
 	#endif
 }
-module_param(SIM_pin, charp, 0600);// New parameter YN
+
 module_param(debug, int, 0600);
 module_param(loopcurrent, int, 0600);
 module_param(robust, int, 0600);

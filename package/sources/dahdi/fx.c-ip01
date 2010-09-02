@@ -47,9 +47,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #define FX_MAX_PORTS   1
 #endif
 
-#include "GSM_module_SPI.h"//yn
-char  port_type[FX_MAX_PORTS];//YN
-
 static u16 flag_enable, flag;
 
 static inline u16 read_FLAG(void)

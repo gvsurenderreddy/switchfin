@@ -46,20 +46,56 @@
 #include <asm/uaccess.h>
 
 #include "sport_interface.h"
-#include "GSM_module_SPI.h"//YN
 
 
-int sport_configure(int baud);
+//#define SPORT_INTERFACE_DEBUG
+#ifdef SPORT_INTERFACE_DEBUG
+#define PRINTK(args...) printk(args)
+#else
+#define PRINTK(args...)
+#endif
+
+#ifdef SPORT_INTERFACE_DEBUG
+static int txCnt = 0, rxCnt = 0;
+#endif
+
+#ifndef SPI_NCSB
+/* Use other PF signals */
+#define SPI_NCSA    8    /* Simulate SPORT interface as SPI */
+#define SPI_NCSB    9
+#endif
+#define SPORT_nPWR	12
+
+#ifndef SPORT1_REGBASE
+#define SPORT1_REGBASE 0xFFC00900
+#endif
+
+#define DEFINE_SPORT1_REG(reg, off) \
+static inline u16 sport1_read_##reg(void) \
+            { return *(volatile unsigned short*)(SPORT1_REGBASE + off); } \
+static inline void sport1_write_##reg(u16 v) \
+            {*(volatile unsigned short*)(SPORT1_REGBASE + off) = v;\
+             __builtin_bfin_ssync();}
+
+
+DEFINE_SPORT1_REG(TCR1,0x00)
+DEFINE_SPORT1_REG(TCR2,0x04)
+DEFINE_SPORT1_REG(TCLKDIV,0x08)
+DEFINE_SPORT1_REG(TFSDIV,0x0C)
+
+DEFINE_SPORT1_REG(RCR1, 0x20)
+DEFINE_SPORT1_REG(RCR2, 0x24)
+DEFINE_SPORT1_REG(RCLKDIV,0x28)
+DEFINE_SPORT1_REG(RFSDIV,0x2C)
+DEFINE_SPORT1_REG(STAT,0x30)
+
+
+static int sport_configure(int baud);
 
 
 /* When FX_MODE, we need not fill the struct of sport_config */
-int sport_configure(int baud)
+static int sport_configure(int baud)
 {
-
-	//Disable the receiving and transmitter	
-	sport1_write_TCR1( sport1_read_TCR1() & ~(TSPEN) ); 
-	sport1_write_RCR1( sport1_read_RCR1() & ~(RSPEN) ); 
-
 	/* Register SPORTx_TCR1 ( relative details pls refer 12-12 of hardware reference ) 
 	        TCKFE ( Clock Falling Edge Select )   ( Bit14 ) 
           	LTFS ( Bit11) :  0 - Active high TFS; 1 - Active low TFS
@@ -216,23 +252,6 @@ int sport_interface_init(int baud, u16 new_chip_select_mask)
 {
 	sport_configure(baud); /* Default should be 0x1 */
 
-//Raise chip selects PF8 and PF9; ADDEd by YN
-#if (defined(CONFIG_BF533) || defined(CONFIG_BF532))
-	bfin_write_FIO_FLAG_S(1<<8);
-	bfin_write_FIO_FLAG_S(1<<9);
-#endif
-#if (defined(CONFIG_BF536) || defined(CONFIG_BF537))
-	bfin_write_PORTFIO_SET(1<<8);
-	bfin_write_PORTFIO_SET(1<<9);
-#endif
-#if (defined(CONFIG_BF533) || defined(CONFIG_BF532))
-	bfin_write_FIO_FLAG_S( 1 << SPORT_nPWR );
-#endif
-#if (defined(CONFIG_BF536) || defined(CONFIG_BF537))
-	bfin_write_PORTFIO_SET( 1 << SPORT_nPWR );
-#endif
-__builtin_bfin_ssync();//YN
-
 	PRINTK("Before setting, FIOD_DIR = 0x%04x\n", bfin_read_FIO_DIR());
 	PRINTK("Before setting, new_chip_select_mask = 0x%04x\n", new_chip_select_mask);
 	if (new_chip_select_mask & 0xff00) 
@@ -257,6 +276,9 @@ __builtin_bfin_ssync();//YN
 	bfin_write_PORTFIO_SET( 1 << SPORT_nPWR );
 #endif
 	
+	//Enable SPORT1 interface
+	sport1_write_TCR1( sport1_read_TCR1() | TSPEN );
+
 	return 0; /* succeed */
 }
 
@@ -296,7 +318,6 @@ void sport_interface_reset(int reset_bit)
   	udelay(1000); 
 }
 
-EXPORT_SYMBOL( sport_configure);
 EXPORT_SYMBOL( sport_tx_byte );
 EXPORT_SYMBOL( sport_rx_byte );
 EXPORT_SYMBOL( sport_interface_init );
