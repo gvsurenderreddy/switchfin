@@ -286,7 +286,7 @@ static int fx_program_register_SPI2UART(struct wcfxs *wc,int port,int value)
 #ifdef CONFIG_4FX_SPI_INTERFACE
     bfsi_spi_write_8_bits(SPI_NCSB, port); 
 
-#else//adde YN
+#else//added YN
 
 	__wcfxs_setcard(wc, port);//We wish to progarmm module 'port'
 
@@ -294,7 +294,7 @@ static int fx_program_register_SPI2UART(struct wcfxs *wc,int port,int value)
  	sport_tx_word(SPI_NCSA,value);//Write register
  	value=value | 0x8000;//change writing to reading!
  	reg=sport_rx_word(SPI_NCSA,value);//Read register
-	temp=value |0xff00;
+	temp=value | 0xff00;
  	sport_configure(SPI_BAUDS);//Reconfigure the SPI (sport) to 1.33MHz/8bits
 	if(temp!=reg){
 		 printk("Register not programmed! T=%x R=%x Rm=%x\n",value,reg,temp);
@@ -416,7 +416,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 		if(strcmp(p2char,"x")==0) return;
 		if(strcmp(p2char,"0")==0){
 			outgoing_call_state=2;
-			//zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+			//dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 			if (debug>=2)
 				printk("OK recevied!\n");
 			return;
@@ -425,7 +425,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 			if (debug>=2)
 				printk("ocs=%d str_rec=%s\n",outgoing_call_state,p2char);
 			outgoing_call_state=0;
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 			if (debug>=2)
 				printk("OK not received!\n");
 			return;	
@@ -442,7 +442,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 		//Inform zaptel for call disconnect
 		if(strcmp(p2char,"3")==0){
 			outgoing_call_state=0;
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 			if (debug>=2)
 				printk("NO CARRIER %s\n",p2char);
 			return;
@@ -451,7 +451,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 		//Inform zaptel for call disconnect
 		if(strcmp(p2char,"7")==0){
 			outgoing_call_state=0;
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 			if (debug>=2)
 				printk("BUSY %s\n",p2char);
 			return;
@@ -460,7 +460,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 		//Inform zaptel for call disconnect
 		if(strcmp(p2char,"8")==0){
 			outgoing_call_state=0;
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 			if (debug>=2)
 				printk("NO ANSWER %s\n",p2char);
 			return;
@@ -488,16 +488,16 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 				}
 			}
 			if(interrupt_count==2){
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_RING);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
 				if (debug>=2)
-					printk("zt_hooksig ZT_RXSIG_RING sent!\n");
+					printk("dahdi_hooksig DAHDI_RXSIG_RING sent!\n");
 				interrupt_count=1;
 				return;
 			}	
 			if(interrupt_count==1) {
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 				if (debug>=2)
-					printk("zt_hooksig ZT_RXSIG_OFFHOOK sent!\n");
+					printk("dahdi_hooksig DAHDI_RXSIG_OFFHOOK sent!\n");
 				interrupt_count=0;
 				incomming_call_state=1;
 				return;
@@ -510,7 +510,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 	if(incomming_call_state==1){
 			p2char=GSM_receive(wc,card);
 
-			//It is necessary to set the state to ZT_TXSTATE_OFFHOOK, otherwise
+			//It is necessary to set the state to DAHDI_TXSTATE_OFFHOOK, otherwise
 			//there is a problem when call is disconnected before it is answered
 			wc->chans[card].txstate=1;//!! YN
 			//When call is disconnected before it is answered
@@ -518,7 +518,7 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 				incomming_call_state=0;
 				interrupt_count=0;
 				
-				zt_hooksig(&wc->chans[card],ZT_RXSIG_ONHOOK);
+				dahdi_hooksig(&wc->chans[card],DAHDI_RXSIG_ONHOOK);
 				if (debug>=2)
 					printk("NO CARRIER %s\n",p2char);
 				return;
@@ -536,16 +536,16 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 				}
 			}
 			if(interrupt_count==2){
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_RING);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
 				if (debug>=2)
-					printk("zt_hooksig ZT_RXSIG_RING sent!\n");
+					printk("dahdi_hooksig DAHDI_RXSIG_RING sent!\n");
 				interrupt_count=1;
 				return;
 			}	
 			if(interrupt_count==1) {
-				zt_hooksig(&wc->chans[card], ZT_RXSIG_OFFHOOK);
+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 				if (debug>=2)
-					printk("zt_hooksig ZT_RXSIG_OFFHOOK sent!\n");
+					printk("dahdi_hooksig DAHDI_RXSIG_OFFHOOK sent!\n");
 				interrupt_count=0;
 				return;
 			}
@@ -560,10 +560,10 @@ void wcfxs_gsm_control(struct wcfxs *wc, int card)
 		//that the other party has ended the conversation
 		if(strcmp(p2char,"3")==0){
 			incomming_call_state=0;
-			zt_hooksig(&wc->chans[card], ZT_RXSIG_ONHOOK);
+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 			if (debug>=2){
 				printk("NO CARRIER %s\n",p2char);
-				printk("zt_hooksig ZT_RXSIG_ONHOOK sent!\n");
+				printk("dahdi_hooksig DAHDI_RXSIG_ONHOOK sent!\n");
 			}
 			return;
 		}

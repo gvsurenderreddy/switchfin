@@ -18,3 +18,11 @@ config SF_PACKAGE_DAHDI_EXTRATOOLS
 		Enable some useful DAHDI tools like dahdi_speed dahdi_test dahdi_monitor 
 		dahdi_maint fxotune  
 
+config SF_PACKAGE_DAHDI_GSM1
+        bool "GSM1 support"
+	default n
+        depends on SF_IP01 || SF_IP04
+        help
+		GSM module (GSM1) support for IP01/IP02/IP04/IP08 PBXs This is done by a separate option now. After some testing the
+ 		support will be added in the main line IP0x and this menu option will be removed
+

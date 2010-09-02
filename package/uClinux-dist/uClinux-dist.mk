@@ -193,7 +193,7 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	cp -af package/uClinux-dist/vendors/SwitchVoice/vendor.mak $(UCLINUX_DIR)/vendors/SwitchVoice/
 	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE/config.linux-2.6.x
 	cp -af package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/br4_appliance.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf537/boards
-	ln -sf $(SOURCES_DIR)/i2c-pca9539.h $(UCLINUX_DIR)/linux-2.6.x/include/linux/
+	ln -sf $(SOURCES_DIR)/linux/i2c-pca9539.h $(UCLINUX_DIR)/linux-2.6.x/include/linux/
 	ln -sf $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/BR4-APPLIANCE_defconfig
 	$(MAKE) -C $(UCLINUX_DIR) SwitchVoice/BR4-APPLIANCE_defconfig
 endif
@@ -209,7 +209,7 @@ ifeq ($(strip $(SF_TARGET_CUSTOM)),y)
 	-$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR) menuconfig
 endif
 	$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR)
-	cp -af $(SOURCES_DIR)/groups $(TARGET_DIR)/bin
+	cp -af $(SOURCES_DIR)/target/groups $(TARGET_DIR)/bin
 ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 	find $(UCLINUX_DIR)/lib/libcurl/ -type f -name curl -print0 | xargs -0 file | grep ELF | cut -d: -f1 | xargs -i cp {} $(TARGET_DIR)/usr/bin/curl
 else

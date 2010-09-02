@@ -77,6 +77,11 @@ ifeq ($(strip $(SF_IP01)),y)
 	ln -sf $(DAHDI_SOURCES)/bfsi.c $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.c
 endif
 
+ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
+	ln -sf $(DAHDI_SOURCES)/gsm_module.c $(DAHDI_DIR)//linux/drivers/dahdi/gsm_module.c
+	ln -sf $(DAHDI_SOURCES)/GSM_module_SPI.h $(DAHDI_DIR)/linux/drivers/dahdi/GSM_module_SPI.h
+endif
+
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	ln -sf $(DAHDI_SOURCES)/wpr1.c $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.c
 	ln -sf $(DAHDI_SOURCES)/wpr1.h $(DAHDI_DIR)/linux/drivers/dahdi/wpr1.h
@@ -156,6 +161,3 @@ dahdi-clean:
 # Toplevel Makefile options
 #
 #################################################
-ifeq ($(strip $(SF_PACKAGE_DAHDI)),y)
-TARGETS+=dahdi
-endif

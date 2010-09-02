@@ -36,6 +36,9 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+
+  Dimitar Penev : GSM1 support added in Switchfin
+  Copyright 2010 Switchfin dpn@switchfin.org
 */
 
 #include <linux/module.h>
@@ -550,7 +553,7 @@ static void init_sport0(void)
 	/* 0 bit delay between FS pulse and first data bit,
 	   multichannel frame mode enabled, 
 	   multichannel tx and rx DMA packing enabled */
-	bfin_write_SPORT0_MCMC2(0x001c);
+	bfin_write_SPORT0_MCMC2(0x101c);//YN was 0x001c //One bit delay between FS pulse and first data bit
 
 }
 #endif

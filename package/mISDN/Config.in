@@ -15,6 +15,6 @@
 config SF_PACKAGE_MISDN
 	bool "mISDN"
 	default y
-	depends SF_BR4_APPLIANCE || SF_E121
+	depends SF_BR4_APPLIANCE
 	help
 		Open source ISDN stack

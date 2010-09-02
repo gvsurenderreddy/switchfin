@@ -20,6 +20,7 @@ source "package/uBoot/Config.in"
 
 
 comment "Hardware settings"
+#source "package/gsm1/Config.in"
 source "package/lec/Config.in"
 comment "DAHDI"
 source "package/dahdi/Config.in"

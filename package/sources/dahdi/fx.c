@@ -36,6 +36,9 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+
+  Dimitar Penev : GSM1 support added in Switchfin
+  Copyright 2010 Switchfin dpn@switchfin.org
 */
 
 #define FX_MAX_DBS     4  // max number of 4fx daughter boards
@@ -43,6 +46,9 @@
 #define FX_LED_OFF     0
 #define FX_LED_RED     1
 #define FX_LED_GREEN   2
+
+#include "GSM_module_SPI.h" //YN
+char  port_type[FX_MAX_PORTS];//YN
 
 static int led[FX_MAX_DBS];
 

@@ -16,10 +16,6 @@
 #define SPI_NCSB    9
 #endif
 
-#define RESET_BIT   4  /* GPIO bit tied to nRESET on Si chips */
-#define NUM_CARDS 8
-#define NUM_CAL_REGS 12
-
 #define FX_MAX_PORTS   8  // max number of ports in system
 
 #define FX_LED_RED     1
