@@ -616,6 +616,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +				printk("NO CARRIER %s\n",p2char);
 +				printk("dahdi_hooksig DAHDI_RXSIG_ONHOOK sent!\n");
 +			}
++			GSM_send(wc,0,"ath"); //Penev !!! disconnect after the call
 +			return;
 +		}
 +		if (debug>=2)
