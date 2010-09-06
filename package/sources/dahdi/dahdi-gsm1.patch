@@ -1,6 +1,6 @@
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/bfsi.c
---- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.c	2010-09-02 16:55:21.000000000 +0300
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/bfsi.c	2010-09-02 16:51:42.000000000 +0300
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/bfsi.c
+--- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.c	2010-09-06 11:13:58.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/bfsi.c	2010-09-06 11:20:14.000000000 +0300
 @@ -36,6 +36,9 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
@@ -20,11 +20,28 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.c dahdi-li
  
  }
  #endif
-Binary files build_ip04/dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.ko and /BACKUP/dahdi-gsm/bfsi.ko differ
-Binary files build_ip04/dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.o and /BACKUP/dahdi-gsm/bfsi.o differ
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/fx.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/fx.c
---- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/fx.c	2010-09-02 16:55:21.000000000 +0300
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/fx.c	2010-09-02 16:51:42.000000000 +0300
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/dahdi-base.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/dahdi-base.c
+--- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/dahdi-base.c	2010-04-19 22:42:53.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/dahdi-base.c	2010-09-06 11:20:14.000000000 +0300
+@@ -3330,6 +3330,7 @@
+ 		case 'T':
+ 			chan->digitmode = DIGIT_MODE_DTMF;
+ 			chan->tonep = 0;
++			chan->span->hooksig(chan, DAHDI_TXSIG_START);
+ 			break;
+ 		case 'M':
+ 			chan->digitmode = DIGIT_MODE_MFR1;
+@@ -3346,6 +3347,7 @@
+ 		case 'P':
+ 			chan->digitmode = DIGIT_MODE_PULSE;
+ 			chan->tonep = 0;
++			chan->span->hooksig(chan, DAHDI_TXSIG_START);
+ 			break;
+ 		default:
+ 			if ((c != 'W') && (chan->digitmode == DIGIT_MODE_PULSE)) {
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/fx.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/fx.c
+--- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/fx.c	2010-09-06 11:13:58.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/fx.c	2010-09-06 11:20:14.000000000 +0300
 @@ -36,6 +36,9 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
@@ -45,10 +62,10 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/fx.c dahdi-linu
  static int led[FX_MAX_DBS];
  
  /*
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/gsm_module.c
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/gsm_module.c
 --- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c	1970-01-01 02:00:00.000000000 +0200
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/gsm_module.c	2010-09-02 16:51:42.000000000 +0300
-@@ -0,0 +1,1071 @@
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/gsm_module.c	2010-09-06 11:20:14.000000000 +0300
+@@ -0,0 +1,1137 @@
 +/*
 + * GSM Interface Driver for Zapata Telephony interface
 + *
@@ -84,6 +101,11 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +extern int outgoing_call_state;
 +extern int incomming_call_state;
 +extern char  port_type[FX_MAX_PORTS];
++
++char CallerID[60]=""; //Keep the callers ID of the incoming GSM calls.
++		      //This variable is exported to Asterisk using the proc. 
++		      //Can be used only diring active call. 
++
 +
 +
 +//SPORT1 emulates SPI communication through the CPLD.
@@ -407,9 +429,9 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +//SPI2UART.Data is received from the UARTs FIFO character by charachter.
 +//It checks if there is data to read and if yes ->reads it, if no 
 +// an 'x' character is output.
-+char * GSM_receive(struct wcfxs *wc,int port)
++//Caller should allocate enought space for rcv_str
++void  GSM_receive(struct wcfxs *wc,int port, char *rcv_str)
 +{
-+	static char GSM_string[60];
 +	u16 reg,i,temp;
 +	int keep_s;
 +	
@@ -420,13 +442,16 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +	reg=reg & 0x00ff;
 +	//Check if data to read is available
 +	if(reg==0) {//if no data to read -> output 'x' string
-+		GSM_string[0]='x';
-+		GSM_string[1]=0x00;//string terminating character
-+		return GSM_string;
++		rcv_str[0]='x';
++		rcv_str[1]=0x00;//string terminating character
++		return;
 +	}
 +
 +	//Get all the characters and put them in a char array
 +	keep_s=0;
++	if(reg>64)
++		printk("receiving buffer overflow!");
++
 +	for(i=0;i<reg;i++){
 +		temp=fx_read_SPI2UART(wc,port,0x8000); 
 +		temp=temp & 0x00ff;
@@ -435,20 +460,51 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +				printk("\n");
 +			//Add the terminating character when at least one char has been received
 +			if(keep_s>0){
-+				GSM_string[keep_s]=0x00;
++				rcv_str[keep_s]=0x00;
 +				keep_s+=1;
 +			}
 +		}
 +		else{		
 +			if(debug>=2)
 +				printk("%c",(char)temp);
-+			GSM_string[keep_s]=(char)temp;
++			rcv_str[keep_s]=(char)temp;
 +			keep_s+=1;
 +		}		
 +	}
-+
-+	return GSM_string;
++	return;
 +}
++
++
++void Extract_CallerID(char *clcc, char *CID){
++	int i,j, commas;
++	
++	i=0; commas=0;
++	while (commas<5 && clcc[i])		//Count 5 commas
++		if(clcc[i++]==',') commas++;
++	
++	if (commas!=5) return;
++
++	while ( clcc[i] != '"' && clcc[i]) {    //Serach for "
++		if(clcc[i++]==',') break;
++	}
++	
++	if(clcc[i++]!='"') return;
++
++	j=0;
++	while ( clcc[i] != '"' && clcc[i]) {    //Copy CID 
++
++		CID[j++]=clcc[i++];
++	}
++	
++	
++	if(clcc[i]=='"') 			//Check for closing "
++		CID[j]=0;
++	else
++		CID[0]=0;				
++		
++	return;
++}
++
 +
 +//The function is placed in the main SPORT interrupt
 +// It implements a state mashine for control of the Dialed/Received
@@ -456,16 +512,16 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +void wcfxs_gsm_control(struct wcfxs *wc, int card)
 +{
 +	static int interrupt_count=0;
-+	char * p2char;
++	char rcv_str[60];
 +
 +//Dialing part
 +
 +	//Once we have dialed the number we expect an OK received from
 +	//the modem. When OK is received, we switch to the next state
 +	if(outgoing_call_state==1){
-+		p2char=GSM_receive(wc,card);
-+		if(strcmp(p2char,"x")==0) return;
-+		if(strcmp(p2char,"0")==0){
++		GSM_receive(wc, card, rcv_str);
++		if(strcmp(rcv_str,"x")==0) return;
++		if(strcmp(rcv_str,"0")==0){
 +			outgoing_call_state=2;
 +			//dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
 +			if (debug>=2)
@@ -474,7 +530,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +		}
 +		else{
 +			if (debug>=2)
-+				printk("ocs=%d str_rec=%s\n",outgoing_call_state,p2char);
++				printk("ocs=%d str_rec=%s\n",outgoing_call_state,rcv_str);
 +			outgoing_call_state=0;
 +			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 +			if (debug>=2)
@@ -487,37 +543,38 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +	//During converstaion
 +	//We continue looking for "NO CARRIER" "BUSY" or other signals.
 +	if(outgoing_call_state==2){
-+		p2char=GSM_receive(wc,card);
-+		if(strcmp(p2char,"x")==0) return;
++		GSM_receive(wc,card, rcv_str);
++		if(strcmp(rcv_str,"x")==0) return;
 +		//If NO CARRIER received, initialize the state machine
 +		//Inform zaptel for call disconnect
-+		if(strcmp(p2char,"3")==0){
++		if(strcmp(rcv_str,"3")==0){
 +			outgoing_call_state=0;
 +			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 +			if (debug>=2)
-+				printk("NO CARRIER %s\n",p2char);
++				printk("NO CARRIER during conversation\n");
++			*CallerID=0;
 +			return;
 +		}
 +		//If BUSY received, initialize the state machine
 +		//Inform zaptel for call disconnect
-+		if(strcmp(p2char,"7")==0){
++		if(strcmp(rcv_str,"7")==0){
 +			outgoing_call_state=0;
 +			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 +			if (debug>=2)
-+				printk("BUSY %s\n",p2char);
++				printk("BUSY %s\n",rcv_str);
 +			return;
 +		}
 +		//If NO ANSWER received, initialize the state machine
 +		//Inform zaptel for call disconnect
-+		if(strcmp(p2char,"8")==0){
++		if(strcmp(rcv_str,"8")==0){
 +			outgoing_call_state=0;
 +			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
 +			if (debug>=2)
-+				printk("NO ANSWER %s\n",p2char);
++				printk("NO ANSWER %s\n",rcv_str);
 +			return;
 +		}
 +		if (debug>=2)
-+			printk("ocs=%d str_rec=%s\n",outgoing_call_state,p2char);	
++			printk("ocs=%d str_rec=%s\n",outgoing_call_state,rcv_str);	
 +		return;		
 +	}
 +
@@ -525,30 +582,42 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +	//Waiting for RING signal from the GSM
 +	if(incomming_call_state==0){
 +		
-+			p2char=GSM_receive(wc,card);
++			GSM_receive(wc, card, rcv_str);
 +			//When RING is received
-+			if(strcmp(p2char,"2")==0){
++			if(strcmp(rcv_str,"2")==0){
 +				 interrupt_count=2;
 +				 if (debug>=2)
-+					 printk("Ring: %s\n",p2char);
++					 printk("Ring: %s\n",rcv_str);
 +			}
 +			else{
-+				if(strcmp(p2char,"x")!=0){
++				if(strcmp(rcv_str,"x")!=0){
 +					if (debug>=2)
-+						printk("ics=%d str_rec=%s\n",incomming_call_state,p2char);
++						printk("ics=%d str_rec=%s\n",incomming_call_state,rcv_str);
 +				}
 +			}
 +			if(interrupt_count==2){
 +				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_RING);
 +				if (debug>=2)
 +					printk("dahdi_hooksig DAHDI_RXSIG_RING sent!\n");
++
++
++                                //Retreive the incomming call Caller ID
++                                if(!(*CallerID)){
++					GSM_send(wc, card, "at+clcc");
++                                	wait_just_a_bit(HZ/3);
++                                	GSM_receive(wc, card, rcv_str);
++					Extract_CallerID(rcv_str, CallerID);
++                                	if(debug>=2) 
++						printk("GSM1 CallerID: %s\n", CallerID);
++				}
++
 +				interrupt_count=1;
 +				return;
 +			}	
 +			if(interrupt_count==1) {
-+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
++				dahdi_hooksig(&wc->chans[card], DAHDI_TXSIG_OFFHOOK);
 +				if (debug>=2)
-+					printk("dahdi_hooksig DAHDI_RXSIG_OFFHOOK sent!\n");
++					printk("dahdi_hooksig DAHDI_TXSIG_OFFHOOK sent!\n");
 +				interrupt_count=0;
 +				incomming_call_state=1;
 +				return;
@@ -559,31 +628,32 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +		
 +	//Ringing and checking for call disconnect
 +	if(incomming_call_state==1){
-+			p2char=GSM_receive(wc,card);
++			GSM_receive(wc, card, rcv_str);
 +
 +			//It is necessary to set the state to DAHDI_TXSTATE_OFFHOOK, otherwise
 +			//there is a problem when call is disconnected before it is answered
 +			wc->chans[card].txstate=1;//!! YN
 +			//When call is disconnected before it is answered
-+			if(strcmp(p2char,"3")==0){
++			if(strcmp(rcv_str,"3")==0){
 +				incomming_call_state=0;
 +				interrupt_count=0;
 +				
-+				dahdi_hooksig(&wc->chans[card],DAHDI_RXSIG_ONHOOK);
++				dahdi_hooksig(&wc->chans[card],DAHDI_TXSIG_ONHOOK);
 +				if (debug>=2)
-+					printk("NO CARRIER %s\n",p2char);
++					printk("NO CARRIER during ringing\n");
++				*CallerID=0;
 +				return;
 +			}
 +			//When RING is received
-+			if(strcmp(p2char,"2")==0){
++			if(strcmp(rcv_str,"2")==0){
 +				 interrupt_count=2;
 +				 if (debug>=2)
-+					 printk("Ring: %s\n",p2char);
++					 printk("Ring: %s\n",rcv_str);
 +			}
 +			else{
-+				if(strcmp(p2char,"x")!=0) {
++				if(strcmp(rcv_str,"x")!=0) {
 +					if (debug>=2)
-+						printk("ics=%d str_rec=%s\n",incomming_call_state,p2char);
++						printk("ics=%d str_rec=%s\n",incomming_call_state,rcv_str);
 +				}
 +			}
 +			if(interrupt_count==2){
@@ -594,9 +664,9 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +				return;
 +			}	
 +			if(interrupt_count==1) {
-+				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
++				dahdi_hooksig(&wc->chans[card], DAHDI_TXSIG_OFFHOOK);
 +				if (debug>=2)
-+					printk("dahdi_hooksig DAHDI_RXSIG_OFFHOOK sent!\n");
++					printk("dahdi_hooksig DAHDI_TXSIG_OFFHOOK sent!\n");
 +				interrupt_count=0;
 +				return;
 +			}
@@ -605,22 +675,22 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +
 +	//Connected state (during conversation)
 +	if(incomming_call_state==2){
-+		p2char=GSM_receive(wc,card);
-+		if(strcmp(p2char,"x")==0) return;
++		GSM_receive(wc, card, rcv_str);
++		if(strcmp(rcv_str,"x")==0) return;
 +		//Looking for NO CARRIER. If received, inform zaptel
 +		//that the other party has ended the conversation
-+		if(strcmp(p2char,"3")==0){
++		if(strcmp(rcv_str,"3")==0){
 +			incomming_call_state=0;
-+			dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
++			dahdi_hooksig(&wc->chans[card], DAHDI_TXSIG_ONHOOK);
 +			if (debug>=2){
-+				printk("NO CARRIER %s\n",p2char);
-+				printk("dahdi_hooksig DAHDI_RXSIG_ONHOOK sent!\n");
++				printk("NO CARRIER during conversation\n");
++				printk("dahdi_hooksig DAHDI_TXSIG_ONHOOK sent!\n");
 +			}
-+			GSM_send(wc,0,"ath"); //Penev !!! disconnect after the call
++			*CallerID=0;
 +			return;
 +		}
 +		if (debug>=2)
-+			printk("ics=%d str_rec=%s\n",incomming_call_state,p2char);	
++			printk("ics=%d str_rec=%s\n",incomming_call_state,rcv_str);	
 +		return;
 +	}
 +		
@@ -734,7 +804,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +static int init_GSM(struct wcfxs *wc,int port)
 +{
 +	u16 reg;
-+	char * p2char;
++	char rcv_str[60];
 +	int cntr;
 +
 +//GSM management part
@@ -754,10 +824,10 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +		GSM_send(wc,port,"at+cpowd=1");
 +		printk("Logging off the network........!\n");
 +		wait_just_a_bit(7*HZ);
-+		p2char=GSM_receive(wc,port);
++		GSM_receive(wc, port, rcv_str);
 +		if (debug)
-+			printk("Received: %s\n",p2char);
-+		} while(strcmp(p2char,"NORMAL POWER DOWN")!=0 && (--cntr>0));
++			printk("Received: %s\n",rcv_str);
++		} while(strcmp(rcv_str,"NORMAL POWER DOWN")!=0 && (--cntr>0));
 +
 +
 +		//Check if VDD_EXT is in high state
@@ -813,19 +883,19 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +	GSM_send(wc,port,"at");
 +	// Wait 
 +	wait_just_a_bit(HZ);
-+	p2char=GSM_receive(wc,port);
++	GSM_receive(wc, port, rcv_str);
 +	if (debug)
-+		printk("Received: %s\n",p2char);
++		printk("Received: %s\n",rcv_str);
 +
 +	//Make sure there that there is no echo to the terminal
 +	cntr=3;
 +	do {
-+	GSM_send(wc,port,"ate0");
-+	wait_just_a_bit(HZ/10);
-+	p2char=GSM_receive(wc,port);
-+	if (debug)
-+		printk("Received: %s\n",p2char);
-+	} while(strcmp(p2char,"OK")!=0 && (--cntr>0));
++		GSM_send(wc,port,"ate0");
++		wait_just_a_bit(HZ/10);
++		GSM_receive(wc, port, rcv_str);
++		if (debug)
++			printk("Received: %s\n",rcv_str);
++	} while(strcmp(rcv_str,"OK")!=0 && (--cntr>0));
 +		
 +
 +	//Change the modem answer type, i.e.
@@ -834,54 +904,57 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +	do {
 +		GSM_send(wc,port,"atv0");
 +		wait_just_a_bit(HZ/10);
-+		p2char=GSM_receive(wc,port);
++		GSM_receive(wc, port, rcv_str);
 +		if (debug)
-+			printk("Received: %s\n",p2char);
-+	} while(strcmp(p2char,"0")!=0 && (--cntr>0));
++			printk("Received: %s\n",rcv_str);
++	} while(strcmp(rcv_str,"0")!=0 && (--cntr>0));
 +	
 +	//Error message verbose string
 +	cntr=3;
 +	do {
 +		GSM_send(wc,port,"at+cmee=2");
 +		wait_just_a_bit(HZ/10);
-+		p2char=GSM_receive(wc,port);
++		GSM_receive(wc, port, rcv_str);
 +		if (debug)
-+			printk("Received: %s\n",p2char);
-+	} while(strcmp(p2char,"0")!=0 && (--cntr>0));
++			printk("Received: %s\n",rcv_str);
++	} while(strcmp(rcv_str,"0")!=0 && (--cntr>0));
 +	
 +
 +
 +	//SIM PIN check
 +	GSM_send(wc,port,"at+cpin?");
 +	wait_just_a_bit(HZ/2);
-+	p2char=GSM_receive(wc,port);
++	GSM_receive(wc, port, rcv_str);
 +	if (debug)
-+		printk("Received: %s\n",p2char);
++		printk("Received: %s\n",rcv_str);
 +	
 +
 +	//If SIM pin has not been entered, enter it
-+	if(strcmp(p2char,"+CPIN: SIM PIN")==0)
++	if(strcmp(rcv_str,"+CPIN: SIM PIN")==0)
 +	{
++		strcat(SIM_Enter_string, SIM_pin);
++		strcat(SIM_Enter_string, "\"");
 +		//Enter PIN and wait for OK
-+		do{
-+			GSM_send(wc,port,SIM_Enter_string);//"at+cpin=\"3700\"");
-+			wait_just_a_bit(3*HZ);
-+			p2char=GSM_receive(wc,port);
-+			if (debug)
-+				printk("Received: %s\n",p2char);
-+			//PIN entered but wrong -> exit
-+			if(strcmp(p2char,"+CME ERROR: incorrect password")==0)
-+			{
-+				printk("WRONG SIM PIN!\n");
-+				return 1;
-+			}
-+		} while(strcmp(p2char,"0")!=0);
++			
++		GSM_send(wc,port,SIM_Enter_string);//"at+cpin=\"3700\"");
++		wait_just_a_bit(4*HZ); 
++		GSM_receive(wc, port, rcv_str);
++		if (debug)
++			printk("Received: %s\n",rcv_str);
++		
++		//PIN entered but wrong -> exit
++		if(strcmp(rcv_str,"+CME ERROR: incorrect password")==0)
++		{
++			printk("WRONG SIM PIN!\n");
++			return 1;
++		}
++
 +	}
 +	//if No SIM PIN required
 +	else
 +	{
 +		//Card not inserted
-+		if(strcmp(p2char,"+CME ERROR: SIM not inserted")==0)
++		if(strcmp(rcv_str,"+CME ERROR: SIM not inserted")==0)
 +		{
 +			printk("SIM NOT INSERTED! PLEASE INSERT SIM!\n");
 +			return 1;
@@ -890,7 +963,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +		else
 +		{
 +			//Card unlocked
-+			if(strcmp(p2char,"+CPIN: READY")==0)
++			if(strcmp(rcv_str,"+CPIN: READY")==0)
 +			{
 +				printk("SIM CARD UNLOCKED!\n");
 +			}
@@ -908,36 +981,46 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +	
 +	// Wait until the modem is initialized properly
 +	if(debug)
-+		printk("Wait some time for GSM PIN init!\n");
-+	wait_just_a_bit(10*HZ);
++		printk("Wait for GSM init ");
++	cntr=60;
++	do{
++		wait_just_a_bit(HZ);
++		GSM_send(wc,port,"at+ccalr?");	
++		wait_just_a_bit(HZ/10);
++		GSM_receive(wc, port, rcv_str);
++		rcv_str[9]=0; //Terminate so we checkonly for +CCALR:1
++		printk(".");
++	} while(strcmp(rcv_str,"+CCALR:1")!=0 && (--cntr>0));
++	if(cntr>0) printk(" DONE!\n");
++	else printk(" TIME OUT!\n");
 +
 +	//text result code ,dial and busy enabled
 +	do {
-+	GSM_send(wc,port,"atx4");
-+	wait_just_a_bit(HZ/10);
-+	p2char=GSM_receive(wc,port);
-+	if (debug)
-+		printk("Received: %s\n",p2char);
-+	} while(strcmp(p2char,"0")!=0);
++		GSM_send(wc,port,"atx4");
++		wait_just_a_bit(HZ/10);
++		GSM_receive(wc, port, rcv_str);
++		if (debug)
++			printk("Received: %s\n",rcv_str);
++	} while(strcmp(rcv_str,"0")!=0);
 +
 +	//Adjust mic volume
 +	do {
-+	GSM_send(wc,port,"at+cmic=0,0");
-+	wait_just_a_bit(HZ/10);
-+	p2char=GSM_receive(wc,port);
-+	if (debug)
-+		printk("Received: %s\n",p2char);
-+	} while(strcmp(p2char,"0")!=0);
++		GSM_send(wc,port,"at+cmic=0,0");
++		wait_just_a_bit(HZ/10);
++		GSM_receive(wc, port, rcv_str);
++		if (debug)
++			printk("Received: %s\n",rcv_str);
++	} while(strcmp(rcv_str,"0")!=0);
 +
 +
 +        //Adjust the side-tone level to 0dB
 +        do {
-+        GSM_send(wc,port,"at+sidet=0");
-+        wait_just_a_bit(HZ/10);
-+        p2char=GSM_receive(wc,port);
-+        if (debug)
-+                printk("Received: %s\n",p2char);
-+        } while(strcmp(p2char,"0")!=0);
++        	GSM_send(wc,port,"at+sidet=0");
++        	wait_just_a_bit(HZ/10);
++        	GSM_receive(wc, port, rcv_str);
++        	if (debug)
++                	printk("Received: %s\n",rcv_str);
++        } while(strcmp(rcv_str,"0")!=0);
 +
 +
 +        //Set the built in echo canceler
@@ -953,22 +1036,22 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +    	//		      1     AUX_AUDIO
 +    	//		      0     NORMAL_AUDIO
 +        do {
-+        GSM_send(wc,port,"at+echo=5000,5,4,0");
-+        wait_just_a_bit(HZ/10);
-+        p2char=GSM_receive(wc,port);
-+        if (debug)
-+                printk("Received: %s\n",p2char);
-+        } while(strcmp(p2char,"0")!=0);
++        	GSM_send(wc,port,"at+echo=5000,5,4,0");
++        	wait_just_a_bit(HZ/10);
++        	GSM_receive(wc, port, rcv_str);
++        	if (debug)
++                	printk("Received: %s\n",rcv_str);
++        } while(strcmp(rcv_str,"0")!=0);
 +
 +
 +	//Adjust loudspeaker volume
 +	do {
-+	GSM_send(wc,port,"at+clvl=90");
-+	wait_just_a_bit(HZ/10);
-+	p2char=GSM_receive(wc,port);
++		GSM_send(wc,port,"at+clvl=90");
++		wait_just_a_bit(HZ/10);
++		GSM_receive(wc, port, rcv_str);
 +	if (debug)
-+		printk("Received: %s\n",p2char);
-+	} while(strcmp(p2char,"0")!=0);
++		printk("Received: %s\n",rcv_str);
++	} while(strcmp(rcv_str,"0")!=0);
 +
 +	if(debug)
 +		printk("\n");
@@ -1120,10 +1203,9 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/gsm_module.c da
 +
 +
 +
-+
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/GSM_module_SPI.h dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/GSM_module_SPI.h
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/GSM_module_SPI.h dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/GSM_module_SPI.h
 --- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/GSM_module_SPI.h	1970-01-01 02:00:00.000000000 +0200
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/GSM_module_SPI.h	2010-09-02 16:51:42.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/GSM_module_SPI.h	2010-09-06 11:20:14.000000000 +0300
 @@ -0,0 +1,69 @@
 +
 +#ifndef GSM_MODULE_SPI
@@ -1194,9 +1276,9 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/GSM_module_SPI.
 +
 +#endif
 +
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/sport_interface.c
---- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface.c	2010-09-02 16:55:21.000000000 +0300
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/sport_interface.c	2010-09-02 16:51:42.000000000 +0300
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/sport_interface.c
+--- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface.c	2010-09-06 11:13:58.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/sport_interface.c	2010-09-06 11:20:14.000000000 +0300
 @@ -46,56 +46,20 @@
  #include <asm/uaccess.h>
  
@@ -1304,11 +1386,9 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface
  EXPORT_SYMBOL( sport_tx_byte );
  EXPORT_SYMBOL( sport_rx_byte );
  EXPORT_SYMBOL( sport_interface_init );
-Binary files build_ip04/dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface.ko and /BACKUP/dahdi-gsm/sport_interface.ko differ
-Binary files build_ip04/dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/sport_interface.o and /BACKUP/dahdi-gsm/sport_interface.o differ
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/wcfxs.c
---- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c	2010-09-02 16:55:21.000000000 +0300
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/wcfxs.c	2010-09-02 16:51:42.000000000 +0300
+diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/wcfxs.c
+--- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c	2010-09-06 11:13:58.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/wcfxs.c	2010-09-06 11:20:14.000000000 +0300
 @@ -47,7 +47,8 @@
   *  5 Mar. 2010 Dimitar Penev Modified for DAHDI
   * 18 Mar. 2010 Dimitar Penev included IP01 support 
@@ -1381,15 +1461,22 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  
  struct wcfxs_desc {
  	char *name;
-@@ -434,7 +443,6 @@
- 		    int count, int *eof, void *data);
+@@ -431,10 +440,12 @@
+ static void enable_dma_sport0(void);
+ static void disable_sport0(void);
+ int wcfxs_proc_read(char *buf, char **start, off_t offset, 
+-		    int count, int *eof, void *data);
++		    int count, int *eof, void *data);/
++
++static int wcfxs_proc_callerid(char *buf, char **start, off_t offset,
++                               int count, int *eof, void *data)
  #endif
  
 -static int debug = 0;
  static int robust = 0;
  static int timingonly = 0;
  static int lowpower = 0;
-@@ -451,8 +459,7 @@
+@@ -451,8 +462,7 @@
  
  static int wcfxs_init_ok = 0;
  
@@ -1399,7 +1486,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  
  #ifdef AUDIO_RINGCHECK
  static inline void ring_check(struct wcfxs *wc, int card)
-@@ -518,37 +525,39 @@
+@@ -518,37 +528,39 @@
  int serialnum = 0;
  int notzero=0;
  
@@ -1450,7 +1537,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  static inline void wcfxs_receiveprep(struct wcfxs *wc, u8 *readchunk)
  {
  	int x;
-@@ -557,22 +566,21 @@
+@@ -557,22 +569,21 @@
  	//memset(readchunk, 0, 64);
  	for (x=0;x<DAHDI_CHUNKSIZE;x++) {
  		if (wc->cardflag & (1 << 7))
@@ -1481,7 +1568,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  	}
  #ifdef AUDIO_RINGCHECK
  	for (x=0;x<wc->cards;x++)
-@@ -590,8 +598,7 @@
+@@ -590,8 +601,7 @@
  }
  
  /* we have only one card at the moment */
@@ -1491,7 +1578,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  {
  	if (wc->curcard != card) {
  #ifndef SF_IP01
-@@ -982,7 +989,7 @@
+@@ -982,7 +992,7 @@
  					printk("wcfxs: Card %d Going off hook\n", card);
  				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_OFFHOOK);
  				if (robust)
@@ -1500,7 +1587,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  				wc->mod.fxs.oldrxhook[card] = 1;
  			
  			} else if (wc->mod.fxs.oldrxhook[card] && !wc->mod.fxs.debouncehook[card]) {
-@@ -1006,7 +1013,7 @@
+@@ -1006,7 +1016,7 @@
  	res = wcfxs_getreg(wc, card, 8);
  	if (res) {
  		printk("Ouch, part reset, quickly restoring reality (%d)\n", card);
@@ -1509,7 +1596,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  	} else {
  		res = wcfxs_getreg(wc, card, 64);
  		if (!res && (res != wc->mod.fxs.lasttxhook[card])) {
-@@ -1065,10 +1072,17 @@
+@@ -1065,10 +1075,17 @@
                if (!(wc->intcount & 0xfc))
                  wcfxs_proslic_recheck_sanity(wc, x);
  #endif
@@ -1528,7 +1615,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
            }
  
  #ifdef DR_DONT_NEED
-@@ -1404,7 +1418,8 @@
+@@ -1404,7 +1421,8 @@
  	schedule_timeout(foo);
  }
  
@@ -1538,7 +1625,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  {
  	unsigned char reg16=0, reg26=0, reg30=0, reg31=0;
  	long newjiffies;
-@@ -1448,9 +1463,9 @@
+@@ -1448,9 +1466,9 @@
  	wcfxs_setreg(wc, card, 31, reg31);
  
  	/* Set Transmit/Receive timeslot */
@@ -1550,7 +1637,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  	wcfxs_setreg(wc, card, 37, 0x00);
  
  	/* Enable ISO-Cap */
-@@ -1502,7 +1517,8 @@
+@@ -1502,7 +1520,8 @@
  	return 0;
  }
  
@@ -1560,7 +1647,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  {
  
  	unsigned short tmp[5];
-@@ -1635,9 +1651,9 @@
+@@ -1635,9 +1654,9 @@
  
      wcfxs_setreg(wc, card, 1, 0x28);
   	// U-Law 8-bit interface
@@ -1572,7 +1659,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
      wcfxs_setreg(wc, card, 5, 0);    // Rx Start count high byte 0
      wcfxs_setreg(wc, card, 18, 0xff);     // clear all interrupt
      wcfxs_setreg(wc, card, 19, 0xff);
-@@ -1710,7 +1726,7 @@
+@@ -1710,7 +1729,7 @@
  		       transfers, not sure why we need to modify state of
  		       SLIC here?
  		    */
@@ -1581,7 +1668,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  		
  		    if (wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x1) {
  				// Apply the change if appropriate 
-@@ -1819,8 +1835,11 @@
+@@ -1819,8 +1838,11 @@
  static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
  {
  	struct wcfxs *wc = chan->pvt;
@@ -1594,7 +1681,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  		/* XXX Enable hooksig for FXO XXX */
  		switch(txsig) {
  		case DAHDI_TXSIG_START:
-@@ -1839,20 +1858,35 @@
+@@ -1839,20 +1861,35 @@
  		default:
  			printk("wcfxo: Can't set tx state to %d\n", txsig);
  		}
@@ -1631,7 +1718,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  				wc->mod.fxs.lasttxhook[chan->chanpos-1] = 3;
  				break;
  			}
-@@ -1863,9 +1897,15 @@
+@@ -1863,9 +1900,15 @@
  			    printk("DAHDI_TXSIG_OFFHOOK FXS %d\n", chan->chanpos - 1);
  			switch(chan->sig) {
  			case DAHDI_SIG_EM:
@@ -1647,7 +1734,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  				wc->mod.fxs.lasttxhook[chan->chanpos-1] = wc->mod.fxs.idletxhookstate[chan->chanpos-1];
  				break;
  			}
-@@ -1884,6 +1924,62 @@
+@@ -1884,6 +1927,71 @@
  		default:
  			printk("wcfxs: Can't set tx state to %d\n", txsig);
  		}
@@ -1687,9 +1774,11 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
 +				break;
 +			}
 +		case DAHDI_TXSIG_OFFHOOK:
++			
 +			if(incomming_call_state==1){//During ringing DAHDI gives OFFHOOK
-+					incomming_call_state=2;
-+					GSM_send(wc,chan->chanpos - 1,"ata");//was GSM_send(wc,0,"ata");//Answer the call
++				printk("DAHDI_TXSIG_ONHOOK GSM %d\n", chan->chanpos - 1);
++				incomming_call_state=2;
++				GSM_send(wc,chan->chanpos - 1,"ata");//Answer the call
 +			}
 +			if (debug)
 +			    printk("DAHDI_TXSIG_OFFHOOK GSM %d\n", chan->chanpos - 1);
@@ -1697,9 +1786,16 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
 +			break;
 +		case DAHDI_TXSIG_ONHOOK:
 +			if(outgoing_call_state==2) {
-+					GSM_send(wc,chan->chanpos - 1,"ath");//was GSM_send(wc,0,"ath");//hangup for GSM
-+					outgoing_call_state=0;
++				GSM_send(wc,chan->chanpos - 1,"ath");//hangup the outgoing GSM call
++				outgoing_call_state=0;
++				*CallerID=0;
 +			}
++                        if(incomming_call_state==2) {
++                                GSM_send(wc,chan->chanpos - 1,"ath");//hangup the incamming GSM call
++                                incomming_call_state=0;
++				*CallerID=0;
++                        }
++
 +			if (debug)
 +			    printk("DAHDI_TXSIG_ONHOOK GSM %d\n", chan->chanpos - 1);
 +			wc->mod.fxo.offhook[chan->chanpos - 1] = 0;
@@ -1710,7 +1806,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  #if 1
  		if (debug) {
  		    char tmp;
-@@ -1941,10 +2037,18 @@
+@@ -1941,10 +2049,18 @@
  	/* Finalize signalling  */
  	for (x=0;x<wc->cards;x++) {
  		if (wc->cardflag & (1 << x)) {
@@ -1733,7 +1829,24 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  		}
  	}
  }
-@@ -1976,12 +2080,7 @@
+@@ -1973,15 +2089,24 @@
+         return len;
+ }
+ 
++static int wcfxs_proc_callerid(char *buf, char **start, off_t offset,
++                               int count, int *eof, void *data)
++{
++  	int len;
++
++  	*eof = 1;
++
++  	strncpy(buf, CallerID, 64);
++	
++  	len=strlen(CallerID);
++	
++  	return len;
++}
++
  static int wcfxs_hardware_init(struct wcfxs *wc)
  {
  	/* Hardware stuff */
@@ -1747,7 +1860,18 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
          int           i;
  
  #ifdef CONFIG_4FX_SPI_INTERFACE
-@@ -2016,6 +2115,7 @@
+@@ -1997,7 +2122,9 @@
+ 
+ 	// select port 1 SPI device
+ 	//bfsi_spi_write_8_bits(2, 2);
+-    create_proc_read_entry("wcfxs", 0, NULL, wcfxs_proc_read, NULL);
++	proc_mkdir("wcfxs", 0);
++    	create_proc_read_entry("wcfxs/wcfxs", 0, NULL, wcfxs_proc_read, NULL);
++	create_proc_read_entry("wcfxs/CallerID", 0, NULL, wcfxs_proc_callerid, NULL);
+ 
+ 	printk("bfsi_sport_init res: %d\n",bfsi_sport_init(regular_interrupt_processing, DAHDI_CHUNKSIZE, debug));
+ #ifdef MULTI_SPI_FRAMEWORK
+@@ -2016,6 +2143,7 @@
  
  #ifdef MULTI_SPI_FRAMEWORK
  	multi_spi_auto_detect(port_type);
@@ -1755,7 +1879,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  
  	for(i=0; i<multi_spi_board_size(); i++) {
  	  printk("port: %d port_type: %c\n", i+1, port_type[i]);
-@@ -2023,6 +2123,8 @@
+@@ -2023,6 +2151,8 @@
  	
  #else
  	fx_auto_detect(port_type, RESET_BIT);
@@ -1764,7 +1888,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  	for(i=0; i<FX_MAX_PORTS; i++) {
  	  printk("port: %d port_type: %c\n", i+1, port_type[i]);
  	}
-@@ -2036,54 +2138,97 @@
+@@ -2036,54 +2166,97 @@
  #endif
  	/* configure daughter cards */
  
@@ -1883,7 +2007,7 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  
  	/* Return error if nothing initialized okay. */
  	if (!wc->cardflag && !timingonly) {
-@@ -2227,7 +2372,7 @@
+@@ -2227,7 +2400,7 @@
  	}
  	#endif
  }
@@ -1892,23 +2016,3 @@ diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-l
  module_param(debug, int, 0600);
  module_param(loopcurrent, int, 0600);
  module_param(robust, int, 0600);
- 
-diff -urP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/dahdi-base.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/dahdi-base.c
---- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/dahdi-base.c	2010-04-19 22:42:53.000000000 +0300
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm/dahdi-base.c	2010-09-02 16:48:07.000000000 +0300
-@@ -3330,6 +3330,7 @@
- 		case 'T':
- 			chan->digitmode = DIGIT_MODE_DTMF;
- 			chan->tonep = 0;
-+			chan->span->hooksig(chan, DAHDI_TXSIG_START);
- 			break;
- 		case 'M':
- 			chan->digitmode = DIGIT_MODE_MFR1;
-@@ -3346,6 +3347,7 @@
- 		case 'P':
- 			chan->digitmode = DIGIT_MODE_PULSE;
- 			chan->tonep = 0;
-+			chan->span->hooksig(chan, DAHDI_TXSIG_START);
- 			break;
- 		default:
- 			if ((c != 'W') && (chan->digitmode == DIGIT_MODE_PULSE)) {

@@ -29,6 +29,7 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ASTERISK_MAKEOPTS=asterisk-1.4
 	ATTRAFAX_NAME=attrafax-0.9
 	ATTRAFAX_DIR=$(BUILD_DIR)/$(ATTRAFAX_NAME)
+	GSM1_PATCH=asterisk-1.4-gsm1.patch
 else
 	ASTERISK_VERSION=1.6.2.6
 	ASTERISK_PATCH=asterisk-1.6.patch
@@ -89,6 +90,8 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(GSM1_PATCH)
+
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs

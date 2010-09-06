@@ -1,0 +1,32 @@
+diff -ur asterisk/channels/chan_dahdi.c asterisk-gsm1/channels/chan_dahdi.c
+--- asterisk/channels/chan_dahdi.c	2010-09-06 11:36:34.000000000 +0300
++++ asterisk-gsm1/channels/chan_dahdi.c	2010-09-06 11:34:09.000000000 +0300
+@@ -7047,7 +7047,27 @@
+ 				dahdi_setlinear(p->subs[index].dfd, p->subs[index].linear);
+ #if 1
+ 				restore_gains(p);
+-#endif				
++#endif			
++
++				if (!number) { //Get Caller ID from the GSM1 module
++					       //At this point we are not sure if this is GSM1 channel but the worst case we 
++					       //will find that the proc/wcfxs/ caller ID is empty 
++					FILE * gsm1_fd;
++					char gsm1_number[60];
++					int gsm1_len;
++
++					gsm1_fd=fopen("/proc/wcfxs/CallerID","r");
++					if(gsm1_fd){
++						gsm1_len=fread(gsm1_number, 1, 60, gsm1_fd);
++						if(gsm1_len) 
++							number=gsm1_number;
++							
++						if (option_debug)
++                                                	ast_log(LOG_DEBUG, "GSM1 CallerID number: %s\n", number);
++					}					
++											 
++				}	
++
+ 				if (res < 0) {
+ 					ast_log(LOG_WARNING, "CallerID returned with error on channel '%s'\n", chan->name);
+ 				}
