@@ -90,7 +90,10 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+
+ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(GSM1_PATCH)
+endif
 
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
