@@ -516,3 +516,28 @@
 +
 +pbx_lua.so:
 +	$(CC) -o pbx_lua.so -shared  $(ASTLDFLAGS) pbx_lua.o $(wildcard $(ASTTOPDIR)/../uClinux-dist/user/lua/lua-5.1.4/src/*[!lua].o)
+
+--- asterisk/channels/chan_sip.c	2010-01-19 14:07:47.000000000 +0100
++++ asterisk/channels/chan_sip.c	2010-01-19 14:55:19.000000000 +0100
+@@ -5334,6 +5334,7 @@
+ 	/* Host information */
+ 	struct ast_hostent audiohp;
+ 	struct ast_hostent videohp;
++	struct ast_hostent imagehp;
+ 	struct ast_hostent sessionhp;
+ 	struct hostent *hp = NULL;	/*!< RTP Audio host IP */
+ 	struct hostent *vhp = NULL;	/*!< RTP video host IP */
+@@ -5542,6 +5543,12 @@
+ 						vhp = &videohp.hp;
+ 					}
+ 				}
++				else if (image) {
++					if (process_sdp_c(value, &imagehp)) {
++						processed = TRUE;
++						hp = &imagehp.hp;
++					}
++				}
+ 				break;
+ 			case 'a':
+ 				/* Audio specific scanning */
+
