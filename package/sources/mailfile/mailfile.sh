@@ -47,7 +47,7 @@ if [ `ls | grep $1 | wc -l` != 0 ]; then
 
   #convert to tiff files
   for i in $1*g3; do 
-    fax2tiff -3 -$sz -o $i.tiff $i
+    fax2tiff -s -3 -$sz -o $i.tiff $i
     rm -f $i
   done
 
