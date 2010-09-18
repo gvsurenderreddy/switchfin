@@ -795,3 +795,67 @@ diff -ur asterisk-1.4.32/channels/chan_sip.c asterisk-1.4.32-attrafax/channels/c
  		}
  	} else {
  		if (p->vad) {
+diff -ur asterisk-1.4.32/main/dsp.c asterisk-1.4.32-attrafax/main/dsp.c
+--- asterisk-1.4.32/main/dsp.c 2010-05-05 19:42:22.000000000 +0300
++++ asterisk-1.4.32-attrafax/main/dsp.c        2010-07-02 01:44:48.000000000 +0300
+@@ -504,28 +504,41 @@
+ 			limit = sample + (102 - s->current_sample);
+ 		else
+ 			limit = samples;
++
+ #if defined(USE_3DNOW)
+-		_dtmf_goertzel_update (s->row_out, amp + sample, limit - sample);
+-		_dtmf_goertzel_update (s->col_out, amp + sample, limit - sample);
++                _dtmf_goertzel_update (s->row_out, amp + sample, limit - sample);
++                _dtmf_goertzel_update (s->col_out, amp + sample, limit - sample);
++
++                /* XXX Need to fax detect for 3dnow too XXX */
++
+ #elif defined(__FIXED_PT__)
+-	for(j=0; j<4; j++) {
+-		goertzel_update(&s->row_out[j], amp + sample, limit - sample);
+-		goertzel_update(&s->col_out[j], amp + sample, limit - sample);
+-	}
+-	{
+-		int acc;
++        for(j=0; j<4; j++) {
++                goertzel_update(&s->row_out[j], amp + sample, limit - sample);
++                goertzel_update(&s->col_out[j], amp + sample, limit - sample);
++        }
++        {
++                int acc;
++
++                acc = 0;
++                for (j = sample;  j < limit;  j++) {
++                        acc += (amp[j] >> AMP_SCALE)*(amp[j] >> AMP_SCALE);
++                }
++                s->energy += (float)acc * ((float)(1<<AMP_SCALE)) * ((float)(1<<AMP_SCALE));
++        }
++
++#ifdef FAX_DETECT
++                goertzel_update (&s->fax_tone, amp + sample, limit - sample);
++#endif
++
++#ifdef OLD_DSP_ROUTINES
++                goertzel_update (s->row_out2nd, amp + sample, limit - sample);
++                goertzel_update (s->col_out2nd, amp + sample, limit - sample);
++#ifdef FAX_DETECT
++                goertzel_update (&s->fax_tone2nd, amp + sample, limit - sample);
++#endif
++
++#endif
+ 
+-		acc = 0;
+-		for (j = sample;  j < limit;  j++) {
+-			acc += (amp[j] >> AMP_SCALE)*(amp[j] >> AMP_SCALE);
+-		}
+-		s->energy += (float)acc * ((float)(1<<AMP_SCALE)) * ((float)(1<<AMP_SCALE));
+-	}
+-/*#ifdef OLD_DSP_ROUTINES
+-		_dtmf_goertzel_update (s->row_out2nd, amp + sample, limit2 - sample);
+-		_dtmf_goertzel_update (s->col_out2nd, amp + sample, limit2 - sample);
+-#endif*/	
+-		/* XXX Need to fax detect for 3dnow too XXX */
+ #else
+ 		/* The following unrolled loop takes only 35% (rough estimate) of the 
+ 		   time of a rolled loop on the machine on which it was developed */
