@@ -2016,3 +2016,26 @@ diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c dahdi-li
  module_param(debug, int, 0600);
  module_param(loopcurrent, int, 0600);
  module_param(robust, int, 0600);
+--- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c	2010-09-07 00:10:28.000000000 +0300
++++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/wcfxs.c	2010-09-07 00:38:23.000000000 +0300
+@@ -1866,11 +1866,6 @@
+ 		switch(txsig) {
+ 		case DAHDI_TXSIG_ONHOOK:
+ 			//incomming_call_state 0, initial state+first ring, 1, ringing, 2 conversastion 				
+-			if(incomming_call_state==2) {//During call 
+-					GSM_send(wc,chan->chanpos - 1,"ath");//was GSM_send(wc,0,"ath");
+-					incomming_call_state=0;//Initial state
+-			}
+-
+ 			wcfxs_set_led(wc, chan->chanpos, FX_LED_GREEN);
+ 			if (debug)
+ 			    printk("DAHDI_TXSIG_ONHOOK FXS %d\n", chan->chanpos - 1);
+@@ -1965,7 +1960,7 @@
+ 		case DAHDI_TXSIG_OFFHOOK:
+ 			
+ 			if(incomming_call_state==1){//During ringing DAHDI gives OFFHOOK
+-				printk("DAHDI_TXSIG_ONHOOK GSM %d\n", chan->chanpos - 1);
++				printk("DAHDI_TXSIG_OFFHOOK GSM %d\n", chan->chanpos - 1);
+ 				incomming_call_state=2;
+ 				GSM_send(wc,chan->chanpos - 1,"ata");//Answer the call
+ 			}
