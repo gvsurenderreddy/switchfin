@@ -21,7 +21,7 @@ configfile='/etc/asterisk/fax2email.conf'
 subject=`sed '/^\#/d' $configfile | grep 'emailsubject' | tail -n 1 | sed 's/^.*=//;s/^[[:space:]]*//;s/[[:space:]]*$//'`
 sender=`sed '/^\#/d' $configfile | grep 'serveremail' | tail -n 1 | sed 's/^.*=//;s/^[[:space:]]*//;s/[[:space:]]*$//'`
 body=`sed '/^\#/d' $configfile | grep 'emailbody' | tail -n 1 | sed 's/^.*=//;s/^[[:space:]]*//;s/[[:space:]]*$//'`
-if [ `ls | grep $1 | wc -l` != 0 ]; then
+if [ `ls | grep $1$foog3 | wc -l` != 0 ]; then
   #email header
   echo 'Subject: '$subject > $tmpfile
   echo 'From: '$sender >> $tmpfile
