@@ -10,11 +10,11 @@ fi
 #logdir=/var/log/asterisk/cdr-csv
 dirsize=`du -k $logdir | cut -f1 | tail -n 1`
 dirsize=`expr $dirsize / 1024`
-logfile=Master.csv
+logfile=$logdir/Master.csv
 logsize=`du -k $logfile | cut -f1`
 
 #archive logfile if it's bigger than 500kb
-if [ -f $logdir/$logfile ] && [ $logsize -gt 500 ]
+if [ -f $logfile ] && [ $logsize -gt 500 ]
 then
 	grep -o '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]' $logfile | tr -d '-'  | sort > /tmp/tmp_dates
 	sh /etc/archive.sh $logfile $logdir/`head -n 1 /tmp/tmp_dates`-`tail -n 1 /tmp/tmp_dates`.csv
