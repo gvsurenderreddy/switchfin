@@ -121,6 +121,12 @@ config SF_NAND_256MB
 	help
 	  Use this option if you have 256MB NAND flash
 
+config SF_NAND_512MB
+        bool "512MB NAND Flash"
+        depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)
+        help
+          Use this option if you have 512MB NAND flash
+
 config SF_NAND_1GB
         bool "1GB NAND Flash"
         depends on (SF_BR4_APPLIANCE || SF_PR1_APPLIANCE)

@@ -281,12 +281,12 @@
         "addip=setenv bootargs $bootargs "											\
         "ip=$ipaddr:$serverip:$gatewayip:$netmask"										\
         ":$hostname:eth0:off\0"													\
-    	"ramboot=tftpboot $loadaddr uImage;"											\
+    	"autostart=yes\0"													\
+	"ramboot=tftpboot $loadaddr uImage;"											\
         "run ramargs;run addip;bootm $loadaddr\0"										\
         "nfsboot=tftpboot $loadaddr uImage;"											\
         "run nfsargs;run addip;bootm $(loadaddr)\0"										\
-        "flashboot=nand read.jffs2 $loadaddr 0x0 0x700000;"           								\
-        "run ramargs;run addip;bootm $loadaddr\0"										\
+        "flashboot=run ramargs;run addip;nboot $loadaddr 0\0"									\
         "update=tftpboot $loadaddr u-boot.ldr;"											\
         "eeprom write $loadaddr 0x0 $filesize;\0"										\
         ""															\

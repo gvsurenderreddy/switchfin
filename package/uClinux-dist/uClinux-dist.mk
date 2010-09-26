@@ -128,6 +128,9 @@ endif
 ifeq ($(strip $(SF_NAND_256MB)),y)
 	echo "CONFIG_BFIN_NAND_SIZE=0x10000000" >> $(VARIABLE_CONFIG_FILE)
 endif
+ifeq ($(strip $(SF_NAND_512MB)),y)
+	echo "CONFIG_BFIN_NAND_SIZE=0x20000000" >> $(VARIABLE_CONFIG_FILE)
+endif
 ifeq ($(strip $(SF_NAND_1GB)),y)
 	echo "CONFIG_BFIN_NAND_SIZE=0x40000000" >> $(VARIABLE_CONFIG_FILE)
 endif
