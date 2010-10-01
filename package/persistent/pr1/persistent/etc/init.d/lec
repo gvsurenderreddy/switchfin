@@ -15,6 +15,7 @@ case $1 in
 		module=`lsmod | grep ec_module`;
 		if test -z $module; then;
 			sed -i 's/echocancel = 64/echocancel = 0/' /etc/asterisk/chan_dahdi.conf;
+			sed -i '/zarlink/d' $DAHDICONF
 		else;
 			sed -i 's/echocancel = 0/echocancel = 64/' /etc/asterisk/chan_dahdi.conf;
 		fi;;
