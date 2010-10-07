@@ -50,7 +50,7 @@ then
 		ifconfig $IF down
 	fi
 	
-ZONE=`echo $TIMEZONE | awk -F, '{print $1}'`                                                                               
+ZONE=`echo $TZNAME | awk -F, '{print $1}'`                                                                               
 ln -sf /persistent/usr/share/zoneinfo/$ZONE /etc/localtime   
 
 else
