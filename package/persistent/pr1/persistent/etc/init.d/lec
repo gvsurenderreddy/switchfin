@@ -18,7 +18,8 @@ case $1 in
 			sed -i '/zarlink/d' $DAHDICONF
 		else;
 			sed -i 's/echocancel = 0/echocancel = 64/' /etc/asterisk/chan_dahdi.conf;
-		fi;;
+		fi
+		sync;;
 	stop) 	modprobe -r ec_module;;
 	restart) modprobe -r ec_module;
 		 modprobe ec_module encoding=$ENCOD;;
