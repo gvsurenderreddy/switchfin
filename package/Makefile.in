@@ -88,7 +88,7 @@ SOURCES_DIR=$(BASE_DIR)/package/sources
 # TARGET
 ###############################################
 
-# Most of these aren't used in astfin
+# Most of these aren't used in Switchfin
 CROSS_COMPILE=bfin-linux-uclibc
 TARGET_CROSS=$(BASE_DIR)/toolchain/opt/uClinux/$(CROSS_COMPILE)/bin/bfin-linux-uclibc-
 TARGET_CC=$(TARGET_CROSS)gcc

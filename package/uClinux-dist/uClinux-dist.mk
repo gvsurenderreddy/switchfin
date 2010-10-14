@@ -135,6 +135,16 @@ ifeq ($(strip $(SF_NAND_1GB)),y)
 	echo "CONFIG_BFIN_NAND_SIZE=0x40000000" >> $(VARIABLE_CONFIG_FILE)
 endif
 endif
+ifeq ($(strip $(SF_PACKAGE_IPTABLES)),y)
+	rm -rf $(UCLINUX_DIR)/user/iptables/;
+	svn checkout --revision 9614 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/iptables $(UCLINUX_DIR)/user/iptables
+#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/iptables.patch
+
+	cat package/iptables/config.iptables >> $(VARIABLE_CONFIG_FILE)
+else
+	echo "# CONFIG_NETFILTER is not set" >> $(VARIABLE_CONFIG_FILE)
+endif
+
 	if [ ! -d $(UCLINUX_DIR)/user/busybox.original ]; then \
                 mv -u $(UCLINUX_DIR)/user/busybox $(UCLINUX_DIR)/user/busybox.original; \
         else \
@@ -142,6 +152,7 @@ endif
 	fi
 	svn checkout --revision 9645 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/busybox $(UCLINUX_DIR)/user/busybox
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dhcpd.patch
+	
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/
@@ -217,7 +228,15 @@ ifeq ($(strip $(SF_PACKAGE_CURL)),y)
 	find $(UCLINUX_DIR)/lib/libcurl/ -type f -name curl -print0 | xargs -0 file | grep ELF | cut -d: -f1 | xargs -i cp {} $(TARGET_DIR)/usr/bin/curl
 else
 	rm -f $(TARGET_DIR)/usr/bin/curl
-endif	
+endif
+
+ifneq ($(strip $(SF_PACKAGE_IPTABLES)),y)
+        rm -f $(TARGET_DIR)/usr/bin/iptables
+	rm -f $(TARGET_DIR)/usr/bin/iptables-save
+	rm -f $(TARGET_DIR)/usr/bin/iptables-restore
+endif
+
+	
 	touch $(UCLINUX_DIR)/.built
 
 uClinux-unpacked: $(UCLINUX_DIR)/.unpacked
