@@ -51,6 +51,7 @@ romfs::
 	done
 		
 	echo "rev. `svnversion $(ROMFSDIR)/../../ | cut -d: -f2` -- `date`" > $(ROMFSDIR)/etc/version
+	echo "rev. `svnversion $(ROMFSDIR)/../../dl/asterisk-gui-4.0/ | cut -d: -f2`" > $(ROMFSDIR)/etc/version-gui
 ifeq ($(CONFIG_BLACKFIN_INSTALL_UCLINUX_CONFIG),y)
 	gzip -9c $(ROOTDIR)/config/.config > $(ROMFSDIR)/root/uclinux-config.gz
 	gzip -9c $(ROOTDIR)/.config > $(ROMFSDIR)/root/vendor-board-config.gz

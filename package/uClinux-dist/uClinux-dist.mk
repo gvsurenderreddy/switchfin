@@ -150,7 +150,7 @@ endif
         else \
 		rm -rf $(UCLINUX_DIR)/user/busybox; \
 	fi
-	svn checkout --revision 9685 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/busybox $(UCLINUX_DIR)/user/busybox
+	svn checkout --revision 9645 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/busybox $(UCLINUX_DIR)/user/busybox
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dhcpd.patch
 	
 
