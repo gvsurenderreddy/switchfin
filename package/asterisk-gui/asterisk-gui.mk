@@ -38,6 +38,7 @@ asterisk-gui-source: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 
 
 $(ASTERISKGUI_DIR)/.unpacked: $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
+	svn up $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 	cp -R $(DL_DIR)/$(ASTERISKGUI_UNPACKED) $(ASTERISKGUI_DIR)
 	touch $(ASTERISKGUI_DIR)/.unpacked
 
@@ -61,7 +62,6 @@ ifeq ($(strip $(SF_ASTERISK_GUI_4_0)),y)
 endif
 
 asterisk-gui: gui_check_prev_ver $(ASTERISKGUI_DIR)/.configured
-	svn up $(DL_DIR)/$(ASTERISKGUI_UNPACKED)
 	-find $(ASTERISKGUI_DIR) -type d -name .svn | xargs rm -rf
 	#mkdir -p $(TARGET_DIR)/etc/scripts
 	mkdir -p $(TARGET_DIR)/var/lib/asterisk

@@ -7,8 +7,10 @@
 
 case $1 in
 	start)  export TZ=`cat /etc/TZ`; 
-		asterisk -f >/dev/null 2>/dev/null & ;;
-	stop) killall -9 asterisk;;
+		asterisk -f >/dev/null 2>/dev/null &;
+		/usr/sbin/httpd;;
+	stop) 	killall -9 asterisk;
+		killall httpd;;
 	restart) asterisk -rx "stop now";
                 sleep 3;
 		export TZ=`cat /etc/TZ`;
