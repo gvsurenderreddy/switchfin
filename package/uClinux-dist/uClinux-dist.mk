@@ -178,6 +178,7 @@ ifeq ($(strip $(SF_IP04)),y)
 	fi
 	cp -af package/uClinux-dist/vendors/Rowetel/common/* $(UCLINUX_DIR)/vendors/Rowetel/common
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
+	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
 	
@@ -193,6 +194,7 @@ ifeq ($(strip $(SF_IP01)),y)
 	if [ $(strip $(SF_PACKAGE_IPTABLES)) = y ]; then \
 		sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.vendor-2.6.x; \
 	fi
+	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.linux-2.6.x
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip01.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP01_defconfig
 	
