@@ -141,6 +141,7 @@ ifeq ($(strip $(SF_PACKAGE_IPTABLES)),y)
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/iptables.patch
 
 	cat package/iptables/config.iptables >> $(VARIABLE_CONFIG_FILE)
+	sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(LIBS_CONFIG)
 else
 	echo "# CONFIG_NETFILTER is not set" >> $(VARIABLE_CONFIG_FILE)
 endif
