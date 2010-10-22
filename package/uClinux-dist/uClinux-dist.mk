@@ -26,6 +26,7 @@ UCLINUX_UNZIP=bzcat
 UCLINUX_HOME=$(BUILD_DIR)/uClinux-dist
 TOOLCHAIN_BUILD=$(BASE_DIR)/toolchain
 VARIABLE_CONFIG_FILE=$(BUILD_DIR)/config_tmp
+VARIABLE_CONFIG_FILE1=$(BUILD_DIR)/config_tmp1
 LIBS_CONFIG=$(BUILD_DIR)/uClinux-dist/config/.config
 ifeq ($(strip $(SF_IP04)),y)
 SF_ANALOG=y
@@ -141,8 +142,10 @@ ifeq ($(strip $(SF_PACKAGE_IPTABLES)),y)
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/iptables.patch
 
 	cat package/iptables/config.iptables >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_USER_IPTABLES_IPTABLES=y" > $(VARIABLE_CONFIG_FILE1)
 else
 	echo "# CONFIG_NETFILTER is not set" >> $(VARIABLE_CONFIG_FILE)
+	echo "# CONFIG_USER_IPTABLES_IPTABLES is not set" > $(VARIABLE_CONFIG_FILE1)
 endif
 
 	if [ ! -d $(UCLINUX_DIR)/user/busybox.original ]; then \
@@ -158,12 +161,10 @@ ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/common/
 	cp -af package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/* $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE
-	if [ $(strip $(SF_PACKAGE_IPTABLES)) = y ]; then \
-		sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/config.vendor-2.6.x; \
-	fi
 	cp -af package/uClinux-dist/vendors/SwitchVoice/common/* $(UCLINUX_DIR)/vendors/SwitchVoice/common
 	cp -af package/uClinux-dist/vendors/SwitchVoice/vendor.mak $(UCLINUX_DIR)/vendors/SwitchVoice/
 	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/config.linux-2.6.x
+	cat $(VARIABLE_CONFIG_FILE1) >> $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/config.vendor-2.6.x;
 	cp -af package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/pr1_appliance.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf537/boards
 	ln -sf $(UCLINUX_DIR)/vendors/SwitchVoice/PR1-APPLIANCE/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/PR1-APPLIANCE_defconfig
 	$(MAKE) -C $(UCLINUX_DIR) SwitchVoice/PR1-APPLIANCE_defconfig
@@ -173,12 +174,10 @@ ifeq ($(strip $(SF_IP04)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/Rowetel/IP04/
 	mkdir -p $(UCLINUX_DIR)/vendors/Rowetel/common/
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/* $(UCLINUX_DIR)/vendors/Rowetel/IP04/
-	if [ $(strip $(SF_PACKAGE_IPTABLES)) = y ]; then \
-		sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.vendor-2.6.x; \
-	fi
 	cp -af package/uClinux-dist/vendors/Rowetel/common/* $(UCLINUX_DIR)/vendors/Rowetel/common
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
 	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x
+	cat $(VARIABLE_CONFIG_FILE1) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.vendor-2.6.x;
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
 	
@@ -191,10 +190,8 @@ ifeq ($(strip $(SF_IP01)),y)
 	cp -af package/uClinux-dist/vendors/Rowetel/common/* $(UCLINUX_DIR)/vendors/Rowetel/common
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/* $(UCLINUX_DIR)/vendors/Rowetel/IP01
-	if [ $(strip $(SF_PACKAGE_IPTABLES)) = y ]; then \
-		sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.vendor-2.6.x; \
-	fi
 	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.linux-2.6.x
+	cat $(VARIABLE_CONFIG_FILE1) >> $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.vendor-2.6.x;
 	cp -af package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip01.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP01/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP01_defconfig
 	
@@ -204,11 +201,10 @@ endif
 ifeq ($(strip $(SF_FX08)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/FX08/
 	cp -af package/uClinux-dist/vendors/SwitchVoice/FX08/* $(UCLINUX_DIR)/vendors/SwitchVoice/FX08
-	if [ $(strip $(SF_PACKAGE_IPTABLES)) = y ]; then \
-		sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(UCLINUX_DIR)/vendors/SwitchVoice/FX08/config.vendor-2.6.x; \
-	fi
 	cp -af package/uClinux-dist/vendors/SwitchVoice/FX08/pre_config/fx0x.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards
 	cp -af package/uClinux-dist/vendors/SwitchVoice/FX08/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/FX08_defconfig
+	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/SwitchVoice/FX08/config.linux-2.6.x
+	cat $(VARIABLE_CONFIG_FILE1) >> $(UCLINUX_DIR)/vendors/SwitchVoice/FX08/config.vendor-2.6.x;
 	cp -af package/uClinux-dist/common/vendor.mak $(UCLINUX_DIR)/vendors/SwitchVoice
 	$(MAKE) -C $(UCLINUX_DIR) SwitchVoice/FX08_config
 endif
@@ -217,12 +213,10 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE
 	mkdir -p $(UCLINUX_DIR)/vendors/SwitchVoice/common/
 	cp -af package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/* $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE
-	if [ $(strip $(SF_PACKAGE_IPTABLES)) = y ]; then \
-		sed -i 's/# CONFIG_USER_IPTABLES_IPTABLES is not set/CONFIG_USER_IPTABLES_IPTABLES=y/' $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE/config.vendor-2.6.x; \
-	fi
 	cp -af package/uClinux-dist/vendors/SwitchVoice/common/* $(UCLINUX_DIR)/vendors/SwitchVoice/common
 	cp -af package/uClinux-dist/vendors/SwitchVoice/vendor.mak $(UCLINUX_DIR)/vendors/SwitchVoice/
 	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE/config.linux-2.6.x
+	cat $(VARIABLE_CONFIG_FILE1) >> $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE/config.vendor-2.6.x;
 	cp -af package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/br4_appliance.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf537/boards
 	ln -sf $(SOURCES_DIR)/linux/i2c-pca9539.h $(UCLINUX_DIR)/linux-2.6.x/include/linux/
 	ln -sf $(UCLINUX_DIR)/vendors/SwitchVoice/BR4-APPLIANCE/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/BR4-APPLIANCE_defconfig
