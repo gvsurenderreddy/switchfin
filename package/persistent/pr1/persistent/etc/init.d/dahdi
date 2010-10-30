@@ -2,12 +2,15 @@
 # Start up file for DAHDI
 
 DAHDICONF="/persistent/etc/dahdi/system.conf"
-TMP=`grep  '^dchan' ${DAHDICONF}`
-if [[ "`echo ${TMP}|grep '24'`" != "" ]]
-then
-T1E1MODE=1
+TMP=`grep  '^span' ${DAHDICONF}`
+if [[ "`echo ${TMP}|grep 'd4'`" != "" ]]; then
+	T1E1MODE=1;
 else
-T1E1MODE=2
+	if [[ "`echo ${TMP}|grep 'esf'`" != "" ]]; then
+		T1E1MODE=1;
+	else
+		T1E1MODE=2;
+	fi
 fi
 
 case $1 in
