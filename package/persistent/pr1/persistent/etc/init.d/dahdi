@@ -4,12 +4,12 @@
 DAHDICONF="/persistent/etc/dahdi/system.conf"
 TMP=`grep  '^span' ${DAHDICONF}`
 if [[ "`echo ${TMP}|grep 'd4'`" != "" ]]; then
-	T1E1MODE=1;
+	T1E1MODE=1; #T1
 else
 	if [[ "`echo ${TMP}|grep 'esf'`" != "" ]]; then
-		T1E1MODE=1;
+		T1E1MODE=1; #T1
 	else
-		T1E1MODE=2;
+		T1E1MODE=2; #E1
 	fi
 fi
 

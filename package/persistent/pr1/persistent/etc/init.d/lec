@@ -1,14 +1,17 @@
 #!/bin/hush
 # Start up file for lec
-DAHDICONF="/persistent/etc/dahdi/system.conf"
-TMP=`grep  '^dchan' ${DAHDICONF}`
-if [[ "`echo ${TMP}|grep '24'`" != "" ]]
-then
-ENCOD=1
-else
-ENCOD=2
-fi
 
+DAHDICONF="/persistent/etc/dahdi/system.conf"
+TMP=`grep  '^span' ${DAHDICONF}`              
+if [[ "`echo ${TMP}|grep 'd4'`" != "" ]]; then
+        T1E1MODE=1; #T1                       
+else                                                   
+        if [[ "`echo ${TMP}|grep 'esf'`" != "" ]]; then
+                ENCOD=1; #T1                           
+        else                                           
+                ENCOD=2; #E1                           
+        fi                                             
+fi
 
 case $1 in
 	start)	modprobe ec_module encoding=$ENCOD;
