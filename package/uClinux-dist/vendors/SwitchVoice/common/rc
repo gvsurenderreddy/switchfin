@@ -110,50 +110,42 @@ for dirname in `ls /persistent/var/lib/asterisk/`; do
         ln -sf /persistent/var/lib/asterisk/$dirname /var/lib/asterisk/
 done
 
+
 # write the log files to sd/mmc card
-modprobe spi_mmc > /dev/null
-sleep 2
-[ ! -d /mnt/sd ] && mkdir /mnt/sd
-mount -t vfat /dev/mmc /mnt/sd
-sleep 2
-if [ -f /proc/spi_mmc ]
-then
-    if [ -z "`grep 'No MMC/SD' /proc/spi_mmc`" ]
-    then
-        echo "found a mmc/sd card"
-        echo 1 > /etc/mmc
-        if [ ! -f /mnt/sd/.format ]
-        then
-            echo "found new mmc/sd card, trying to format it..."
-            umount /mnt/sd
-            /bin/mkdosfs /dev/mmc
-            mount -t vfat /dev/mmc /mnt/sd
-            touch /mnt/sd/.format
-        else
-           echo "the card has been already formatted"
-        fi
-        [ ! -d /mnt/sd/asterisk ] && mkdir /mnt/sd/asterisk
-        echo "[directories]" > /etc/asterisk/asterisk.conf
-        echo "astlogdir => /mnt/sd/asterisk" >> /etc/asterisk/asterisk.conf
-        [ ! -d /mnt/sd/asterisk/cdr-csv ] && mkdir /mnt/sd/asterisk/cdr-csv
-        [ ! -d /mnt/sd/asterisk/cdr-custom ] && mkdir /mnt/sd/asterisk/cdr-custom
-        ln -sf /mnt/sd/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
-    else
-        echo "no sd/mmc card found"
-        echo 0 > /etc/mmc
-        echo "[directories]" > /etc/asterisk/asterisk.conf
-        echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf
-        ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
-        modprobe -r spi_mmc
-    fi
-else
-    echo "can't load spi_mmc module!!!"
-    echo 0 > /etc/mmc
-    echo "[directories]" > /etc/asterisk/asterisk.conf
-    echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf
-    ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
-    modprobe -r spi_mmc
+if [ -n "$pr1" ]; then
+	#PR1
+        modprobe mmc_spi
+	sleep 1
+	sdcard=`dmesg | grep "new SD card on SPI"`
+	if [ -n "$sdcard" ]; then
+		echo "mmc/sd detected"
+		modprobe mmc_block	
+		[ ! -d /mnt/sd ] && mkdir /mnt/sd 
+		mount -t vfat /dev/mmcblk0p1 /mnt/sd/ #mount the first partition
+		if [ ! -f /mnt/sd/.format ]; then
+            		echo "Found new mmc/sd card, trying to format it..."
+            		umount /mnt/sd
+            		/bin/mkdosfs /dev/mmcblk0p1
+            		mount -t vfat /dev/mmcblk0p1 /mnt/sd/
+            		touch /mnt/sd/.format
+        	else
+           		echo "The mmc/sd card has been already formatted"
+        	fi
+        	[ ! -d /mnt/sd/asterisk ] && mkdir /mnt/sd/asterisk
+        	echo "[directories]" > /etc/asterisk/asterisk.conf
+        	echo "astlogdir => /mnt/sd/asterisk" >> /etc/asterisk/asterisk.conf
+        	[ ! -d /mnt/sd/asterisk/cdr-csv ] && mkdir /mnt/sd/asterisk/cdr-csv
+        	[ ! -d /mnt/sd/asterisk/cdr-custom ] && mkdir /mnt/sd/asterisk/cdr-custom
+        	ln -sf /mnt/sd/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+	else
+    		echo "No SD Card Detected!"
+    		echo "[directories]" > /etc/asterisk/asterisk.conf
+    		echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf
+    		ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+		rmmod mmc_spi
+	fi
 fi
+
 if [ -d /persistent/var/log/asterisk ]; then
 	ln -sf /persistent/var/log/asterisk/ /var/log/
 fi
