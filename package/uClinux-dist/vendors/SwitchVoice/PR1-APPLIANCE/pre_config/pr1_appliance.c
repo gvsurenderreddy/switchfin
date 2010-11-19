@@ -37,6 +37,7 @@
 #include <linux/mtd/physmap.h>
 #include <linux/spi/spi.h>
 #include <linux/spi/flash.h>
+#include <linux/spi/mmc_spi.h>
 #include <linux/irq.h>
 #include <linux/interrupt.h>
 #include <asm/dma.h>
@@ -101,10 +102,24 @@ static struct bfin5xx_spi_chip spi_flash_chip_info = {
 };
 #endif
 
-#if defined(CONFIG_SPI_MMC) || defined(CONFIG_SPI_MMC_MODULE)
-static struct bfin5xx_spi_chip spi_mmc_chip_info = {
-	.enable_dma = 1,
-	.bits_per_word = 8,
+#if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
+static int bfin_mmc_spi_init(struct device *dev, irqreturn_t (*detect_int)(int, void *), void *data) {
+        return 0;
+}
+
+static void bfin_mmc_spi_exit(struct device *dev, void *data){
+}
+
+static struct mmc_spi_platform_data bfin_mmc_spi_pdata = {
+        .init = bfin_mmc_spi_init,
+        .exit = bfin_mmc_spi_exit,
+        .detect_delay = 500, /* msecs */
+};
+
+//This information is specific to the Blackfin SPI driver:
+static struct bfin5xx_spi_chip  mmc_spi_chip_info = {
+        .enable_dma = 0,
+        .bits_per_word = 8,
 };
 #endif
 
@@ -123,25 +138,26 @@ static struct spi_board_info bfin_spi_board_info[] __initdata = {
 	},
 #endif
 
-#if defined(CONFIG_SPI_MMC) || defined(CONFIG_SPI_MMC_MODULE)
-	{
-		.modalias = "spi_mmc_dummy",
-		.max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
-		.bus_num = 0,
-		.chip_select = 0,
-		.platform_data = NULL,
-		.controller_data = &spi_mmc_chip_info,
-		.mode = SPI_MODE_3,
-	},
-	{
-		.modalias = "spi_mmc",
-		.max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
-		.bus_num = 0,
-		.chip_select = CONFIG_SPI_MMC_CS_CHAN,
-		.platform_data = NULL,
-		.controller_data = &spi_mmc_chip_info,
-		.mode = SPI_MODE_3,
-	},
+#if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
+
+        {
+                .modalias = "mmc_spi",              	    // Name of the device drivers
+                .max_speed_hz = 25000000,           	    // Maximum Clock Rate for SD cards
+                .bus_num = 0,                       	    // Bus number
+                .chip_select = 4,	    		    // We use SPISEL4 for PR1 to Select the SD card
+                .platform_data = &bfin_mmc_spi_pdata, 	    // Platform data
+                .controller_data = &mmc_spi_chip_info, 	    // Controller data
+
+//              .mode = SPI_MODE_3,                 	    // Clock Polarity und Phase. Mode 3 MUST
+                                                    	    // be used (CPHA=1 und CPOL=1), because
+                                                    	    // Mode 0 sets the interface between the individual
+						    	    // bytes in short, the chip select inactive. This is very important!
+							    // In thi scase the SPI_CLK line should be pulled up 	
+
+		.mode = SPI_MODE_0,			    // Now it seems Mode 0 is supported and in our case 
+							    // we should use it as we have SPI_CLK pulled down
+        },
+
 #endif
 };
 

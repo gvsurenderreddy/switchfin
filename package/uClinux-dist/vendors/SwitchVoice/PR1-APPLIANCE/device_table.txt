@@ -126,6 +126,12 @@
 /dev/sport0	c	660	0	0	237	0	0	0	-
 /dev/sport1	c	660	0	0	237	1	0	0	-
 /dev/timer	c	660	0	0	238	0	0	1	8
+/dev/mmcblk0 	b 	660	0	0	179 	0	0	0	-
+/dev/mmcblk0p1	b       660     0       0       179     1       0       0	-
+/dev/mmcblk0p2	b       660     0       0       179     2       0       0	-
+/dev/mmcblk0p3	b       660     0       0       179     3       0       0	-
+/dev/mmcblk0p4	b       660     0       0       179     4       0       0	-
+/dev/mmcblk0p5	b       660     0       0       179     5       0       0	-
 
 # IDE Devices
 /dev/hda	b	640	0	0	3	0	0	0	-
