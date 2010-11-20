@@ -118,7 +118,7 @@ static struct mmc_spi_platform_data bfin_mmc_spi_pdata = {
 
 //This information is specific to the Blackfin SPI driver:
 static struct bfin5xx_spi_chip  mmc_spi_chip_info = {
-        .enable_dma = 0,
+        .enable_dma = 1,
         .bits_per_word = 8,
 };
 #endif
