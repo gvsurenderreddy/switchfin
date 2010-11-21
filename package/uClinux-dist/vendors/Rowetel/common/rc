@@ -173,6 +173,14 @@ dahdi_update.sh
 dahdi_cfg
 fi
 
+if [ ! -f /etc/asterisk/extensions_custom.conf ]
+then
+	mv /etc/asterisk/extensions.conf /etc/asterisk/extensions_custom.conf
+	echo "#include extensions_custom.conf" > /etc/asterisk/extensions.conf
+	echo "#include custom.conf" >> /etc/asterisk/extensions.conf
+	touch /etc/asterisk/custom.conf
+fi
+
 inetd &
 
 # setting up localtime for asterisk timezone
@@ -199,4 +207,5 @@ then
 else
 	ln -sf /persistent/sounds/monitor /var/spool/asterisk/
 fi
+
 cat /etc/motd

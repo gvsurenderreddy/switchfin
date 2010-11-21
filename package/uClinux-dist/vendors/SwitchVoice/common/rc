@@ -167,6 +167,14 @@ for i in /persistent/etc/rc.d/S*; do
         $i start
 done
 
+if [ ! -f /etc/asterisk/extensions_custom.conf ]
+then
+	mv /etc/asterisk/extensions.conf /etc/asterisk/extensions_custom.conf
+	echo "#include extensions_custom.conf" > /etc/asterisk/extensions.conf
+	echo "#include custom.conf" >> /etc/asterisk/extensions.conf
+	touch /etc/asterisk/custom.conf
+fi
+
 inetd &
 
 # setting up localtime for asterisk timezone
