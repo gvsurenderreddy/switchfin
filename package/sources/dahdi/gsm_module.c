@@ -427,44 +427,91 @@ void  GSM_receive(struct wcfxs *wc,int port, char *rcv_str)
 }
 
 
-//DPN: reads data from the GSM module and terminates in case no data 
-//or some data available but time out has passed
-//Caller should allocate enought space for rcv_str
-void  GSM_receive_sms(struct wcfxs *wc,int port, char *rcv_str)
-{
-        u16 len,i,j,idx;
+//DPN: reads data from the GSM module and checks if match the  
+//requested string. It return 0 in case of match or -1 if no match 
+//in the timeout period  
+int GSM_waitfor(struct wcfxs *wc,int port, char *pattern, int timeout){
+	int i, j, match_idx, len, initial_match, pattern_len, timeout_step=HZ/125;
 
-        //Get the number of characters in the Rx FIFO
-        //==>  R/~W A3 A2 A1 A0 CH1 CH0 X
-        //==>   1    1  0  0  1  0   0  0 ==0xC8. RXLVL register
-        len=fx_read_SPI2UART(wc,port,0xC800) & 0x00ff;
-        if(len==0) {
-                rcv_str[0]=0;//string terminating character
-                return;
+	pattern_len=strlen(pattern);
+	match_idx=0; initial_match=0;
+	for(i=0;i<timeout/timeout_step;i++){
+		len=fx_read_SPI2UART(wc,port,0xC800) & 0x00ff;
+                if(len>64) printk("receiving buffer overflow!");
+		
+                for(j=0;j<len;j++) {
+			
+                        if((char)fx_read_SPI2UART(wc,port,0x8000) == pattern[match_idx]){
+				initial_match=1;
+				if(++match_idx==pattern_len) return 0;
+			}
+			else{
+				if(initial_match) {
+					initial_match=0;
+					match_idx=0;
+				}
+			}
+                }
+                wait_just_a_bit(timeout_step);
+        }
+	
+	return -1;
+}
+
+//DPN: reads data from the GSM module and checks if match the  
+//requested string. It return 0 in case of match or -1 if no match 
+//in the timeout period. If match detected this function also return the data
+//which cama just after the match  
+//Caller should allocate enought space for rcv_str
+int  GSM_waitfor_receive(struct wcfxs *wc,int port, char *pattern, int timeout, char * rcv_str){
+        #define SMS_TIMEOUT_AFTER_MATCH 5
+	char ch;
+	int i, j, match_idx, idx, len, pattern_len, match, initial_match, timeout_step=HZ/125;
+
+        pattern_len=strlen(pattern);
+        idx=0; match_idx=0; match=0; initial_match=0;
+        for(i=0; i < (match?SMS_TIMEOUT_AFTER_MATCH:timeout/timeout_step); i++){
+                len=fx_read_SPI2UART(wc,port,0xC800) & 0x00ff;
+                if(len>64) printk("receiving buffer overflow!");
+
+                for(j=0;j<len;j++) {
+			ch=(char)fx_read_SPI2UART(wc,port,0x8000);
+			if(match) {
+				rcv_str[idx++]=ch;
+
+                        	if (idx==SMS_MAX_LEN-1) {
+                                	printk("SMS too long!");
+                                	return -1;
+                        	}
+			}
+
+                        if(!match && (ch == pattern[match_idx])){
+				initial_match=1;
+                                if(++match_idx==pattern_len) {
+					match=1;
+					i=0; //Wait SMS_TIMEOUT_AFTER_MATCH quants after the match
+					initial_match=0;
+				}
+                        }
+			else {
+                                if(initial_match) {
+                                        initial_match=0;
+                                        match_idx=0;
+                                }
+			}
+			
+                }
+                wait_just_a_bit(timeout_step);
         }
 
-        //Get all the characters and put them in a char array
-        if(len>64) printk("receiving buffer overflow!");
-	
-	
-	//Get all the characters and put them in a char array
-        idx=0;
-	for(i=0;i<SMS_TIMEOUT;i++){
-		for(j=0;j<len;j++) {
-			rcv_str[idx++]=fx_read_SPI2UART(wc,port,0x8000);
-			if (idx==SMS_MAX_LEN-1) {
-				printk("SMS too long!");
-				rcv_str[idx]=0;
-				return;
-			}
-		}
-		wait_just_a_bit(HZ/100);
-		len=fx_read_SPI2UART(wc,port,0xC800) & 0x00ff;
-		if(len>64) printk("receiving buffer overflow!");
+	if(match){
+		rcv_str[idx]=0;
+		return 0;
 	}
-
-	rcv_str[idx]=0;
+	else
+		return -1;
 }
+
 
 
 void Extract_CallerID(char *clcc, char *CID){
@@ -503,27 +550,21 @@ void Extract_CallerID(char *clcc, char *CID){
 //In case of success a 'message' pointer is allocated 
 static int sms_read(struct wcfxs *wc,int port, char **message) {
 	
-        char rcv_str[SMS_MAX_LEN], rcv_str1[20], cmd_str[20];
+        char rcv_str[SMS_MAX_LEN], cmd_str[20];
 	int  i,sms_count, sms_max, len;
-
+	
         GSM_send(wc,port,"at+cmgf=1");// Set Text mode operation for the SMS
-        wait_just_a_bit(HZ/10);
-	//msleep(100);
-        GSM_receive_sms(wc, port, rcv_str);
+        GSM_waitfor(wc, port, "0\r", HZ/10);
 
-	GSM_send(wc,port,"at+cpms?");// List the Preffered SMS Message Store 
-        wait_just_a_bit(HZ/4);	     // This command list the amount of messages available	
-        //msleep(100);
-	GSM_receive_sms(wc, port, rcv_str);
-	len=strlen(rcv_str);
-	if (rcv_str[len-2]!='0'){
-		printk("at+cpms-> %s\n", rcv_str);
-                return -1;	
+	GSM_send(wc,port,"at+cpms?");				 // List the Preffered SMS Message Store 
+        if(GSM_waitfor_receive(wc, port, "+CPMS: ", HZ/4, rcv_str)){ // This command list the amount of messages available	
+		printk("at+cpms? -> %s\n", rcv_str);
+                return -1; 
 	}
 
 	//typically we should get something like
 	//+CPMS: "SM",29,32,"SM",29,32,"SM",29,32
-	len=sscanf(rcv_str,"\r\n+CPMS: \"SM\",%d,%d,", &sms_count, &sms_max);
+	len=sscanf(rcv_str,"\"SM\",%d,%d,", &sms_count, &sms_max);
 	if (len != 2){
 		printk("Wrong CPMS format, only %d parameters interpreted\n", len);
 		return -1;
@@ -539,16 +580,9 @@ static int sms_read(struct wcfxs *wc,int port, char **message) {
 
 	if(sms_count){	//We have SMS available lets read one
 		for(i=1;i<=sms_max;i++) {
-			sprintf(cmd_str, "at+cmgr=%d,1", i);
+			sprintf(cmd_str, "at+cmgr=%d,0", i);
 			GSM_send(wc,port,cmd_str);// Read the i-th SMS 
-        		wait_just_a_bit(HZ/2);
-			//msleep(500);
-        		GSM_receive_sms(wc, port, rcv_str);
-			if (debug>=2)
-                		printk("at+cmgr-> %s\n", rcv_str);
-			len=strlen(rcv_str);
-			if (!strncmp(rcv_str+2,"+CMGR:", 6)) 
-				break; //We got a message 
+        		if(!GSM_waitfor_receive(wc, port, "+CMGR: ", HZ/2, rcv_str)) break; //We got a message  
 		}
 		
 		if(i>sms_max) {
@@ -556,6 +590,8 @@ static int sms_read(struct wcfxs *wc,int port, char **message) {
                         return -1;
                 }
 
+		if (debug>=2) printk("at+cmgr-> %s\n", rcv_str);
+                len=strlen(rcv_str);
 	
 		//Let's alocate memory and copy the message
         	*message = kmalloc(len+1, GFP_ATOMIC);
@@ -568,14 +604,11 @@ static int sms_read(struct wcfxs *wc,int port, char **message) {
 		//Let's delete the mesage
 		sprintf(cmd_str, "at+cmgd=%d", i);
                 GSM_send(wc,port,cmd_str);		
-		wait_just_a_bit(HZ);           
-               	//msleep(1000);
-		GSM_receive_sms(wc, port, rcv_str1);
-		if(rcv_str1[0]!='0') {
-			printk("Can not delete the message -> %s\n", rcv_str1);
-			kfree(*message);
+		if(GSM_waitfor(wc, port, "0\r", 4*HZ)){ // This command list the amount of messages available   
+                	printk("Can not delete the message \n");
+                        kfree(*message);
 			return -1;
-		}
+        	}		
 		
 		if (debug>=2)
                 	printk("Message received!\n");
@@ -599,8 +632,7 @@ static int sms_send(struct wcfxs *wc,int port, char *message) {
         int  i, len, msg_idx, res;
 
         GSM_send(wc,port,"at+cmgf=1");// Set Text mode operation for the SMS
-        wait_just_a_bit(HZ/10);
-        GSM_receive_sms(wc, port, rcv_str);
+	GSM_waitfor(wc, port, "0\r", HZ/10);        
 
 	//Extract number and the actual message
 	for(i=0;i<SMS_NUM_MAX_LEN; i++){
@@ -618,42 +650,31 @@ static int sms_send(struct wcfxs *wc,int port, char *message) {
 	//Store the message in the SIM card
 	sprintf(cmd_str,"at+cmgw=\"%s\"\r\n%s\x1a\x1b", message, message+i+1);
 	GSM_send(wc,port,cmd_str);	
-	wait_just_a_bit(HZ/2);
-	GSM_receive_sms(wc, port, rcv_str);
-	if(!strncmp(rcv_str+6,"+CMGW: ", 7)) {
-		len=sscanf(rcv_str+6,"+CMGW: %d", &msg_idx);
+	if(!GSM_waitfor_receive(wc, port, "+CMGW: ", HZ*.8, rcv_str)){
+		len=sscanf(rcv_str,"%d", &msg_idx);
 		if(len !=1 || msg_idx<1 ||  msg_idx > SMS_MAX_SIM_SMS){
 			printk("Strange message index %d\n", msg_idx);
-			return -1;	
-		}
+			return -1;      
+                }
 	}
 	else {
-		printk("%s\n", rcv_str);
-		return -1;
-	}	
-	
+		printk("Can not store the SMS\n");
+                return -1;
+	}
+
 	//Send the message
 	sprintf(cmd_str,"at+cmss=%d", msg_idx);
 	GSM_send(wc,port,cmd_str);
-        wait_just_a_bit(4*HZ);
-        GSM_receive_sms(wc, port, rcv_str);
-	res=0;
-        if(strncmp(rcv_str+4,"+CMSS: ", 7)) {
-                printk("at+cmss->%s\n", rcv_str);
-                res=-1;
-        } 
-
+	res=GSM_waitfor(wc, port, "+CMSS: ", 4*HZ);
 
 	//Delete the message from the SIM card 
 	sprintf(cmd_str,"at+cmgd=%d", msg_idx);
         GSM_send(wc,port,cmd_str);
-        wait_just_a_bit(HZ);
-        GSM_receive_sms(wc, port, rcv_str);
-        if(rcv_str[0]!='0') {
-		printk("Can not delete the message -> %s\n", rcv_str);
-               	return -1;
-       	}
-        
+        if(GSM_waitfor(wc, port, "0\r", HZ)){
+                printk("Can not delete the message\n");
+                return -1;
+	}
+
 	return res;
 }
 

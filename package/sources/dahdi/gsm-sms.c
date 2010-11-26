@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
                 res=ioctl(fd, WCGSM_GET_SMS, (long)sms);
 		if (!res) {
                 	sms[strlen(sms)-2]=0;           //Remove trailing OK
-                	fprintf(stdout, "%s\n", sms+9); //Don't print '+CMGR: '
+                	fprintf(stdout, "%s\n", sms+2); //Don't print '+CMGR: '
                 }
                 return 0;
 	}else if (!strcasecmp(argv[2], "smssend")){
