@@ -73,12 +73,21 @@ ifeq ($(strip $(SF_IP01)),y)
 	cp -f $(DAHDI_SOURCES)/bfsi.h $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.h
 	cp -f $(DAHDI_SOURCES)/sport_interface.c $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.c
 	cp -f $(DAHDI_SOURCES)/wcfxs.c $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.c
-	cp -f $(DAHDI_SOURCES)/fx.c-ip01 $(DAHDI_DIR)/linux/drivers/dahdi/fx.c
+	cp -f $(DAHDI_SOURCES)/fx-ip01.c $(DAHDI_DIR)/linux/drivers/dahdi/fx.c
 	cp -f $(DAHDI_SOURCES)/bfsi.c $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.c
 endif
 
 ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
 	patch -d $(DAHDI_DIR) -p1 < package/sources/dahdi/dahdi-gsm1.patch
+	cp -f $(DAHDI_SOURCES)/wcfxs-gsm1.c $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.c
+	cp -f $(DAHDI_SOURCES)/wcfxs-gsm1.h $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.h
+	cp -f $(DAHDI_SOURCES)/gsm-sms.c $(DAHDI_DIR)/tools/
+
+ifeq ($(strip $(SF_IP01)),y)
+	cp -f $(DAHDI_SOURCES)/gsm_module-ip01.c $(DAHDI_DIR)/linux/drivers/dahdi/gsm_module.c
+else
+	cp -f $(DAHDI_SOURCES)/gsm_module.c $(DAHDI_DIR)/linux/drivers/dahdi/gsm_module.c
+endif
 endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
@@ -136,6 +145,11 @@ ifeq ($(strip $(SF_IP04)),y)
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
+	cp -f $(DAHDI_DIR)/tools/gsm-sms $(TARGET_DIR)/bin
+else
+	rm -f $(TARGET_DIR)/bin/gsm-sms
+endif
 endif	
 ifeq ($(strip $(SF_IP01)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
@@ -144,6 +158,11 @@ ifeq ($(strip $(SF_IP01)),y)
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_dummy.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
+ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
+        cp -f $(DAHDI_DIR)/tools/gsm-sms $(TARGET_DIR)/bin
+else
+        rm -f $(TARGET_DIR)/bin/gsm-sms
+endif
 endif
 ifeq ($(strip $(SF_PACKAGE_DAHDI_EXTRATOOLS)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_maint $(DAHDI_DIR)/tools/dahdi_monitor $(DAHDI_DIR)/tools/dahdi_speed \
