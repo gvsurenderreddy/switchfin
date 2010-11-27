@@ -159,9 +159,9 @@ ifeq ($(strip $(SF_IP01)),y)
 	cp -f $(DAHDI_DIR)/linux/drivers/staging/echo/echo.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi_echocan_oslec.ko $(TARGET_DIR)/lib/modules/$(TARGET_KERNEL_MODULES)/misc
 ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
-        cp -f $(DAHDI_DIR)/tools/gsm-sms $(TARGET_DIR)/bin
+	cp -f $(DAHDI_DIR)/tools/gsm-sms $(TARGET_DIR)/bin
 else
-        rm -f $(TARGET_DIR)/bin/gsm-sms
+	rm -f $(TARGET_DIR)/bin/gsm-sms
 endif
 endif
 ifeq ($(strip $(SF_PACKAGE_DAHDI_EXTRATOOLS)),y)
