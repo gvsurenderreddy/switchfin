@@ -2404,7 +2404,7 @@ static void wcfxs_release(struct wcfxs *wc)
 	  kfree(wc);
 
       #ifdef SF_IP01
-      	fx_set_led(1, LED_OFF);
+      	fx_set_led(1, FX_LED_OFF);
       #endif
 	}
         remove_proc_entry("wcfxs/wcfxs", NULL);
