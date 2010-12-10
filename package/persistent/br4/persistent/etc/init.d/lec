@@ -9,7 +9,7 @@ case $1 in
     		else;
             		sed -i 's/echocancel = 0/echocancel = 64/' /etc/asterisk/misdn.conf;
     		fi
-		sync;
+		sync;;
 	stop) 	modprobe -r ec_module;;
 	restart) modprobe -r ec_module;
 		 modprobe ec_module encoding=2 doubletail=2;;
