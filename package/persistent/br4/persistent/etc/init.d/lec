@@ -8,7 +8,8 @@ case $1 in
             		sed -i 's/echocancel = 64/echocancel = 0/' /etc/asterisk/misdn.conf;
     		else;
             		sed -i 's/echocancel = 0/echocancel = 64/' /etc/asterisk/misdn.conf;
-    		fi;;
+    		fi
+		sync;
 	stop) 	modprobe -r ec_module;;
 	restart) modprobe -r ec_module;
 		 modprobe ec_module encoding=2 doubletail=2;;
