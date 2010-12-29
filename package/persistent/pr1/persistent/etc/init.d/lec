@@ -2,19 +2,22 @@
 # Start up file for lec
 
 DAHDICONF="/persistent/etc/dahdi/system.conf"
-TMP=`grep  '^span' ${DAHDICONF}`              
-if [[ "`echo ${TMP}|grep 'd4'`" != "" ]]; then
-        T1E1MODE=1; #T1                       
-else                                                   
-        if [[ "`echo ${TMP}|grep 'esf'`" != "" ]]; then
-                ENCOD=1; #T1                           
-        else                                           
-                ENCOD=2; #E1                           
-        fi                                             
+TMP1=`grep  '^span' ${DAHDICONF}`              
+if [[ "`echo ${TMP1}|grep 'd4\|esf'`" != "" ]]; then
+        ENCOD=1; #T1
+else
+        ENCOD=2; #E1
+fi
+
+ASTERISKUSERS="/persistent/etc/asterisk/users.conf"
+TMP2=`grep  '^signalling' ${ASTERISKUSERS}`
+RBS=0; #Default is Common Channel signalling (using common D signalling channel)
+if [[ "`echo ${TMP2}|grep 'em\|em_w\|featd\|fxs\|fxo'`" != "" ]]; then
+        RBS=1; #Robbed-bit signaling
 fi
 
 case $1 in
-	start)	modprobe ec_module encoding=$ENCOD;
+	start)	modprobe ec_module encoding=$ENCOD RBS=$RBS;
 		module=`lsmod | grep ec_module`;
 		if test -z "$module"; then;
 			sed -i 's/echocancel = 64/echocancel = 0/' /etc/asterisk/chan_dahdi.conf;
