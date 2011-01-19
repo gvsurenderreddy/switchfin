@@ -1164,7 +1164,7 @@ static int init_GSM(struct wcfxs *wc,int port)
 		rcv_str[9]=0; //Terminate so we checkonly for +CCALR:1
 		printk(".");
 	} while(strcmp(rcv_str,"+CCALR:1")!=0 && (--cntr>0));
-	if(cntr>0) printk(" DONE!\n");
+	if(cntr>0) printk(" GSM DONE!\n");
 	else printk(" TIME OUT!\n");
 
 	//text result code ,dial and busy enabled
