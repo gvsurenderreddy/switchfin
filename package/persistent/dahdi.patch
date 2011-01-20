@@ -1,0 +1,14 @@
+--- package/persistent/ip04/persistent/etc/init.d/dahdi	2011-01-20 19:01:05.000000000 +0200
++++ package/persistent/ip04/persistent/etc/init.d/dahdi	2011-01-20 19:02:11.000000000 +0200
+@@ -3,8 +3,10 @@
+ 
+ opermode=`cat /etc/asterisk/guipreferences.conf | grep opermode | sed 's/opermode = */\1/'`
+ 
++SIM_pin=`grep simpin /persistent/etc/asterisk/guipreferences.conf | sed 's/simpin = */\1/'`
++
+ case $1 in
+-	start) 	modprobe wcfxs opermode=$opermode;
++	start) 	modprobe wcfxs SIM_pin=$SIM_pin opermode=$opermode;
+ 		wctdm=`dahdi_scan | grep WCTDM`;
+ 		if test -z $wctdm; then; modprobe dahdi_dummy; fi;
+ 		dahdi_cfg;;

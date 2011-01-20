@@ -424,7 +424,7 @@ struct wcfxs {
 //YN =>from here
 inline void __wcfxs_setcard(struct wcfxs *wc, int card);
 
-static char *SIM_pin="3700";
+static char *SIM_pin="0000";
 static char SIM_Enter_string[20]="at+cpin=\"";
 
 static int debug = 0;
@@ -2447,7 +2447,6 @@ static int __init wcfxs_init(void)
 	}
 	*/
 	
-
 	if(debug)
 	{
 		printk(KERN_ALERT "Code test: code function addr = 0x%p\n", dahdi_ec_chunk);

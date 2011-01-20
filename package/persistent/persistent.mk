@@ -69,11 +69,17 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 	cd package/persistent/ip04/persistent/etc/rc.d; \
 	ln -sf ../init.d/asteriskwatch S90asteriskwatch
 endif
+ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
+	patch -p0 package/persistent/ip04/persistent/etc/init.d/dahdi < package/persistent/dahdi.patch
+endif
 	cd package/persistent/ip04; \
 	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
 	cd package/persistent/ip04/persistent/etc/rc.d; \
 	rm -f S45mdnsd S90asteriskwatch
+ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
+	patch -p0 -R package/persistent/ip04/persistent/etc/init.d/dahdi < package/persistent/dahdi.patch
+endif
 endif
 ifeq ($(strip $(SF_IP01)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
