@@ -49,5 +49,6 @@ source "package/libtiff/Config.in"
 source "package/lua/Config.in"
 source "package/uw-imap/Config.in"
 source "package/iptables/Config.in"
+source "package/nfs/Config.in"
 endmenu
 

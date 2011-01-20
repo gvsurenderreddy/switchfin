@@ -1,0 +1,18 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2010 SwitchFin <dpn@switchfin.org>
+#########################################################################
+
+config SF_PACKAGE_NFS
+        bool "nfs"
+        default n
+        help
+                Enables Network File System (NFS) Client support in the kernel. NFS allows PBX to read/write data from a remote server. For our VOIP applications it is useful for recording of the conversations directly to the external network storage. It can be used for external storage for big library of sound prompts.
+

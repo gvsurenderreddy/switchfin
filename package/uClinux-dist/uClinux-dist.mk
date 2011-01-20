@@ -147,6 +147,11 @@ else
 	echo "# CONFIG_NETFILTER is not set" >> $(VARIABLE_CONFIG_FILE)
 	echo "# CONFIG_USER_IPTABLES_IPTABLES is not set" > $(VARIABLE_CONFIG_FILE1)
 endif
+ifeq ($(strip $(SF_PACKAGE_NFS)),y)
+	cat package/nfs/config.nfs >> $(VARIABLE_CONFIG_FILE)
+else
+	echo "# CONFIG_NFS_FS is not set" >> $(VARIABLE_CONFIG_FILE)
+endif
 
 	if [ ! -d $(UCLINUX_DIR)/user/busybox.original ]; then \
                 mv -u $(UCLINUX_DIR)/user/busybox $(UCLINUX_DIR)/user/busybox.original; \

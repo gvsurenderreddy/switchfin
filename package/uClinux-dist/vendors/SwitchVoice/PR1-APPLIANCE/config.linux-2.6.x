@@ -1001,7 +1001,6 @@ CONFIG_JFFS2_RTIME=y
 #
 # Network File Systems
 #
-# CONFIG_NFS_FS is not set
 # CONFIG_NFSD is not set
 # CONFIG_SMB_FS is not set
 # CONFIG_CIFS is not set
@@ -1009,6 +1008,7 @@ CONFIG_JFFS2_RTIME=y
 # CONFIG_CODA_FS is not set
 # CONFIG_AFS_FS is not set
 # CONFIG_9P_FS is not set
+
 
 #
 # Partition Types
