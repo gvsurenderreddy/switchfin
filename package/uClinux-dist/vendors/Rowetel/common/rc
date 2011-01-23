@@ -44,6 +44,7 @@ if [ -d "/persistent/imageupdate" ]; then
                         echo "**************************************" >> /persistent/imageupdate/flashresult
                         echo "**************************************" >> /persistent/imageupdate/flashresult
                         cat /persistent/imageupdate/flashresult
+			cp -r /defaults.tgz /persistent/
                         sleep 2 
                         reboot
                 else
@@ -207,5 +208,6 @@ then
 else
 	ln -sf /persistent/sounds/monitor /var/spool/asterisk/
 fi
+rm /defaults.tgz
 
 cat /etc/motd
