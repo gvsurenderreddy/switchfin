@@ -15,13 +15,17 @@
 ##########################################
 # toolchain package for SwitchFin.org
 ##########################################
-#ifeq ($(strip $(HOST_ARCH)),64bit)
-TOOLCHAIN_BIN_A=blackfin-toolchain-uclibc-default-2010R1-RC4.i386.tar.bz2
-TOOLCHAIN_SITE_A=http://blackfin.uclinux.org/gf/download/frsrelease/501/8384
-TOOLCHAIN_BIN_B=blackfin-toolchain-2010R1-RC4.i386.tar.bz2
-TOOLCHAIN_SITE_B=http://blackfin.uclinux.org/gf/download/frsrelease/501/8378
-#else
-#endif
+ifeq ($(strip $(HOST_ARCH)),64bit)
+TOOLCHAIN_BIN_A=blackfin-toolchain-uclibc-default-09r1.1-2.x86_64.tar.bz2
+TOOLCHAIN_SITE_A=http://blackfin.uclinux.org/gf/download/frsrelease/470/7338
+TOOLCHAIN_BIN_B=blackfin-toolchain-09r1.1-2.x86_64.tar.bz2
+TOOLCHAIN_SITE_B=http://blackfin.uclinux.org/gf/download/frsrelease/470/7330
+else
+TOOLCHAIN_BIN_A=blackfin-toolchain-uclibc-default-09r1.1-2.i386.tar.bz2
+TOOLCHAIN_SITE_A=http://blackfin.uclinux.org/gf/download/frsrelease/470/7320
+TOOLCHAIN_BIN_B=blackfin-toolchain-09r1.1-2.i386.tar.bz2
+TOOLCHAIN_SITE_B=http://blackfin.uclinux.org/gf/download/frsrelease/470/7316
+endif
 TOOLCHAIN_UNZIP=tar
 TOOLCHAIN_BUILD=$(BASE_DIR)/toolchain
 

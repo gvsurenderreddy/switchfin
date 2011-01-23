@@ -20,14 +20,14 @@
 # uClinux-dist package for Astfin.org
 ##########################################
 UCLINUX_KERNEL_SRC=$(BUILD_DIR)/uClinux-dist/linux-2.6.x
-UCLINUX_SOURCE=blackfin-linux-dist-2010R1-RC5.tar.bz2
-UCLINUX_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/509/8660
+UCLINUX_SOURCE=uClinux-dist-2009R1.1-RC4.tar.bz2
+UCLINUX_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/473/7285/
 UCLINUX_UNZIP=bzcat
-UCLINUX_HOME=$(BUILD_DIR)/blackfin-linux-dist
+UCLINUX_HOME=$(BUILD_DIR)/uClinux-dist
 TOOLCHAIN_BUILD=$(BASE_DIR)/toolchain
 VARIABLE_CONFIG_FILE=$(BUILD_DIR)/config_tmp
 VARIABLE_CONFIG_FILE1=$(BUILD_DIR)/config_tmp1
-LIBS_CONFIG=$(BUILD_DIR)/blackfin-linux-dist/config/.config
+LIBS_CONFIG=$(BUILD_DIR)/uClinux-dist/config/.config
 ifeq ($(strip $(SF_IP04)),y)
 SF_ANALOG=y
 endif
