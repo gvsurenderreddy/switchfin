@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	return 0;
 
 help:
-	fprintf(stderr, "Usage: gsm-smstest <wcgsm device> <cmd> <number> <text>\n"
+	fprintf(stderr, "Usage: gsm-sms <wcgsm device> <cmd> <number> <text>\n"
 			"       <wcgsm> is a char device exported by the wcfxs driver for SMS\n"
                         "       comunication with GSM1 hardware, usually /dev/dahdi/wcgsm\n\n"
                         "       <cmd> is one of:\n"

@@ -586,7 +586,7 @@ static int sms_read(struct wcfxs *wc,int port, char **message) {
 		}
 		
 		if(i>sms_max) {
-                        printk("Can not find a message");
+                        printk("Can not find a message\n");
                         return -1;
                 }
 
@@ -633,7 +633,7 @@ static int sms_send(struct wcfxs *wc,int port, char *message) {
 
         GSM_send(wc,port,"at+cmgf=1");// Set Text mode operation for the SMS
 	GSM_waitfor(wc, port, "0\r", HZ/10);        
-
+	
 	//Extract number and the actual message
 	for(i=0;i<SMS_NUM_MAX_LEN; i++){
 
@@ -643,7 +643,7 @@ static int sms_send(struct wcfxs *wc,int port, char *message) {
 	if(message[i]==':')
 		message[i]=0; //Correct number detected, terminate the string
 	else {
-		printk("Uncorrect number format");
+		printk("Incorrect number format\n");
 		return -1;
 	}
 	
