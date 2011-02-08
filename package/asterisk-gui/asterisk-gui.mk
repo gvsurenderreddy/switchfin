@@ -71,6 +71,7 @@ asterisk-gui: gui_check_prev_ver $(ASTERISKGUI_DIR)/.configured
 	cp -Rv $(ASTERISKGUI_DIR)/config/* $(TARGET_DIR)/var/lib/asterisk/static-http/config/
 	cp -v $(ASTERISKGUI_DIR)/scripts/* $(TARGET_DIR)/var/lib/asterisk/scripts/
 	chmod +x  $(TARGET_DIR)/var/lib/asterisk/scripts/*
+	chmod +x  $(TARGET_DIR)/var/lib/asterisk/static-http/config/cgi-bin/*
 
 
 asterisk-gui-configure: $(ASTERISKGUI_DIR)/.configured
