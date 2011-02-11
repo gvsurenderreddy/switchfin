@@ -1,6 +1,6 @@
-diff -r -u asterisk-1.4.32/include/asterisk/channel.h asterisk-1.4.32-attrafax/include/asterisk/channel.h
---- asterisk-1.4.32/include/asterisk/channel.h	2010-03-09 23:25:36.000000000 +0100
-+++ asterisk-1.4.32-attrafax/include/asterisk/channel.h	2010-07-01 00:03:33.000000000 +0100
+diff -r -u asterisk/include/asterisk/channel.h asterisk-attrafax/include/asterisk/channel.h
+--- asterisk/include/asterisk/channel.h	2010-03-09 23:25:36.000000000 +0100
++++ asterisk-attrafax/include/asterisk/channel.h	2010-07-01 00:03:33.000000000 +0100
 @@ -90,6 +90,8 @@
  #include "asterisk/abstract_jb.h"
  
@@ -31,9 +31,9 @@ diff -r -u asterisk-1.4.32/include/asterisk/channel.h asterisk-1.4.32-attrafax/i
  	/*! Track the read/written samples for monitor use */
  	unsigned long insmpl;
  	unsigned long outsmpl;
-diff -r -u asterisk-1.4.32/include/asterisk/logger.h asterisk-1.4.32-attrafax/include/asterisk/logger.h
---- asterisk-1.4.32/include/asterisk/logger.h	2010-03-09 23:25:36.000000000 +0100
-+++ asterisk-1.4.32-attrafax/include/asterisk/logger.h	2010-07-01 00:03:33.000000000 +0100
+diff -r -u asterisk/include/asterisk/logger.h asterisk-attrafax/include/asterisk/logger.h
+--- asterisk/include/asterisk/logger.h	2010-03-09 23:25:36.000000000 +0100
++++ asterisk-attrafax/include/asterisk/logger.h	2010-07-01 00:03:33.000000000 +0100
 @@ -80,6 +80,8 @@
  void ast_verbose(const char *fmt, ...)
  	__attribute__((format(printf, 1, 2)));
@@ -43,9 +43,9 @@ diff -r -u asterisk-1.4.32/include/asterisk/logger.h asterisk-1.4.32-attrafax/in
  int ast_register_verbose(void (*verboser)(const char *string));
  int ast_unregister_verbose(void (*verboser)(const char *string));
  
-diff -r -u asterisk-1.4.32/include/asterisk/threadstorage.h asterisk-1.4.29.1-attrafax/include/asterisk/threadstorage.h
---- asterisk-1.4.32/include/asterisk/threadstorage.h	2010-03-09 23:25:36.000000000 +0100
-+++ asterisk-1.4.32-attrafax/include/asterisk/threadstorage.h	2010-07-01 00:03:33.000000000 +0100
+diff -r -u asterisk/include/asterisk/threadstorage.h asterisk-1.4.29.1-attrafax/include/asterisk/threadstorage.h
+--- asterisk/include/asterisk/threadstorage.h	2010-03-09 23:25:36.000000000 +0100
++++ asterisk-attrafax/include/asterisk/threadstorage.h	2010-07-01 00:03:33.000000000 +0100
 @@ -337,6 +337,15 @@
  		(__res);                                                         \
  	})
@@ -62,9 +62,9 @@ diff -r -u asterisk-1.4.32/include/asterisk/threadstorage.h asterisk-1.4.29.1-at
  /*!
   * \brief Append to a thread local dynamic string using a va_list
   *
-diff -r -u asterisk-1.4.32/main/udptl.c asterisk-1.4.32-attrafax/main/udptl.c
---- asterisk-1.4.32/main/udptl.c	2010-03-09 23:25:35.000000000 +0100
-+++ asterisk-1.4.32-attrafax/main/udptl.c	2010-07-01 00:03:33.000000000 +0100
+diff -r -u asterisk/main/udptl.c asterisk-attrafax/main/udptl.c
+--- asterisk/main/udptl.c	2010-03-09 23:25:35.000000000 +0100
++++ asterisk-attrafax/main/udptl.c	2010-07-01 00:03:33.000000000 +0100
 @@ -68,7 +68,7 @@
  static int udptlmaxdatagram;
  static int use_even_ports;
@@ -74,37 +74,9 @@ diff -r -u asterisk-1.4.32/main/udptl.c asterisk-1.4.32-attrafax/main/udptl.c
  #define MAX_FEC_ENTRIES             5
  #define MAX_FEC_SPAN                5
  
-diff -ur asterisk-1.4.32/channels/chan_dahdi.c asterisk-1.4.32-attrafax/channels/chan_dahdi.c
---- asterisk-1.4.32/channels/chan_dahdi.c	2010-05-01 01:22:46.000000000 +0300
-+++ asterisk-1.4.32-attrafax/channels/chan_dahdi.c	2010-07-01 00:03:33.000000000 +0300
-@@ -4035,6 +4035,7 @@
- 		/* Fax tone -- Handle and return NULL */
- 		if ((p->callprogress & 0x6) && !p->faxhandled) {
- 			p->faxhandled = 1;
-+			ast->zap_fax_detected = 1;
- 			if (strcmp(ast->exten, "fax")) {
- 				const char *target_context = S_OR(ast->macrocontext, ast->context);
- 
-@@ -5070,6 +5071,7 @@
- 	int index;
- 	void *readbuf;
- 	struct ast_frame *f;
-+	int bridge_flag = 0;
- 
- 	while (ast_mutex_trylock(&p->lock)) {
- 		DEADLOCK_AVOIDANCE(&ast->lock);
-@@ -8567,6 +8569,8 @@
- 		} else if (groupmatched) {
- 			*cause = AST_CAUSE_CONGESTION;
- 		}
-+	} else {
-+		tmp->zap_fax_detected = 0;
- 	}
- 		
- 	return tmp;
-diff -ur asterisk-1.4.32/channels/chan_misdn.c asterisk-1.4.32-attrafax/channels/chan_misdn.c
---- asterisk-1.4.32/channels/chan_misdn.c	2010-02-19 19:18:49.000000000 +0200
-+++ asterisk-1.4.32-attrafax/channels/chan_misdn.c	2010-07-01 00:05:25.000000000 +0300
+diff -ur asterisk/channels/chan_misdn.c asterisk-attrafax/channels/chan_misdn.c
+--- asterisk/channels/chan_misdn.c	2010-02-19 19:18:49.000000000 +0200
++++ asterisk-attrafax/channels/chan_misdn.c	2010-07-01 00:05:25.000000000 +0300
 @@ -2711,6 +2711,7 @@
   		if (!tmp->faxhandled) {
    			struct ast_channel *ast = tmp->ast;
@@ -123,9 +95,9 @@ diff -ur asterisk-1.4.32/channels/chan_misdn.c asterisk-1.4.32-attrafax/channels
  	} else {
  		chan_misdn_log(-1, 0, "Unable to allocate channel structure\n");
  	}
-diff -ur asterisk-1.4.32/main/asterisk.c asterisk-1.4.32-attrafax/main/asterisk.c
---- asterisk-1.4.32/main/asterisk.c	2010-03-15 03:33:50.000000000 +0200
-+++ asterisk-1.4.32-attrafax/main/asterisk.c	2010-07-01 00:45:04.000000000 +0300
+diff -ur asterisk/main/asterisk.c asterisk-attrafax/main/asterisk.c
+--- asterisk/main/asterisk.c	2010-03-15 03:33:50.000000000 +0200
++++ asterisk-attrafax/main/asterisk.c	2010-07-01 00:45:04.000000000 +0300
 @@ -129,6 +129,8 @@
  
  #include "../defaults.h"
@@ -144,9 +116,9 @@ diff -ur asterisk-1.4.32/main/asterisk.c asterisk-1.4.32-attrafax/main/asterisk.
  	if (ast_image_init()) {
  		printf("%s", term_quit());
  		exit(1);
-diff -ur asterisk-1.4.32/main/channel.c asterisk-1.4.32-attrafax/main/channel.c
---- asterisk-1.4.32/main/channel.c	2010-05-05 02:47:08.000000000 +0300
-+++ asterisk-1.4.32-attrafax/main/channel.c	2010-07-01 00:49:10.000000000 +0300
+diff -ur asterisk/main/channel.c asterisk-attrafax/main/channel.c
+--- asterisk/main/channel.c	2010-05-05 02:47:08.000000000 +0300
++++ asterisk-attrafax/main/channel.c	2010-07-01 00:49:10.000000000 +0300
 @@ -70,6 +70,8 @@
  #include "asterisk/threadstorage.h"
  #include "asterisk/slinfactory.h"
@@ -266,9 +238,9 @@ diff -ur asterisk-1.4.32/main/channel.c asterisk-1.4.32-attrafax/main/channel.c
  	return res;
  }
  
-diff -ur asterisk-1.4.32/main/logger.c asterisk-1.4.32-attrafax/main/logger.c
---- asterisk-1.4.32/main/logger.c	2010-02-24 23:02:18.000000000 +0200
-+++ asterisk-1.4.32-attrafax/main/logger.c	2010-07-01 00:52:05.000000000 +0300
+diff -ur asterisk/main/logger.c asterisk-attrafax/main/logger.c
+--- asterisk/main/logger.c	2010-02-24 23:02:18.000000000 +0200
++++ asterisk-attrafax/main/logger.c	2010-07-01 00:52:05.000000000 +0300
 @@ -895,6 +895,42 @@
  		v->verboser(buf->str);
  	AST_LIST_UNLOCK(&verbosers);
@@ -312,9 +284,9 @@ diff -ur asterisk-1.4.32/main/logger.c asterisk-1.4.32-attrafax/main/logger.c
  	ast_log(LOG_VERBOSE, "%s", buf->str + 1);
  }
  
-diff -ur asterisk-1.4.32/main/Makefile asterisk-1.4.32-attrafax/main/Makefile
---- asterisk-1.4.32/main/Makefile	2010-03-24 00:45:55.000000000 +0200
-+++ asterisk-1.4.32-attrafax/main/Makefile	2010-07-01 00:44:07.000000000 +0300
+diff -ur asterisk/main/Makefile asterisk-attrafax/main/Makefile
+--- asterisk/main/Makefile	2010-03-24 00:45:55.000000000 +0200
++++ asterisk-attrafax/main/Makefile	2010-07-01 00:44:07.000000000 +0300
 @@ -50,6 +50,8 @@
    AST_LIBS+=$(EDITLINE_LIB) -lm
  endif
@@ -324,9 +296,9 @@ diff -ur asterisk-1.4.32/main/Makefile asterisk-1.4.32-attrafax/main/Makefile
  ifneq ($(findstring darwin,$(OSARCH)),)
    AST_LIBS+=-lresolv
    ifneq ($(findstring LOADABLE_MODULES,$(MENUSELECT_CFLAGS)),)
-diff -ur asterisk-1.4.32/Makefile asterisk-1.4.32-attrafax/Makefile
---- asterisk-1.4.32/Makefile	2010-05-03 19:54:41.000000000 +0300
-+++ asterisk-1.4.32-attrafax/Makefile	2010-07-01 00:54:24.000000000 +0300
+diff -ur asterisk/Makefile asterisk-attrafax/Makefile
+--- asterisk/Makefile	2010-05-03 19:54:41.000000000 +0300
++++ asterisk-attrafax/Makefile	2010-07-01 00:54:24.000000000 +0300
 @@ -156,7 +156,7 @@
  HTTP_CGIDIR=/var/www/cgi-bin
  
@@ -336,9 +308,9 @@ diff -ur asterisk-1.4.32/Makefile asterisk-1.4.32-attrafax/Makefile
  
  # If the file .asterisk.makeopts is present in your home directory, you can
  # include all of your favorite menuselect options so that every time you download
-diff -ur asterisk-1.4.32/main/dsp.c asterisk-1.4.32-attrafax/main/dsp.c
---- asterisk-1.4.32/main/dsp.c	2010-07-02 00:54:23.000000000 +0300
-+++ asterisk-1.4.32-attrafax/main/dsp.c	2010-07-02 00:56:58.000000000 +0300
+diff -ur asterisk/main/dsp.c asterisk-attrafax/main/dsp.c
+--- asterisk/main/dsp.c	2010-07-02 00:54:23.000000000 +0300
++++ asterisk-attrafax/main/dsp.c	2010-07-02 00:56:58.000000000 +0300
 @@ -229,12 +229,14 @@
  	goertzel_state_t col_out[4];
  #ifdef FAX_DETECT
@@ -486,13 +458,13 @@ diff -ur asterisk-1.4.32/main/dsp.c asterisk-1.4.32-attrafax/main/dsp.c
  #endif
  		dsp->td.dtmf.hit1 = dsp->td.dtmf.hit2 = dsp->td.dtmf.hit3 = dsp->td.dtmf.hit4 = dsp->td.dtmf.mhit = 0;
  #else
-diff -ur asterisk-1.4.32/channels/chan_sip.c asterisk-1.4.32-attrafax/channels/chan_sip.c
---- asterisk-1.4.32/channels/chan_sip.c	2010-05-05 19:42:22.000000000 +0300
-+++ asterisk-1.4.32-attrafax/channels/chan_sip.c	2010-07-02 01:44:48.000000000 +0300
+diff -ur asterisk/channels/chan_sip.c asterisk-attrafax/channels/chan_sip.c
+--- asterisk/channels/chan_sip.c	2010-05-05 19:42:22.000000000 +0300
++++ asterisk-attrafax/channels/chan_sip.c	2010-07-02 01:44:48.000000000 +0300
 @@ -149,6 +149,7 @@
- #include "asterisk/compiler.h"
  #include "asterisk/threadstorage.h"
  #include "asterisk/translate.h"
+ #include "asterisk/astobj2.h"
 +#include "attractel/attrlic.h"
  
  #ifndef FALSE
@@ -711,19 +683,6 @@ diff -ur asterisk-1.4.32/channels/chan_sip.c asterisk-1.4.32-attrafax/channels/c
  		if (reinvite && p->udptl) {
  			/* If this is a T.38 call, we should go back to 
  			   audio. If this is an audio call - something went
-@@ -13121,9 +13167,11 @@
- 			   sides here? 
- 			*/
- 			/* While figuring that out, hangup the call */
--			if (p->owner && !ast_test_flag(req, SIP_PKT_IGNORE))
-+			/* Disabled by Vasil Kolev. Why should we drop the call? */
-+/*			if (p->owner && !ast_test_flag(req, SIP_PKT_IGNORE))
- 				ast_queue_control(p->owner, AST_CONTROL_CONGESTION);
- 			ast_set_flag(&p->flags[0], SIP_NEEDDESTROY);
-+*/
- 		} else {
- 			/* We can't set up this call, so give up */
- 			if (p->owner && !ast_test_flag(req, SIP_PKT_IGNORE))
 @@ -15329,15 +15377,22 @@
  							ast_set_flag(&p->flags[1], SIP_PAGE2_DIALOG_ESTABLISHED);
  							transmit_response_with_t38_sdp(p, "200 OK", req, XMIT_CRITICAL);
@@ -795,9 +754,9 @@ diff -ur asterisk-1.4.32/channels/chan_sip.c asterisk-1.4.32-attrafax/channels/c
  		}
  	} else {
  		if (p->vad) {
-diff -ur asterisk-1.4.32/main/dsp.c asterisk-1.4.32-attrafax/main/dsp.c
---- asterisk-1.4.32/main/dsp.c 2010-05-05 19:42:22.000000000 +0300
-+++ asterisk-1.4.32-attrafax/main/dsp.c        2010-07-02 01:44:48.000000000 +0300
+diff -ur asterisk/main/dsp.c asterisk-attrafax/main/dsp.c
+--- asterisk/main/dsp.c 2010-05-05 19:42:22.000000000 +0300
++++ asterisk-attrafax/main/dsp.c        2010-07-02 01:44:48.000000000 +0300
 @@ -504,28 +504,41 @@
  			limit = sample + (102 - s->current_sample);
  		else
@@ -859,3 +818,30 @@ diff -ur asterisk-1.4.32/main/dsp.c asterisk-1.4.32-attrafax/main/dsp.c
  #else
  		/* The following unrolled loop takes only 35% (rough estimate) of the 
  		   time of a rolled loop on the machine on which it was developed */
+--- asterisk/channels/chan_dahdi.c	2011-02-04 11:49:51.000000000 +0200
++++ asterisk-attrafax/channels/chan_dahdi.c	2011-02-04 18:23:26.000000000 +0200
+@@ -4267,6 +4267,7 @@
+ 			/* Fax tone -- Handle and return NULL */
+ 			if ((p->callprogress & 0x6) && !p->faxhandled) {
+ 				p->faxhandled = 1;
++                                ast->zap_fax_detected = 1;
+ 				if (strcmp(ast->exten, "fax")) {
+ 					const char *target_context = S_OR(ast->macrocontext, ast->context);
+ 
+@@ -5368,6 +5369,7 @@
+ 	void *readbuf;
+ 	struct ast_frame *f;
+ 	int before;
++        int bridge_flag = 0;
+ 
+ 	while (ast_mutex_trylock(&p->lock)) {
+ 		DEADLOCK_AVOIDANCE(&ast->lock);
+@@ -8916,6 +8918,8 @@
+ 		} else if (groupmatched) {
+ 			*cause = AST_CAUSE_CONGESTION;
+ 		}
++        } else {
++                 tmp->zap_fax_detected = 0;
+ 	}
+ 		
+ 	return tmp;

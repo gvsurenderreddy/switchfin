@@ -22,10 +22,8 @@
 ##########################################
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
-	ASTERISK_VERSION=1.4.32
+	ASTERISK_VERSION=1.4.39.1
 	ASTERISK_PATCH=asterisk-1.4.patch
-	CID_PATCH=cid-1.4.patch
-	AUTOMIXMON_PATCH=automixmon-1.4.patch
 	ASTERISK_MAKEOPTS=asterisk-1.4
 	ATTRAFAX_NAME=attrafax-0.9
 	ATTRAFAX_DIR=$(BUILD_DIR)/$(ATTRAFAX_NAME)
@@ -87,7 +85,6 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(ASTERISK_UNZIP) $(DL_DIR)/$(ASTERISK_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	ln -sf $(ASTERISK_DIR) $(ASTERISK_DIR_LINK)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(ASTERISK_PATCH)
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(CID_PATCH)
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 
@@ -95,7 +92,6 @@ ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(GSM1_PATCH)
 endif
 
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(AUTOMIXMON_PATCH)
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
 	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs
 ifeq ($(strip $(SF_PACKAGE_LUA)),y)
