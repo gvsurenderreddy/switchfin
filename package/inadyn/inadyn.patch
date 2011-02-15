@@ -1,13 +1,11 @@
---- inadyn/makefile	2010-08-30 02:21:17.000000000 +0300
-+++ inadyn/makefile	2010-08-30 02:18:39.000000000 +0300
-@@ -33,8 +33,8 @@
- 	$(OUTDIR)/os_unix.o $(OUTDIR)/os_windows.o $(OUTDIR)/tcp.o $(OUTDIR)/inadyn_cmd.o
- OBJ=$(COMMON_OBJ) $(CFG_OBJ)
+--- src/os_unix.c	2011-02-15 11:33:42.000000000 +0200
++++ src/os_unix.c	2011-02-15 11:34:02.000000000 +0200
+@@ -164,7 +164,7 @@
+ */
+ RC_TYPE close_console_window(void)
+ {
+-    pid_t pid = fork();
++    pid_t pid = vfork();
  
--COMPILE=gcc  -Wall  -pedantic -c  $(ARCH_SPECIFIC_CFLAGS) $(CFLAGS) -o "$(OUTDIR)/$(*F).o" $(CFG_INC) "$<"
--LINK=gcc $(CFLAGS) -o "$(OUTFILE)" $(OBJ) $(CFG_LIB) $(ARCH_SPECIFIC_LIBS)
-+COMPILE=$(CC)  -Wall  -pedantic -c  $(ARCH_SPECIFIC_CFLAGS) $(CFLAGS) -o "$(OUTDIR)/$(*F).o" $(CFG_INC) "$<"
-+LINK=$(CC) $(CFLAGS) -o "$(OUTFILE)" $(OBJ) $(CFG_LIB) $(ARCH_SPECIFIC_LIBS)
- 
- # Pattern rules
- $(OUTDIR)/%.o : $(SRCDIR)/%.c
+     if (pid < 0)
+     {

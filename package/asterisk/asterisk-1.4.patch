@@ -1216,3 +1216,14 @@ diff -ur asterisk/utils/Makefile asterisk.patched/utils/Makefile
  
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compiler 'attribute pure' support" >&5
  $as_echo_n "checking for compiler 'attribute pure' support... " >&6; }
+--- asterisk/main/manager.c	2011-02-15 12:46:59.000000000 +0200
++++ asterisk.patched/main/manager.c	2011-02-15 12:47:27.000000000 +0200
+@@ -2934,7 +2934,7 @@
+ 			size_t l;
+ 
+ 			if ((l = lseek(ss.fd, 0, SEEK_END)) > 0) {
+-				if (MAP_FAILED == (buf = mmap(NULL, l + 1, PROT_READ | PROT_WRITE, MAP_SHARED, ss.fd, 0))) {
++				if (MAP_FAILED == (buf = mmap(NULL, l + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, ss.fd, 0))) {
+ 					ast_log(LOG_WARNING, "mmap failed.  Manager request output was not processed\n");
+ 				} else {
+ 					char *tmpbuf;
