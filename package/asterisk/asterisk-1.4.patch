@@ -1227,3 +1227,37 @@ diff -ur asterisk/utils/Makefile asterisk.patched/utils/Makefile
  					ast_log(LOG_WARNING, "mmap failed.  Manager request output was not processed\n");
  				} else {
  					char *tmpbuf;
+--- asterisk/channels/chan_sip.c	2010-12-10 00:00:30.000000000 +0200
++++ asterisk.patched/channels/chan_sip.c	2011-02-22 19:46:52.000000000 +0200
+@@ -1604,6 +1604,7 @@
+ static void build_callid_registry(struct sip_registry *reg, struct in_addr ourip, const char *fromdomain);
+ static void make_our_tag(char *tagbuf, size_t len);
+ static int add_header(struct sip_request *req, const char *var, const char *value);
++static int add_header_contentLength(struct sip_request *req, int len);
+ static int add_content(struct sip_request *req, const char *line);
+ static int finalize_content(struct sip_request *req);
+ static int add_text(struct sip_request *req, const char *text);
+@@ -6229,6 +6230,15 @@
+ }
+ 
+ /*! \brief Add 'Content-Length' header to SIP message */
++static int add_header_contentLength(struct sip_request *req, int len)
++{
++	char clen[10];
++
++	snprintf(clen, sizeof(clen), "%d", len);
++	return add_header(req, "Content-Length", clen);
++}
++
++/*! \brief Add 'Content-Length' header to SIP message */
+ static int finalize_content(struct sip_request *req)
+ {
+ 	char clen[10];
+@@ -6840,6 +6850,7 @@
+ 	struct sip_request resp;
+ 	respprep(&resp, p, msg, req);
+ 	add_header(&resp, "Accept", "application/sdp");
++	add_header_contentLength(&resp, 0);  //Penev: Zero the Content-Length !
+ 	return send_response(p, &resp, reliable, 0);
+ }
+ 

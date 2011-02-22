@@ -22,7 +22,7 @@
 ##########################################
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
-	ASTERISK_VERSION=1.4.39.1
+	ASTERISK_VERSION=1.4.39.2
 	ASTERISK_PATCH=asterisk-1.4.patch
 	ASTERISK_MAKEOPTS=asterisk-1.4
 	ATTRAFAX_NAME=attrafax-0.9
