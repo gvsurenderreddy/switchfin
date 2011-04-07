@@ -27,10 +27,10 @@ STAGING_INC=$(STAGING_DIR)/usr/include
 STAGING_LIB=$(STAGING_DIR)/usr/lib
 
 SSMTP_CFLAGS+=-O2 -Wall -D__uClinux__ -DEMBED -fno-builtin -mfdpic
-SSMTP_CFLAGS+=-I$(UCLINUX_DIST) -isystem $(STAGING_INC)
+SSMTP_CFLAGS+=-I$(UCLINUX_DIST) -isystem $(STAGING_INC) -I$(STAGING_INC)
 SSMTP_CFLAGS+=-DLOGFILE -DSTDC_HEADERS=1 -DHAVE_LIMITS_H=1 -DHAVE_STRINGS_H=1 
 SSMTP_CFLAGS+=-DHAVE_UNISTD_H=1 -DHAVE_LIBNSL=1 -DRETSIGTYPE=void -DHAVE_VPRINTF=1 
-SSMTP_CFLAGS+=-DHAVE_GETHOSTNAME=1 -DHAVE_SOCKET=1 -DHAVE_STRDUP=1 -DHAVE_STRSTR=1 
+SSMTP_CFLAGS+=-DHAVE_GETHOSTNAME=1 -DHAVE_SOCKET=1 -DHAVE_STRDUP=1 -DHAVE_STRSTR=1 -DHAVE_MD5=1 -DHAVE_SSL=1
 SSMTP_CFLAGS+=-DREWRITE_DOMAIN=1  $(EXTRADEFS) -g
 SSMTP_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl
 SSMTP_DEP=""
@@ -74,7 +74,7 @@ base64.o: $(SSMTP_DIR)/base64.c
 	bfin-linux-uclibc-gcc $(SSMTP_CFLAGS) -c -o $(SSMTP_DIR)/base64.o $<
 
 ssmtp: $(SSMTP_DIR)/.configured xgethostname.o ssmtp.o arpadate.o base64.o
-	bfin-linux-uclibc-gcc -o $(SSMTP_DIR)/ssmtp $(SSMTP_DIR)/xgethostname.o $(SSMTP_DIR)/ssmtp.o $(SSMTP_DIR)/arpadate.o $(SSMTP_DIR)/base64.o 
+	bfin-linux-uclibc-gcc -o $(SSMTP_DIR)/ssmtp $(SSMTP_DIR)/xgethostname.o $(SSMTP_DIR)/ssmtp.o $(SSMTP_DIR)/arpadate.o $(SSMTP_DIR)/base64.o -L$(STAGING_LIB) -lssl -lcrypto
 
 	mkdir -p $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR)/bin
