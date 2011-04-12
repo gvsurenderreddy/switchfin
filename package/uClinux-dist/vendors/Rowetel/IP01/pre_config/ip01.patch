@@ -268,3 +268,48 @@
  
  #define DM9000_MRCMDX          0xF0
  #define DM9000_MRCMD           0xF2
+--- uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2011-04-10 12:07:18.000000000 +0300
++++ uClinux-dist/linux-2.6.x/drivers/net/dm9000.c	2011-04-10 12:06:44.000000000 +0300
+@@ -672,6 +672,8 @@
+ 	spin_unlock_irqrestore(&db->lock, flags);
+ }
+ 
++static void dm9000_phy_write(struct net_device *, int , int, int);
++
+ /*
+  * Initilize dm9000 board
+  */
+@@ -688,8 +690,10 @@
+ 
+ 	/* GPIO0 on pre-activate PHY */
+ 	iow(db, DM9000_GPR, 0);	/* REG_1F bit0 activate phyxcer */
++	mdelay(20); //Penev Wait for PHY power on ready
+ 	iow(db, DM9000_GPCR, GPCR_GEP_CNTL);	/* Let GPIO0 output */
+ 	iow(db, DM9000_GPR, 0);	/* Enable PHY */
++	mdelay(20); //Penev, probably not needed!!!  Wait for PHY power on ready
+ 
+ 	if (db->flags & DM9000_PLATF_EXT_PHY)
+ 		iow(db, DM9000_NCR, NCR_EXT_PHY);
+@@ -719,6 +723,13 @@
+ 	db->tx_pkt_cnt = 0;
+ 	db->queue_pkt_len = 0;
+ 	dev->trans_start = 0;
++
++        if (db->type == TYPE_DM9000B){
++                iow(db, 0x38, 0x01);                    //Penev: default 2mA, eliminate 2ns IOR spike
++                                                        //as defined in the migration document
++
++                dm9000_phy_write(dev, 0, 0x1b, 0xe100); //Penev: Set DSP _Control as per migration document 
++        }
+ }
+ 
+ /* Our watchdog timed out. Called by the networking layer */
+@@ -1036,6 +1047,8 @@
+ 	
+ 	dm9000_schedule_poll(db);
+ 
++	dm9000_timeout(dev); //Penev, This fixes the driver in case of DM9000B !?!?  
++
+ 	return 0;
+ }
+ 
