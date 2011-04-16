@@ -569,7 +569,7 @@ static int sms_read(struct wcfxs *wc,int port, char **message) {
 		printk("Wrong CPMS format, only %d parameters interpreted\n", len);
 		return -1;
 	}
-	if(sms_max != 32) {
+	if(sms_max < 8 || sms_max > 256) {
 		printk("Strange Storage Capacity %d\n", sms_max);
 		return -1;
 	}
