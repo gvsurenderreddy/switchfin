@@ -90,6 +90,7 @@ $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(UBOOT_UNZIP) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch
+	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/nand.patch
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch.br4
 	mkdir -p $(UBOOT_DIR)/board/SwitchVoice/br4
