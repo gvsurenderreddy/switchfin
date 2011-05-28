@@ -15,6 +15,9 @@
  *               Copyright 2005 National ICT Australia (NICTA)
  *               Copyright 2004-2006 Analog Devices Inc.
  *
+ *               May 2011, updated for uClinux 2010R1-RC5
+ *               COpyright 2011 Switchfin.org  
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -33,13 +36,12 @@
 
 #include <linux/device.h>
 #include <linux/platform_device.h>
-//#include <linux/io.h>   // asm-generic/io.h instead
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
 #include <linux/spi/spi.h>
 #include <linux/spi/flash.h>
-#include <linux/spi/mmc_spi.h> //Added
+#include <linux/spi/mmc_spi.h>
 #if defined(CONFIG_USB_ISP1362_HCD) || defined(CONFIG_USB_ISP1362_HCD_MODULE)
 #include <linux/usb/isp1362.h>
 #endif
@@ -49,8 +51,6 @@
 #include <asm/reboot.h>
 #include <asm/portmux.h>
 
-//#include <asm/dpmc.h> not needed
-#include <linux/spi/mmc_spi.h> //Added
 #include <asm-generic/io.h>
 
 /*
@@ -367,7 +367,7 @@ static struct mtd_partition bfin_plat_nand_partitions[] = {
                 .offset     = 0xA00000,
         }, {
                 .name       = "persistent file system(nand)",
-                .size       = (CONFIG_BFIN_NAND_PLAT_SIZE-(20 *1024*1024)),
+                .size       = (CONFIG_BFIN_NAND_PLAT_SIZE-0x1400000),
                 .offset     = 0x1400000,
         }
 };
