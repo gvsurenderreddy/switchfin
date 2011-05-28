@@ -19,15 +19,15 @@
 ##########################################
 # uClinux-dist package for Astfin.org
 ##########################################
-UCLINUX_KERNEL_SRC=$(BUILD_DIR)/uClinux-dist/linux-2.6.x
-UCLINUX_SOURCE=uClinux-dist-2009R1.1-RC4.tar.bz2
-UCLINUX_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/473/7285/
+UCLINUX_KERNEL_SRC=$(BUILD_DIR)/blackfin-linux-dist/linux-2.6.x
+UCLINUX_SOURCE=blackfin-linux-dist-2010R1-RC5.tar.bz2
+UCLINUX_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/509/8660
 UCLINUX_UNZIP=bzcat
-UCLINUX_HOME=$(BUILD_DIR)/uClinux-dist
+UCLINUX_HOME=$(BUILD_DIR)/blackfin-linux-dist
 TOOLCHAIN_BUILD=$(BASE_DIR)/toolchain
 VARIABLE_CONFIG_FILE=$(BUILD_DIR)/config_tmp
 VARIABLE_CONFIG_FILE1=$(BUILD_DIR)/config_tmp1
-LIBS_CONFIG=$(BUILD_DIR)/uClinux-dist/config/.config
+LIBS_CONFIG=$(BUILD_DIR)/blackfin-linux-dist/config/.config
 ifeq ($(strip $(SF_IP04)),y)
 SF_ANALOG=y
 endif
@@ -36,6 +36,9 @@ SF_ANALOG=y
 endif
 ifeq ($(strip $(SF_FX08)),y)
 SF_ANALOG=y
+endif
+ifeq ($(strip $(SF_IP08)),y)
+SF_IP04=y
 endif
 
 ################################################
@@ -57,7 +60,8 @@ uClinux-source: $(DL_DIR)/$(UCLINUX_SOURCE) $(UCLINUX_CONFIG_FILE)
 $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR);
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/ncpu.patch
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/curl.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/wget.patch
+#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/curl.patch #Tempprary removed
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/mem.patch
@@ -68,7 +72,10 @@ ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 endif
 
 ifeq ($(strip $(SF_IP04)),y)
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.patch
+#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.patch #Tempprary removed
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/Kconfig.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/serial.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/dm9000.patch
 endif
 
 ifeq ($(strip $(SF_IP01)),y)
@@ -89,9 +96,8 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 endif
 
 	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/gsm.patch
-	patch -d $(UCLINUX_DIR) -u -p0 < package/uClinux-dist/common/mkuclinux.patch
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dropbear.patch
-#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/u-boot-tools.patch	     Penev: I think not needed
+#	patch -d $(UCLINUX_DIR) -u -p0 < package/uClinux-dist/common/mkuclinux.patch #Tempprary removed
+#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dropbear.patch     #Tempprary removed
 
 	touch $(UCLINUX_DIR)/.unpacked
 
@@ -153,13 +159,7 @@ else
 	echo "# CONFIG_NFS_FS is not set" >> $(VARIABLE_CONFIG_FILE)
 endif
 
-	if [ ! -d $(UCLINUX_DIR)/user/busybox.original ]; then \
-                mv -u $(UCLINUX_DIR)/user/busybox $(UCLINUX_DIR)/user/busybox.original; \
-        else \
-		rm -rf $(UCLINUX_DIR)/user/busybox; \
-	fi
-	svn checkout --revision 9645 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/busybox $(UCLINUX_DIR)/user/busybox
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dhcpd.patch
+#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dhcpd.patch   #Tempprary removed
 	
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
@@ -181,11 +181,17 @@ ifeq ($(strip $(SF_IP04)),y)
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/* $(UCLINUX_DIR)/vendors/Rowetel/IP04/
 	cp -af package/uClinux-dist/vendors/Rowetel/common/* $(UCLINUX_DIR)/vendors/Rowetel/common
 	cp -af package/uClinux-dist/vendors/Rowetel/vendor.mak $(UCLINUX_DIR)/vendors/Rowetel/
-	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x
 	cat $(VARIABLE_CONFIG_FILE1) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.vendor-2.6.x;
 	cp -af package/uClinux-dist/vendors/Rowetel/IP04/pre_config/ip04.c $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/mach-bf533/boards/ip0x.c
+	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
-	
+
+ifeq ($(strip $(SF_IP08)),y)
+	sed -i 's/# CONFIG_BF533 is not set/CONFIG_BF533=y/' $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
+else
+	sed -i 's/# CONFIG_BF532 is not set/CONFIG_BF532=y/' $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
+endif
+
 	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP04_defconfig
 endif
 

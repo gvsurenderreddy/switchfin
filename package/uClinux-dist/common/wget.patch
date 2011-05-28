@@ -1,0 +1,11 @@
+--- blackfin-linux-dist/user/wget/wget-1.11/src/utils.c	2011-05-18 16:26:55.000000000 +0300
++++ blackfin-linux-dist/user/wget/wget-1.11/src/utils.c	2011-05-18 14:54:25.000000000 +0300
+@@ -316,7 +316,7 @@
+           fclose (new_log_fp);
+         }
+     }
+-  pid = fork ();
++  pid = vfork ();
+   if (pid < 0)
+     {
+       /* parent, error */

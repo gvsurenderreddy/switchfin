@@ -20,22 +20,6 @@
  
  stackcheck: checkstack modules
  	./checkstack kernel/*.ko kernel/*/*.ko
---- tools/dahdi_scan.c	2009-11-04 18:36:21.000000000 +0200
-+++ tools/dahdi_scan.c	2010-05-23 12:36:32.000000000 +0300
-@@ -156,8 +156,11 @@
- 			fprintf(stdout, "framing=");
- 			if (s.lineconfig & DAHDI_CONFIG_ESF) fprintf(stdout, "ESF");
- 			else if (s.lineconfig & DAHDI_CONFIG_D4) fprintf(stdout, "D4");
--			else if (s.lineconfig & DAHDI_CONFIG_CCS) fprintf(stdout, "CCS");
--			else if (s.lineconfig & DAHDI_CONFIG_CRC4) fprintf(stdout, "/CRC4");
-+			else
-+                        if (s.lineconfig & DAHDI_CONFIG_CCS) {
-+                                fprintf(stdout, "CCS");
-+                                if (s.lineconfig & DAHDI_CONFIG_CRC4) fprintf(stdout, "/CRC4"); //Penev in general CRC4 can go together with CAS as well
-+                        }	
- 			fprintf(stdout, "\n");
- 		} else {
- 			/* this is an analog span */
 --- linux/drivers/dahdi/Kbuild	2010-06-11 11:06:41.000000000 +0300
 +++ linux/drivers/dahdi/Kbuild	2010-06-11 11:06:56.000000000 +0300
 @@ -1,5 +1,5 @@
@@ -61,4 +45,15 @@
 +obj-m += dahdi_echocan_zarlink.o
  
  CFLAGS_MODULE += -I$(DAHDI_INCLUDE) -I$(src)
+ 
+--- linux/include/dahdi/kernel.h	2011-05-18 23:49:55.000000000 +0300
++++ linux/include/dahdi/kernel.h	2011-05-18 23:48:14.000000000 +0300
+@@ -33,6 +33,8 @@
+ #ifndef _DAHDI_KERNEL_H
+ #define _DAHDI_KERNEL_H
+ 
++#include <linux/slab.h>
++
+ #include <dahdi/user.h>
+ #include <dahdi/fasthdlc.h>
  

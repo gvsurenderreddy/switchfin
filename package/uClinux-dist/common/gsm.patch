@@ -1,5 +1,5 @@
---- uClinux-dist.R1.1-RC3/lib/blackfin-gsm/Makefile	2006-09-14 15:35:52.000000000 +0930
-+++ uClinux-dist.R1.1-RC3/lib/blackfin-gsm/Makefile	2007-11-05 10:44:22.000000000 +1030
+--- blackfin-linux-dist/lib/blackfin-gsm/Makefile	2006-09-14 15:35:52.000000000 +0930
++++ blackfin-linux-dist/lib/blackfin-gsm/Makefile	2007-11-05 10:44:22.000000000 +1030
 @@ -10,7 +10,7 @@
  # these will override flags of same name in the gsm Makefile
  

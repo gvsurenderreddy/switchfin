@@ -44,6 +44,7 @@
 #include <asm/blackfin.h>
 #include <asm/system.h>
 #include <asm/uaccess.h>
+#include <asm/bfin_sport.h>
 
 #include "sport_interface.h"
 

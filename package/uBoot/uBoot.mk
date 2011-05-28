@@ -141,7 +141,7 @@ $(UBOOT_DIR)/.configured: $(UBOOT_DIR)/.unpacked
 
 uBoot: $(UBOOT_DIR)/.configured
 	mkdir -p $(IMAGE_DIR)
-	$(MAKE)  -C $(UBOOT_DIR)
+	$(MAKE) -C $(UBOOT_DIR)
 	cd $(UBOOT_DIR)/tools/bin2ldr; ./runme.sh
 	cp -v $(UBOOT_DIR)/u-boot.ldr $(IMAGE_DIR)
 

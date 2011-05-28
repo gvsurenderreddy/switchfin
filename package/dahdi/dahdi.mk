@@ -36,6 +36,7 @@ endif
 endif
 ifeq ($(strip $(SF_IP04)),y)
 DAHDI_MODULES_EXTRA+= wcfxs bfsi sport_interface
+
 #Keep in mind that CONFIG_4FX_SPORT_INTERFACE macro is actually not used
 #SPI/SPORT are switched by the definition of CONFIG_4FX_SPI_INTERFACE
 DAHDI_EXTRA_CFLAGS+= -DCONFIG_4FX_SPORT_INTERFACE -DSF_IP04
@@ -59,12 +60,12 @@ $(DAHDI_DIR)/.unpacked: $(DL_DIR)/$(DAHDI_SOURCE) $(BASE_DIR)/.config
 
 ifeq ($(strip $(SF_IP04)),y)
 	cp -f $(DAHDI_SOURCES)/sport_interface.h $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.h
-	cp -f $(DAHDI_SOURCES)/wcfxs.h $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.h
-	cp -f $(DAHDI_SOURCES)/bfsi.h $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.h
-	cp -f $(DAHDI_SOURCES)/sport_interface.c $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.c
-	cp -f $(DAHDI_SOURCES)/wcfxs.c $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.c
-	cp -f $(DAHDI_SOURCES)/fx.c $(DAHDI_DIR)/linux/drivers/dahdi/fx.c
-	cp -f $(DAHDI_SOURCES)/bfsi.c $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.c
+	cp -f $(DAHDI_SOURCES)/wcfxs.h $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.h			 
+	cp -f $(DAHDI_SOURCES)/bfsi.h $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.h			
+	cp -f $(DAHDI_SOURCES)/sport_interface.c $(DAHDI_DIR)/linux/drivers/dahdi/sport_interface.c 
+	cp -f $(DAHDI_SOURCES)/wcfxs.c $(DAHDI_DIR)/linux/drivers/dahdi/wcfxs.c			 
+	cp -f $(DAHDI_SOURCES)/fx.c $(DAHDI_DIR)/linux/drivers/dahdi/fx.c			    
+	cp -f $(DAHDI_SOURCES)/bfsi.c $(DAHDI_DIR)/linux/drivers/dahdi/bfsi.c			    
 endif
 
 ifeq ($(strip $(SF_IP01)),y)

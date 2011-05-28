@@ -36,7 +36,9 @@ config SF_PR1_APPLIANCE
 config SF_BR4_APPLIANCE
         bool "BR4 Appliance"
 config SF_IP04
-	bool "IP02/IP04/IP08 Analog PBX"
+	bool "IP02/IP04 Analog PBX"
+config SF_IP08
+        bool "IP08 Analog PBX"
 config SF_IP01
 	bool "IP01/IP01p Analog PBX"
 config SF_FX08

@@ -2397,3 +2397,11 @@ diff -ruN u-boot-1.1.5-bf1-orig/Makefile u-boot-1.1.5-bf1/Makefile
  stamp_config	:	unconfig
  	@$(MKCONFIG) $(@:_config=) blackfin bf533 stamp
  
+--- u-boot-1.1.5-bf1/board/ip04/config.mk	2011-05-19 00:38:51.000000000 +0300
++++ u-boot-1.1.5-bf1/board/ip04/config.mk	2011-05-19 00:37:31.000000000 +0300
+@@ -25,4 +25,4 @@
+ # 64M setting, use 0x01FE0000 for 32M
+ 
+ TEXT_BASE = 0x03FE0000
+-PLATFORM_CPPFLAGS += -I$(TOPDIR) -Werror
++PLATFORM_CPPFLAGS += -I$(TOPDIR) -Werror -fno-strict-aliasing

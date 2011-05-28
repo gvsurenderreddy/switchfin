@@ -25,6 +25,7 @@ BUILD_CFLAGS += $(CFLAGS)
 $(PROCWATCH_DIR)/.unpacked:
 	mkdir -p dl
 	svn co $(PROCWATCH_SVN) $(PROCWATCH_DIR)
+	patch -p0 -d $(PROCWATCH_DIR) < package/procwatch/procwatch.patch 
 	touch $(PROCWATCH_DIR)/.unpacked
 
 procwatch: $(PROCWATCH_DIR)/.unpacked

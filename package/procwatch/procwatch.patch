@@ -1,0 +1,11 @@
+--- procwatch.c	2011-05-19 00:12:02.000000000 +0300
++++ procwatch.c	2011-05-19 00:12:17.000000000 +0300
+@@ -109,7 +109,7 @@
+ 
+     if (daemon){	/*NOTE uClinux does not support fork - Save it for later*/
+ 		/* Fork off process */
+-		pid = fork();
++		pid = vfork();
+ 		if (pid < 0) {
+ 			perror("Cannot Fork child process\n");
+ 			exit(EXIT_FAILURE);

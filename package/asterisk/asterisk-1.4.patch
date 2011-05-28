@@ -269,7 +269,7 @@ diff -ur asterisk/codecs/Makefile asterisk.patched/codecs/Makefile
 +$(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): $(LIBG722)
 +
 +$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
-+	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../uClinux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
++	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../blackfin-linux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
 +
 diff -ur asterisk/configure asterisk.patched/configure
 --- asterisk/configure	2010-10-07 23:56:04.000000000 +0300

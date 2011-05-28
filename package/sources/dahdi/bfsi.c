@@ -55,6 +55,7 @@
 #include <linux/spi/spi.h>
 #include <linux/dma-mapping.h>
 #include <asm/dma-mapping.h>
+#include <asm/bfin_sport.h>
 
 /* Default for BF537 is SPORT1 */
 
@@ -206,7 +207,7 @@ void bfsi_spi_write_8_bits(u16 chip_select, u8 bits)
   /* read kicks off transfer, detect end by polling RXS */
   write_TDBR(bits);
   read_RDBR(); __builtin_bfin_ssync();
-  do {} while (!(read_STAT() & RXS) );
+  do {} while (!(read_STAT() & (1<<5)) ); //hardcode RXS mask
 
   /* raise SPISEL */
   if (chip_select < 8) {
@@ -257,7 +258,7 @@ u8 bfsi_spi_read_8_bits(u16 chip_select)
   */
   write_TDBR(0xff);
   read_RDBR(); __builtin_bfin_ssync();
-  do {} while (!(read_STAT() & RXS) );
+  do {} while (!(read_STAT() & (1<<5))); //hardcode RXS mask
   ret = bfin_read_SPI_SHADOW();
 
   /* raise SPISEL */
@@ -383,7 +384,9 @@ void bfsi_spi_init(int baud, u16 new_chip_select_mask)
 #endif
 
   	/* note TIMOD = 00 - reading SPI_RDBR kicks off transfer */
-  	ctl_reg = SPE | MSTR | CPOL | CPHA | SZ;
+  	//Undefines flags lets patch it for now. BFSI is kind of obsolate. 
+	//Will be replaced in teh future
+	ctl_reg = 0x5C04;   //0101 1100 0000  0100  SPE | MSTR | CPOL | CPHA | SZ;
   	write_FLAG(flag);
   	write_BAUD(baud);
   	write_CTRL(ctl_reg);
@@ -1283,12 +1286,15 @@ void bfsi_sport_close(void)
   l1_data_sram_free(iTxBuffer1);
   l1_data_sram_free(iRxBuffer1);
 #else
- dma_free_coherent(NULL, 2*samples_per_chunk*8, iTxBuffer1, 0);
+  dma_free_coherent(NULL, 2*samples_per_chunk*8, iTxBuffer1, 0);
   dma_free_coherent(NULL, 2*samples_per_chunk*8, iRxBuffer1, 0);
 #endif
-  remove_proc_entry("bfsi", NULL);
-  remove_proc_entry("bfsi_freeze", NULL);
-  remove_proc_entry("bfsi_reset", NULL);
+
+  if(bfsi_debug){
+    remove_proc_entry("bfsi", NULL);
+    remove_proc_entry("bfsi_freeze", NULL);
+    remove_proc_entry("bfsi_reset", NULL);
+  }
 }
 
 MODULE_LICENSE("GPL");
