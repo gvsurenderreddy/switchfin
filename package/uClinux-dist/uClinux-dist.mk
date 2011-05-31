@@ -79,7 +79,10 @@ ifeq ($(strip $(SF_IP04)),y)
 endif
 
 ifeq ($(strip $(SF_IP01)),y)
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip01.patch
+#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP01/pre_config/ip01.patch  #Tempprary removed
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/Kconfig.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/serial.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/Rowetel/IP04/pre_config/dm9000.patch
 endif
 
 
