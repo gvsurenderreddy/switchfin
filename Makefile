@@ -132,6 +132,7 @@ $(TARGET_DIR):
 .PHONY: image
 image: $(TARGETS_IMAGE)
 
+	@echo $(TARGETS)
 	@echo "" 
 	@echo "" 
 	@echo "" 

@@ -27,14 +27,18 @@ restore: $(RESTORE_WORKING)/.configured
 
 restore-clean:
 	rm -rf $(RESTORE_WORKING) 
+
 ################################################
 #
 # Toplevel Makefile options
 #
 #################################################
 ifeq ($(strip $(SF_IP04)),y)
-TARGETS+=restore
+TARGETS+= restore
+endif
+ifeq ($(strip $(SF_IP08)),y)
+TARGETS+= restore
 endif
 ifeq ($(strip $(SF_FX08)),y) 
-TARGETS+=restore
+TARGETS+= restore
 endif

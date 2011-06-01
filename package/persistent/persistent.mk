@@ -19,9 +19,11 @@ PERSISTENT_DIST=defaults.tgz
 PERSISTENT_ZIP=zcat
 PERSISTENT_LOC=$(TARGET_DIR)/$(PERSISTENT_DIST)
 
+ifeq ($(strip $(SF_IP08)),y)
+SF_IP04=y
+endif
 
 persistent: 
-	
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 ifeq ($(strip $(SF_PACKAGE_BONJOUR)),y)
 	cd package/persistent/pr1/persistent/etc/rc.d; \
