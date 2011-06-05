@@ -1,5 +1,5 @@
---- uClinux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-01-08 10:58:03.000000000 +0200
-+++ uClinux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-09-01 19:25:15.000000000 +0300
+--- blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-01-08 10:58:03.000000000 +0200
++++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-09-01 19:25:15.000000000 +0300
 @@ -2,6 +2,7 @@
      pca9539.c - 16-bit I/O port with interrupt and reset
  

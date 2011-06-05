@@ -50,7 +50,6 @@
 #include <asm/dma.h>
 #include <asm/reboot.h>
 #include <asm/portmux.h>
-
 #include <asm-generic/io.h>
 
 /*

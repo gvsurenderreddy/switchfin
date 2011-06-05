@@ -1,5 +1,5 @@
---- uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2007-11-09 20:01:29.000000000 -0500
-+++ uClinux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2007-11-09 20:23:26.000000000 -0500
+--- blackfin-linux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2007-11-09 20:01:29.000000000 -0500
++++ blackfin-linux-dist-2008R1-RC8/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2007-11-09 20:23:26.000000000 -0500
 @@ -1,6 +1,6 @@
  choice
  	prompt "System type"
@@ -19,8 +19,8 @@
 +         BR4_APPLIANCE board Support
 +
  endchoice
---- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-04 00:31:39.000000000 +0300
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-04 00:32:22.000000000 +0300
+--- blackfin-linux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-04 00:31:39.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Kconfig	2010-05-04 00:32:22.000000000 +0300
 @@ -4,41 +4,41 @@
  	help
  	  Select your board!
@@ -98,3 +98,54 @@
  config BR4_APPLIANCE
         bool "BR4_APPLIANCE"
         depends on (BF537)
+--- blackfin-linux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2011-05-19 16:47:17.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/drivers/mtd/nand/Kconfig	2011-05-19 17:04:00.000000000 +0300
+@@ -488,4 +488,47 @@
+ 	  This enables the driver for the NAND Flash on evaluation board based
+ 	  on w90p910.
+ 
++config BFIN_NAND_PLAT_BASE
++	hex "NAND Flash Base Address"
++	depends on MTD_NAND_PLATFORM
++	default 0x20000000
++	help
++	  NAND Flash Base Address
++ 
++config BFIN_NAND_PLAT_SIZE
++	hex "NAND Flash Size"
++	depends on MTD_NAND_PLATFORM
++	default 0x10000000
++	help
++	  NAND Flash size, for example 0x10000000 for 256Mbyte, or
++	  0x02000000 for 32MByte.  The NAND will be divided into
++	  two partitions.  The first partition is 8M (kernel), the
++	  second partition the remaining space (e.g. yaffs).
++ 
++config BFIN_NAND_PLAT_CLE
++	int "NAND Flash Command Latch Enable (CLE) Address strobe A[x]"
++	depends on MTD_NAND_PLATFORM
++	range 1 19
++	default 2
++	help
++	  NAND Flash Command Latch Enable (CLE) Address strobe A[x]
++ 
++config BFIN_NAND_PLAT_ALE
++	int "NAND Flash Address Latch Enable (ALE) Address strobe A[x]"
++	depends on MTD_NAND_PLATFORM
++	range 1 19
++	default 1
++	help
++	  NAND Flash Address Latch Enable (ALE) Address strobe A[x]
++ 
++config BFIN_NAND_PLAT_READY
++	int "NAND Flash Ready Strobe PF[x]"
++	depends on MTD_NAND_PLATFORM
++	range 0 15 if (BF533 || BF532 || BF531)
++	range 0 47 if (BF534 || BF536 || BF537)
++	range 0 47 if BF561
++	default 10
++	help
++	  NAND Flash Ready Strobe PF[x]
++
+ endif # MTD_NAND
+ 

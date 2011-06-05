@@ -16,7 +16,7 @@
 # mISDN package for Astfin.org
 ##########################################
 mISDN_NAME=mISDN
-mISDN_REV=3
+mISDN_REV=540
 mISDN_DIR=$(BUILD_DIR)/$(mISDN_NAME)-$(mISDN_REV)
 mISDN_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/mISDN/trunk
 mISDN_UNZIP=zcat
@@ -33,7 +33,7 @@ $(mISDN_DIR)/.unpacked: $(DL_DIR)/$(mISDN_NAME)-$(mISDN_REV)
 
 
 $(mISDN_DIR)/.configured: $(mISDN_DIR)/.unpacked
-	patch -d $(mISDN_DIR) -p0 < package/mISDN/mISDN.patch
+#	patch -d $(mISDN_DIR) -p0 < package/mISDN/mISDN.patch   #patch applied in the SVN
 	touch $(mISDN_DIR)/.configured
 
 

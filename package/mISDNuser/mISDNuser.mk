@@ -12,7 +12,7 @@
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################################
 
-mISDNuser_REV=4
+mISDNuser_REV=541
 mISDNuser_NAME=mISDNuser
 mISDNuser_DIR=$(BUILD_DIR)/$(mISDNuser_NAME)-$(mISDN_REV)
 mISDNuser_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/mISDNuser/trunk
