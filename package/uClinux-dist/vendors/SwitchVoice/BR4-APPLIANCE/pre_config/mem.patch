@@ -1,5 +1,5 @@
---- uClinux-dist/linux-2.6.x/arch/blackfin/include/asm/mem_init.h	2009-07-14 11:44:25.000000000 +0300
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/include/asm/mem_init_.h	2009-07-14 12:24:07.000000000 +0300
+--- blackfin-linux-dist/linux-2.6.x/arch/blackfin/include/asm/mem_init.h	2009-07-14 11:44:25.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/arch/blackfin/include/asm/mem_init.h	2009-07-14 12:24:07.000000000 +0300
 @@ -14,7 +14,8 @@
      defined(CONFIG_MEM_MT48LC32M8A2_75) || \
      defined(CONFIG_MEM_MT48LC8M32B2B5_7) || \

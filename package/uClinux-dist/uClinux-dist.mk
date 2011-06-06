@@ -65,7 +65,6 @@ $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/mem.patch
-	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/flash.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/Kconfig_arch.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/boards.patch
 
@@ -92,7 +91,6 @@ endif
 
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/mem.patch
-#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/flash.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/Kconfig_arch.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/boards.patch
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/i2c.patch # gpio/pca953x driver needs to be used
@@ -136,13 +134,13 @@ ifeq ($(strip $(SF_CAS_2)),y)
 endif
 endif
 ifeq ($(strip $(SF_NAND_256MB)),y)
-	echo "CONFIG_BFIN_NAND_SIZE=0x10000000" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_BFIN_NAND_PLAT_SIZE=0x10000000" >> $(VARIABLE_CONFIG_FILE)
 endif
 ifeq ($(strip $(SF_NAND_512MB)),y)
-	echo "CONFIG_BFIN_NAND_SIZE=0x20000000" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_BFIN_NAND_PLAT_SIZE=0x20000000" >> $(VARIABLE_CONFIG_FILE)
 endif
 ifeq ($(strip $(SF_NAND_1GB)),y)
-	echo "CONFIG_BFIN_NAND_SIZE=0x40000000" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_BFIN_NAND_PLAT_SIZE=0x40000000" >> $(VARIABLE_CONFIG_FILE)
 endif
 endif
 ifeq ($(strip $(SF_PACKAGE_IPTABLES)),y)

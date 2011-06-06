@@ -1,5 +1,5 @@
---- uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2010-05-20 20:35:01.000000000 +0300
-+++ uClinux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2010-05-20 20:35:28.000000000 +0300
+--- blackfin-linux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2010-05-20 20:35:01.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/arch/blackfin/mach-bf537/boards/Makefile	2010-05-20 20:35:28.000000000 +0300
 @@ -8,3 +8,4 @@
  obj-$(CONFIG_BFIN537_BLUETECHNIX_TCM)  += tcm_bf537.o
  obj-$(CONFIG_PNAV10)                   += pnav10.o

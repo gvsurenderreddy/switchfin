@@ -204,8 +204,6 @@ static struct platform_device bfin_spi0_device = {
 #endif  /* spi master and devices */
 
 /* All UART  stuff goes here -------------------------------------------------------------------------------- */
-
-
 #if defined(CONFIG_SERIAL_BFIN) || defined(CONFIG_SERIAL_BFIN_MODULE)
 #ifdef CONFIG_SERIAL_BFIN_UART0
 static struct resource bfin_uart0_resources[] = {
@@ -252,6 +250,18 @@ static struct platform_device bfin_uart0_device = {
 };
 #endif
 
+#if defined(CONFIG_SERIAL_BFIN_SPORT) || defined(CONFIG_SERIAL_BFIN_SPORT_MODULE)
+static struct platform_device bfin_sport0_uart_device = {
+        .name = "bfin-sport-uart",
+        .id = 0,
+};
+
+static struct platform_device bfin_sport1_uart_device = {
+        .name = "bfin-sport-uart",
+        .id = 1,
+};
+#endif
+
 /* All I2C  stuff goes here -------------------------------------------------------------------------------- */
 #if defined(CONFIG_I2C_BLACKFIN_TWI) || defined(CONFIG_I2C_BLACKFIN_TWI_MODULE)
 static struct resource bfin_twi0_resource[] = {
@@ -272,18 +282,6 @@ static struct platform_device i2c_bfin_twi_device = {
 	.id = 0,
 	.num_resources = ARRAY_SIZE(bfin_twi0_resource),
 	.resource = bfin_twi0_resource,
-};
-#endif
-
-#if defined(CONFIG_SERIAL_BFIN_SPORT) || defined(CONFIG_SERIAL_BFIN_SPORT_MODULE)
-static struct platform_device bfin_sport0_uart_device = {
-	.name = "bfin-sport-uart",
-	.id = 0,
-};
-
-static struct platform_device bfin_sport1_uart_device = {
-	.name = "bfin-sport-uart",
-	.id = 1,
 };
 #endif
 

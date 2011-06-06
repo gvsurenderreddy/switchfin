@@ -56,6 +56,8 @@
 #include <asm/dma.h>
 #include <linux/dma-mapping.h>
 #include <linux/proc_fs.h>
+#include <asm/bfin_sport.h>
+#include <linux/version.h>
 
 #include <dahdi/kernel.h>
 
@@ -1358,8 +1360,9 @@ static int pr1_software_init(struct t1 *wc)
 	wc->num = 1;
 	sprintf(wc->span.name, "WCT1/%d", wc->num);
 	sprintf(wc->span.desc, "%s Card %d", wc->variety, wc->num);
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 	wc->span.owner = THIS_MODULE;
+#endif
 	wc->span.manufacturer 	= "Switchvoice";
 	strncpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
 	wc->span.spanconfig 	= pr1_spanconfig;
@@ -1942,7 +1945,9 @@ static int pr1_hardware_init(struct t1 *wc)
 
 	Our_Proc_File->read_proc  = wpr1_proc_read;
 	Our_Proc_File->write_proc = wpr1_proc_write;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
 	Our_Proc_File->owner 	  = THIS_MODULE;
+#endif
 	Our_Proc_File->mode 	  = S_IFREG | S_IRUGO;
 	Our_Proc_File->uid 	  = 0;
 	Our_Proc_File->gid 	  = 0;
