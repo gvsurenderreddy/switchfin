@@ -36,6 +36,10 @@ then
 
 		else
 			ifconfig $IF $IPADDRESS netmask $NETMASK up
+			if [[ ¨$LAN¨ == yes ]]
+			then
+				ifconfig eth1 $LAN_IP netmask $LAN_MASK up
+			fi
 			route add default gw $GATEWAY
 			if [ ! -f /etc/resolv.conf ]
 			then
