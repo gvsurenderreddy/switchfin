@@ -39,6 +39,7 @@
  * 				    T1: 100 Ohm; E1: 120 Ohm 	
  * 12/16/08 : Mark @ Astfin . org - Added support for Legacy 2.1 version
  * 12/23/09 : dpn@switchfin.org   - Dimitar Penev, migration to DAHDI
+ * 6/14/11  : dpn@switchfin.org   - Dimitar Penev, DAHDI 2.4.1.2+2.4.1 update  
  *
  * Copyright @ 2010 SwitchFin <dpn@switchfin.org> 
  ******************************************************************************/

@@ -47,6 +47,7 @@
  *  5 Mar. 2010 Dimitar Penev Modified for DAHDI
  * 18 Mar. 2010 Dimitar Penev included IP01 support 
  * for use in Switchfin, based on the previous work done by Atcom
+ * 14 May 2011 Dimitar Penev, DAHDI 2.4.1.2+2.4.1 update
  * 	
  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
  */
@@ -1898,6 +1899,15 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 	return 0;
 }
 
+static const struct dahdi_span_ops wcfxs_span_ops = {
+        .owner = THIS_MODULE,
+        .hooksig = wcfxs_hooksig
+	.open = wcfxs_open,
+        .close = wcfxs_close,
+        .ioctl = wcfxs_ioctl,
+	.watchdog = wcfxs_watchdog
+};
+
 static int wcfxs_initialize(struct wcfxs *wc)
 {
 	int x;
@@ -1919,15 +1929,10 @@ static int wcfxs_initialize(struct wcfxs *wc)
 	dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
 	wc->span.chans = wc->_chans;
 	wc->span.channels = wc->cards;
-	wc->span.hooksig = wcfxs_hooksig;
-	wc->span.open = wcfxs_open;
-	wc->span.close = wcfxs_close;
 	wc->span.flags = DAHDI_FLAG_RBS;
-	wc->span.ioctl = wcfxs_ioctl;
-	wc->span.watchdog = wcfxs_watchdog;
 	init_waitqueue_head(&wc->span.maintq);
-	wc->span.pvt = wc;
 	
+	wc->span.ops = &wcfxs_span_ops;
 	if (dahdi_register(&wc->span, 0)) {
 		printk("Unable to register span with DAHDI\n");
 		return -1;
