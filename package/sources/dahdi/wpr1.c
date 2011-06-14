@@ -760,9 +760,13 @@ static int pr1_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long da
        return val;
 }
 
+static inline struct t1 *t1_from_span(struct dahdi_span *span){
+	return container_of(span, struct t1, span);
+}
+
 static int __t1_maint(struct dahdi_span *span, int cmd)
 {
-	struct t1 *wc = span->pvt;
+	struct t1 *wc = t1_from_span(span);
 
 	if (wc->spantype == E1) {
 		switch(cmd) {
@@ -1268,7 +1272,7 @@ static void pr1_framer_start(struct t1 *wc, struct dahdi_span *span)
 
 static int pr1_startup(struct dahdi_span *span)
 {
-	struct t1 *wc = span->pvt;
+	struct t1 *wc = t1_from_span(span);
 	int i,alreadyrunning = span->flags & DAHDI_FLAG_RUNNING;
 
 	if(debug)
@@ -1297,7 +1301,7 @@ static int pr1_startup(struct dahdi_span *span)
 
 static int pr1_shutdown(struct dahdi_span *span)
 {
-	struct t1 *wc = span->pvt;
+	struct t1 *wc = t1_from_span(span);
 	unsigned long flags;
 
 	if (debug)
@@ -1332,7 +1336,7 @@ static int pr1_chanconfig(struct dahdi_chan *chan, int sigtype)
 
 static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc)
 {
-	struct t1 *wc = span->pvt;
+	struct t1 *wc = t1_from_span(span);
 
 	if (debug)
 		printk("wpr1 : pr1_spanconfig \n");
@@ -1348,6 +1352,18 @@ static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc)
 	return 0;
 }
 
+static const struct dahdi_span_ops pr1_span_ops = {
+	.owner = THIS_MODULE,
+	.startup = pr1_startup,
+	.shutdown = pr1_shutdown,
+	.rbsbits = t1_rbsbits,
+	.maint = __t1_maint,
+	.open = pr1_open,
+	.close = pr1_close,
+	.spanconfig = pr1_spanconfig,
+	.chanconfig = pr1_chanconfig,
+	.ioctl = pr1_ioctl,
+};
 
 static int pr1_software_init(struct t1 *wc)
 {
@@ -1358,22 +1374,11 @@ static int pr1_software_init(struct t1 *wc)
  	pr1_sport_start(wc, regular_interrupt_processing, DAHDI_CHUNKSIZE, debug);
 
 	wc->num = 1;
-	sprintf(wc->span.name, "WCT1/%d", wc->num);
+	sprintf(wc->span.name, "PR1/%d", wc->num);
 	sprintf(wc->span.desc, "%s Card %d", wc->variety, wc->num);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
-	wc->span.owner = THIS_MODULE;
-#endif
-	wc->span.manufacturer 	= "Switchvoice";
-	strncpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
-	wc->span.spanconfig 	= pr1_spanconfig;
-	wc->span.chanconfig 	= pr1_chanconfig;
-	wc->span.startup 	= pr1_startup;
-	wc->span.shutdown 	= pr1_shutdown;
-	wc->span.rbsbits 	= t1_rbsbits;
-	wc->span.maint 		= __t1_maint;
-	wc->span.open 		= pr1_open;
-	wc->span.close 		= pr1_close;
 	
+	wc->span.manufacturer 	= "Switchvoice";
+	dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
 	if (wc->spantype == E1) {
 		wc->span.channels = 31;
 		wc->span.linecompat = DAHDI_CONFIG_HDB3 | DAHDI_CONFIG_CCS | DAHDI_CONFIG_CRC4;
@@ -1386,13 +1391,11 @@ static int pr1_software_init(struct t1 *wc)
 		wc->span.spantype = "T1";
 	}
 	wc->span.flags = DAHDI_FLAG_RBS;
-	wc->span.ioctl = pr1_ioctl;
-	wc->span.pvt = wc;
 
 	init_waitqueue_head(&wc->span.maintq);
 
 	for (x=0;x<wc->span.channels;x++) {
-		sprintf(wc->chans[x].name, "WCT1/%d/%d", wc->num, x + 1);
+		sprintf(wc->chans[x].name, "PR1/%d/%d", wc->num, x + 1);
 		wc->chans[x].sigcap = DAHDI_SIG_EM | DAHDI_SIG_CLEAR | DAHDI_SIG_EM_E1 | 
 				      DAHDI_SIG_FXSLS | DAHDI_SIG_FXSGS | 
 				      DAHDI_SIG_FXSKS | DAHDI_SIG_FXOLS | DAHDI_SIG_DACS_RBS |
@@ -1401,9 +1404,11 @@ static int pr1_software_init(struct t1 *wc)
 		wc->chans[x].chanpos = x + 1;
 		wc->_chans[x]=&(wc->chans[x]);
 	}
-	wc->span.chans = wc->_chans;
+
+        wc->span.chans = wc->_chans;
+	wc->span.ops = &pr1_span_ops;
 	if (dahdi_register(&wc->span, 0)) {
-		printk("Unable to register span with zaptel\n");
+		printk("Unable to register span with DAHDI\n");
 		return -1;
 	}
 	return 0;

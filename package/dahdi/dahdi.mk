@@ -15,7 +15,8 @@
 # DAHDI package for SwitchFin.org
 #############################################
 
-DAHDI_VERSION=2.3.0.1+2.3.0
+#DAHDI_VERSION=2.3.0.1+2.3.0
+DAHDI_VERSION=2.4.1.2+2.4.1
 DAHDI_NAME=dahdi-linux-complete-$(DAHDI_VERSION)
 DAHDI_DIR=$(BUILD_DIR)/$(DAHDI_NAME)
 DAHDI_SOURCE=$(DAHDI_NAME).tar.gz

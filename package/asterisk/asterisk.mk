@@ -109,7 +109,11 @@ endif
 	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
 	touch $(ASTERISK_DIR)/.unpacked
 
-$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DIR)/.unpacked $(ATTRAFAX_DIR)/.unpacked 
+ifeq ($(strip $(SF_PACKAGE_ATTRAFAX)),y)
+$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DIR)/.unpacked $(ATTRAFAX_DIR)/.unpacked
+else
+$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DIR)/.unpacked
+endif 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
 	cp -v package/asterisk/$(ASTERISK_MAKEOPTS)_misdn.makeopts $(ASTERISK_DIR)/menuselect.makeopts
 else
