@@ -39,7 +39,7 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 endif
 	cd package/persistent/pr1; \
 	chmod +x persistent/etc/init.d/*; \
-	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
 	cd package/persistent/pr1/persistent/etc/rc.d; \
 	rm -f S39lec S45mdnsd S90asteriskwatch
 endif
@@ -58,7 +58,7 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 endif
 	cd package/persistent/br4; \
 	chmod +x persistent/etc/init.d/*; \
-	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
 	cd package/persistent/br4/persistent/etc/rc.d; \
 	rm -f S39lec S45mdnsd S90asteriskwatch
 endif
@@ -76,7 +76,7 @@ ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
 endif
 	cd package/persistent/ip04; \
 	chmod +x persistent/etc/init.d/*; \
-	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
 	cd package/persistent/ip04/persistent/etc/rc.d; \
 	rm -f S45mdnsd S90asteriskwatch
 ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
@@ -94,7 +94,7 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 endif
 	cd package/persistent/ip01; \
 	chmod +x persistent/etc/init.d/*; \
-	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
 	cd package/persistent/ip01/persistent/etc/rc.d; \
 	rm -f S45mdnsd S90asteriskwatch
 endif
@@ -110,7 +110,7 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 endif
 	cd package/persistent/fx08; \
 	chmod +x persistent/etc/init.d/*; \
-	tar zcvf $(PERSISTENT_LOC) --exclude '.svn' persistent/
+	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
 	cd package/persistent/fx08/persistent/etc/rc.d; \
 	rm -f S45mdnsd S90asteriskwatch
 endif

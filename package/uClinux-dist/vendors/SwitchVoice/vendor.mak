@@ -73,7 +73,7 @@ endif
 .PHONY: image.rootfs.ext2 image.rootfs.ext2.force
 EXT2_BLOCKS ?= 23552 # Blocks must be a multiple of 1024
 EXT2_INODES ?= 1024
-MKFS_EXT2_FLAGS ?= -m 0 -i $(EXT2_INODES) -b $(EXT2_BLOCKS)
+MKFS_EXT2_FLAGS ?= -U -m 0 -i $(EXT2_INODES) -b $(EXT2_BLOCKS)
 image.rootfs.ext2.force:
 	$(MKFS_EXT2) $(MKFS_EXT2_FLAGS) -d $(ROMFSDIR) -D $(DEVICE_TABLE) $(IMAGE_ROMFS_BASE).ext2
 ifeq ($(CONFIG_EXT2_FS),y)
@@ -97,7 +97,7 @@ image.rootfs.initramfs.gz.force: image.rootfs.initramfs.force
 	gzip -c -9 $(IMAGE_ROMFS_BASE).initramfs > $(IMAGE_ROMFS_BASE).initramfs.gz
 
 .PHONY: image.rootfs.jffs2 image.rootfs.jffs2.force
-MKFS_JFFS2_FLAGS ?= -l -p
+MKFS_JFFS2_FLAGS ?= -U -l -p
 image.rootfs.jffs2.force:
 	$(MKFS_JFFS2) $(MKFS_JFFS2_FLAGS) -d $(ROMFSDIR) -D $(DEVICE_TABLE) -o $(IMAGE_ROMFS_BASE).jffs2
 ifeq ($(CONFIG_JFFS2_FS),y)
@@ -127,7 +127,7 @@ endif
 UBIFS_MIN_IO_SIZE ?= 2048
 UBIFS_LEB_SIZE    ?= 204800
 UBIFS_MAX_LEB_CNT ?= 1024
-MKFS_UBIFS_FLAGS ?= --squash-uids -m $(UBIFS_MIN_IO_SIZE) -e $(UBIFS_LEB_SIZE) -c $(UBIFS_MAX_LEB_CNT)
+MKFS_UBIFS_FLAGS ?= -U --squash-uids -m $(UBIFS_MIN_IO_SIZE) -e $(UBIFS_LEB_SIZE) -c $(UBIFS_MAX_LEB_CNT)
 image.rootfs.ubifs.force:
 	$(MKFS_UBIFS) $(MKFS_UBIFS_FLAGS) -d $(ROMFSDIR) -D $(DEVICE_TABLE) -o $(IMAGE_ROMFS_BASE).ubifs
 ifeq ($(CONFIG_UBIFS_FS),y)
