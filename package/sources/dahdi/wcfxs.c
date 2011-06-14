@@ -1900,13 +1900,12 @@ static int wcfxs_hooksig(struct dahdi_chan *chan, enum dahdi_txsig  txsig)
 }
 
 static const struct dahdi_span_ops wcfxs_span_ops = {
-        .owner = THIS_MODULE,
-        .hooksig = wcfxs_hooksig
-	.open = wcfxs_open,
-        .close = wcfxs_close,
-        .ioctl = wcfxs_ioctl,
-	.watchdog = wcfxs_watchdog
-};
+        						.owner = THIS_MODULE,
+        						.hooksig = wcfxs_hooksig,
+							.open = wcfxs_open,
+        						.close = wcfxs_close,
+        						.ioctl = wcfxs_ioctl,
+							.watchdog = wcfxs_watchdog};
 
 static int wcfxs_initialize(struct wcfxs *wc)
 {
@@ -1924,7 +1923,6 @@ static int wcfxs_initialize(struct wcfxs *wc)
 		wc->chans[x].pvt = wc;
 		wc->_chans[x]=&(wc->chans[x]);
 	}
-	wc->span.owner = THIS_MODULE;
 	wc->span.manufacturer   = "Rowetel";
 	dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
 	wc->span.chans = wc->_chans;
