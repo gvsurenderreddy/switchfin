@@ -101,6 +101,10 @@ static struct platform_device bfin_mac_device = {
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
 /* All SPI peripherals info goes here  ---------------------------------------------------------------------- */
 
+// It would be nice to see the SPI flash from Linux but the current MMC_SPI driver is having issue sharing the 
+// bus with other drivers. The new SPI locking API was tested but seems not stable. Will test on the next release 
+// Let's test it some more 
+
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 static struct mtd_partition bfin_spi_flash_partitions[] = {
         {
@@ -127,60 +131,78 @@ static struct flash_platform_data bfin_spi_flash_data = {
         .type = "m25p64",
 };
 
-/* SPI flash chip (m25p64) */
+// SPI flash chip (m25p64) 
 static struct bfin5xx_spi_chip spi_flash_chip_info = {
-        .enable_dma = 0,         /* use dma transfer with this chip*/
+        .enable_dma = 0,         // use dma transfer with this chip
         .bits_per_word = 8,
 };
 #endif
 
-#if defined(CONFIG_SPI_MMC) || defined(CONFIG_SPI_MMC_MODULE)
-static struct bfin5xx_spi_chip spi_mmc_chip_info = {
-        .enable_dma = 1,
-        .bits_per_word = 8,
+#if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
+#define MMC_SPI_CARD_DETECT_INT IRQ_PF7
+ 
+static int bfin_mmc_spi_init(struct device *dev, irqreturn_t (*detect_int)(int, void *), void *data)
+{
+        return request_irq(MMC_SPI_CARD_DETECT_INT, detect_int, IRQF_TRIGGER_FALLING, "mmc-spi-detect", data);
+}
+ 
+static void bfin_mmc_spi_exit(struct device *dev, void *data)
+{
+        free_irq(MMC_SPI_CARD_DETECT_INT, data);
+}
+ 
+static struct mmc_spi_platform_data bfin_mmc_spi_pdata = {
+        .init = bfin_mmc_spi_init,
+        .exit = bfin_mmc_spi_exit,
+        .detect_delay = 100, /* msecs */
 };
+
+static struct bfin5xx_spi_chip  mmc_spi_chip_info = {
+        .enable_dma = 0,
+        .bits_per_word = 8,
+        .pio_interrupt = 0,
+};
+ 
 #endif
 
 static struct spi_board_info bfin_spi_board_info[] __initdata = {
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
         {
                 /* the modalias must be the same as spi device driver name */
-                .modalias = "m25p80", /* Name of spi_driver for this device */
-                .max_speed_hz = 25000000,     /* max spi clock (SCK) speed in HZ */
-                .bus_num = 0, /* Framework bus number */
-                .chip_select = 1, /* Framework chip select. On STAMP537 it is SPISSEL1*/
-                .platform_data = &bfin_spi_flash_data,
+                .modalias = "m25p80",    // Name of spi_driver for this device 
+                .max_speed_hz = 25000000,// max spi clock (SCK) speed in HZ 
+                .bus_num = 0, 	         // Framework bus number 
+                .chip_select = GPIO_PF10 + MAX_CTRL_CS, // Framework chip select. On PR1 it is SPISSEL1 
+							// SPISSEL1=PF10 and in SPI_MODE_0 software control
+							// of the CS using GPIO way is preffered
+	        .platform_data = &bfin_spi_flash_data,
                 .controller_data = &spi_flash_chip_info,
-                .mode = SPI_MODE_3,
+                .mode = SPI_MODE_0,      // Now it seems Mode 0 is supported and in our case
+					 // we should use it as we have SPI_CLK pulled down
         },
 
 #endif
 
-#if defined(CONFIG_SPI_MMC) || defined(CONFIG_SPI_MMC_MODULE)
+#if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
         {
-                .modalias = "spi_mmc_dummy",
-                .max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
+                .modalias = "mmc_spi",
+                .max_speed_hz = 20000000,// max spi clock (SCK) speed in HZ 
                 .bus_num = 0,
-                .chip_select = 0,
-                .platform_data = NULL,
-                .controller_data = &spi_mmc_chip_info,
-                .mode = SPI_MODE_3,
-        },
-        {
-                .modalias = "spi_mmc",
-                .max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
-                .bus_num = 0,
-                .chip_select = CONFIG_SPI_MMC_CS_CHAN,
-                .platform_data = NULL,
-                .controller_data = &spi_mmc_chip_info,
-                .mode = SPI_MODE_3,
+                .chip_select = GPIO_PF6 + MAX_CTRL_CS, // Framework chip select. On PR1 it is SPISSEL4 
+                                                       // SPISSEL4=PF6 and in SPI_MODE_0 software control 
+                                                       // of the CS using GPIO way is preffered
+                .platform_data = &bfin_mmc_spi_pdata,
+                .controller_data = &mmc_spi_chip_info,
+                .mode = SPI_MODE_0,	 // Now it seems Mode 0 is supported and in our case 	                 
+					 // we should use it as we have SPI_CLK pulled down	
         },
 #endif
+
 };
 
 /* SPI controller data */
 static struct bfin5xx_spi_master bfin_spi0_info = {
-        .num_chipselect = 8,
+        .num_chipselect = MAX_CTRL_CS + MAX_BLACKFIN_GPIOS,
         .enable_dma = 1,  /* master has the ability to do dma transfer */
         .pin_req = {P_SPI0_SCK, P_SPI0_MISO, P_SPI0_MOSI, 0},
 };
@@ -195,6 +217,11 @@ static struct resource bfin_spi0_resource[] = {
         [1] = {
                 .start = CH_SPI,
                 .end   = CH_SPI,
+                .flags = IORESOURCE_DMA,
+        },
+        [2] = {
+                .start = IRQ_SPI,
+                .end   = IRQ_SPI,
                 .flags = IORESOURCE_IRQ,
         },
 };
@@ -404,8 +431,7 @@ static int __init pr1_appliance_init(void)
         bfin_plat_nand_init();
 	platform_add_devices(pr1_appliance_devices, ARRAY_SIZE(pr1_appliance_devices));
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-	spi_register_board_info(bfin_spi_board_info,
-				ARRAY_SIZE(bfin_spi_board_info));
+	spi_register_board_info(bfin_spi_board_info, ARRAY_SIZE(bfin_spi_board_info));
 #endif
 
 	return 0;
