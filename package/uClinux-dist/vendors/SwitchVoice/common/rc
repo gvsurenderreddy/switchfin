@@ -18,13 +18,13 @@ else
 	vidhdroffset="2048"
 fi
 mknod /dev/ubi_ctrl c 10 63
-ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=$vidhdroffset
+ubiattach /dev/ubi_ctrl --mtdn=5 --devn=0 --vid-hdr-offset=$vidhdroffset
 mknod /dev/ubi0 c 253 0
 ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
 if [ -z "$ubivol" ]; then
-	ubidetach /dev/ubi_ctrl --mtdn=3
-	ubiformat /dev/mtd3 -y --vid-hdr-offset=$vidhdroffset			 #format
-	ubiattach /dev/ubi_ctrl --mtdn=3 --devn=0 --vid-hdr-offset=$vidhdroffset #attach it
+	ubidetach /dev/ubi_ctrl --mtdn=5
+	ubiformat /dev/mtd5 -y --vid-hdr-offset=$vidhdroffset			 #format
+	ubiattach /dev/ubi_ctrl --mtdn=5 --devn=0 --vid-hdr-offset=$vidhdroffset #attach it
 	ubimkvol /dev/ubi0 -m -N persistent					 #make volume	
 fi
 mount /persistent
@@ -116,39 +116,39 @@ done
 
 
 # write the log files to sd/mmc card
-#if [ -n "$pr1" ]; then
-#	#PR1
-#        modprobe mmc_spi
-#	sleep 1
-#	sdcard=`dmesg | grep "new SD card on SPI"`
-#	if [ -n "$sdcard" ]; then
-#		echo "mmc/sd detected"
-#		modprobe mmc_block	
-#		[ ! -d /mnt/sd ] && mkdir /mnt/sd 
-#		mount -t vfat /dev/mmcblk0p1 /mnt/sd/ #mount the first partition
-#		if [ ! -f /mnt/sd/.format ]; then
-#            		echo "Found new mmc/sd card, trying to format it..."
-#            		umount /mnt/sd
-#            		/bin/mkdosfs /dev/mmcblk0p1
-#            		mount -t vfat /dev/mmcblk0p1 /mnt/sd/
-#            		touch /mnt/sd/.format
-#        	else
-#           		echo "The mmc/sd card has been already formatted"
-#        	fi
-#        	[ ! -d /mnt/sd/asterisk ] && mkdir /mnt/sd/asterisk
-#        	echo "[directories]" > /etc/asterisk/asterisk.conf
-#        	echo "astlogdir => /mnt/sd/asterisk" >> /etc/asterisk/asterisk.conf
-#        	[ ! -d /mnt/sd/asterisk/cdr-csv ] && mkdir /mnt/sd/asterisk/cdr-csv
-#        	[ ! -d /mnt/sd/asterisk/cdr-custom ] && mkdir /mnt/sd/asterisk/cdr-custom
-#        	ln -sf /mnt/sd/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
-#	else
-#    		echo "No SD Card Detected!"
-#    		echo "[directories]" > /etc/asterisk/asterisk.conf
-#    		echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf
-#    		ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
-#		rmmod mmc_spi
-#	fi
-#fi
+if [ -n "$pr1" ]; then
+	#PR1
+        modprobe mmc_spi
+	sleep 1
+	sdcard=`dmesg | grep "new SD card on SPI"`
+	if [ -n "$sdcard" ]; then
+		echo "mmc/sd detected"
+		modprobe mmc_block	
+		[ ! -d /mnt/sd ] && mkdir /mnt/sd 
+		mount -t vfat /dev/mmcblk0p1 /mnt/sd/ #mount the first partition
+		if [ ! -f /mnt/sd/.format ]; then
+            		echo "Found new mmc/sd card, trying to format it..."
+            		umount /mnt/sd
+            		/bin/mkdosfs /dev/mmcblk0p1
+            		mount -t vfat /dev/mmcblk0p1 /mnt/sd/
+            		touch /mnt/sd/.format
+        	else
+           		echo "The mmc/sd card has been already formatted"
+        	fi
+        	[ ! -d /mnt/sd/asterisk ] && mkdir /mnt/sd/asterisk
+        	echo "[directories]" > /etc/asterisk/asterisk.conf
+        	echo "astlogdir => /mnt/sd/asterisk" >> /etc/asterisk/asterisk.conf
+        	[ ! -d /mnt/sd/asterisk/cdr-csv ] && mkdir /mnt/sd/asterisk/cdr-csv
+        	[ ! -d /mnt/sd/asterisk/cdr-custom ] && mkdir /mnt/sd/asterisk/cdr-custom
+        	ln -sf /mnt/sd/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+	else
+    		echo "No SD Card Detected!"
+    		echo "[directories]" > /etc/asterisk/asterisk.conf
+    		echo "astlogdir => /persistent/var/log/asterisk" >> /etc/asterisk/asterisk.conf
+    		ln -sf /persistent/var/log/asterisk/cdr-csv/ /var/lib/asterisk/static-http/config
+		rmmod mmc_spi
+	fi
+fi
 
 if [ -d /persistent/var/log/asterisk ]; then
 	ln -sf /persistent/var/log/asterisk/ /var/log/
@@ -193,7 +193,7 @@ else
 sleep 3
 if test `ping -c 1 downloads.digium.com |grep "ttl" |wc -l` -gt 0
 then
-#/bin/create_sounds
+/bin/create_sounds
 fi
 fi
 ln -sf /persistent/sounds/moh /var/lib/asterisk/

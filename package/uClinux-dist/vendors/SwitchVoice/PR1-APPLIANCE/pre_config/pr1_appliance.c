@@ -101,10 +101,6 @@ static struct platform_device bfin_mac_device = {
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
 /* All SPI peripherals info goes here  ---------------------------------------------------------------------- */
 
-// It would be nice to see the SPI flash from Linux but the current MMC_SPI driver is having issue sharing the 
-// bus with other drivers. The new SPI locking API was tested but seems not stable. Will test on the next release 
-// Let's test it some more 
-
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 static struct mtd_partition bfin_spi_flash_partitions[] = {
         {
@@ -114,14 +110,9 @@ static struct mtd_partition bfin_spi_flash_partitions[] = {
                 .mask_flags = MTD_CAP_ROM
         },{
                 .name = "linux kernel(spi)",
-                .size = 0xe0000,
+                .size = 0x60000,
                 .offset = 0x20000
-        },{
-                .name = "file system(spi)",
-                .size = 0x700000,
-                .offset = 0x00100000,
         }
-
 };
 
 static struct flash_platform_data bfin_spi_flash_data = {
@@ -400,10 +391,6 @@ static struct platform_device *pr1_appliance_devices[] __initdata = {
 #endif
 
 
-#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-	&bfin_spi0_device,
-#endif
-
 #if defined(CONFIG_SERIAL_BFIN) || defined(CONFIG_SERIAL_BFIN_MODULE)
 	&bfin_uart0_device,
 
@@ -415,6 +402,11 @@ static struct platform_device *pr1_appliance_devices[] __initdata = {
 #endif
 #if defined(CONFIG_MTD_NAND_PLATFORM) || defined(CONFIG_MTD_NAND_PLATFORM_MODULE)
         &bfin_async_nand_device,
+#endif
+
+
+#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
+        &bfin_spi0_device,
 #endif
 
 };
