@@ -19,10 +19,10 @@ restore: $(RESTORE_WORKING)/.configured
 	$(MAKE) -C $(UCLINUX_DIR)/linux-2.6.x SUBDIRS=$(RESTORE_WORKING)
 
         # install
-	mkdir -p $(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin)/misc
 
 	cp -f $(RESTORE_WORKING)/restore.ko \
-        	$(TARGET_DIR)/lib/modules/$(shell ls $(TARGET_DIR)/lib/modules)/misc
+        	$(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin)/misc
 
 
 restore-clean:
