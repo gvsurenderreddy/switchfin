@@ -2,4 +2,18 @@ config SF_PACKAGE_N2N
 	bool "n2n"
 	default n
 	help
-		n2n is an open source VPN application which utilizes a Peer-to-peer architecture for network membership and routing, it is small but very powerful.
+		n2n is an open source VPN application that utilizes a peer-to-peer architecture for network membership and routing. It is small but very powerful.
+choice
+	prompt "n2n version"
+	default SF_N2N_V1
+	depends on SF_PACKAGE_N2N
+
+config SF_N2N_V1
+		bool "n2n v1"
+		depends on SF_PACKAGE_N2N
+
+config SF_N2N_V2
+		bool "n2n v2 (EXPERIMENTAL)"
+		depends on SF_PACKAGE_N2N
+
+endchoice
