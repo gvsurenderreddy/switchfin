@@ -137,7 +137,7 @@ static struct platform_device dm9000_device2 = {
 
 
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-/* All SPI peripherals info goes here  ------------------------------------------------------------------ */
+/* All SPI peripherals info goes here  ---------------------------------------------------------------------- */
 
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
 static struct mtd_partition bfin_spi_flash_partitions[] = {
@@ -148,14 +148,9 @@ static struct mtd_partition bfin_spi_flash_partitions[] = {
                 .mask_flags = MTD_CAP_ROM
         },{
                 .name = "linux kernel(spi)",
-                .size = 0xe0000,
+                .size = 0x60000,
                 .offset = 0x20000
-        },{
-                .name = "file system(spi)",
-                .size = 0x700000,
-                .offset = 0x00100000,
         }
-
 };
 
 static struct flash_platform_data bfin_spi_flash_data = {
@@ -165,61 +160,80 @@ static struct flash_platform_data bfin_spi_flash_data = {
         .type = "m25p64",
 };
 
-/* SPI flash chip (m25p64) */
+// SPI flash chip (m25p64) 
 static struct bfin5xx_spi_chip spi_flash_chip_info = {
-        .enable_dma = 0,         /* use dma transfer with this chip*/
+        .enable_dma = 0,         // use dma transfer with this chip
         .bits_per_word = 8,
 };
 #endif
 
 #if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
-static struct bfin5xx_spi_chip spi_mmc_chip_info = {
-//CPOL (Clock Polarity)
-// 0 - Active high SCK
-// 1 - Active low SCK
-// CPHA (Clock Phase) Selects transfer format and operation mode
-// 0 - SCLK toggles from middle of the first data bit, slave select
-//     pins controlled by hardware.
-// 1 - SCLK toggles from beginning of first data bit, slave select
-//     pins controller by user software.
-//	.ctl_reg = 0x1c00,		// CPOL=1,CPHA=1,Sandisk 1G work
-//NO NO	.ctl_reg = 0x1800,		// CPOL=1,CPHA=0
-//NO NO	.ctl_reg = 0x1400,		// CPOL=0,CPHA=1
-//MT	.ctl_reg = 0x1000,		// CPOL=0,CPHA=0,Sandisk 1G work
-        .enable_dma = 0,		// if 1 - block!!!
-        .bits_per_word = 8,
-//        .cs_gpio = GPIO_PF5,          //Not available in the latest kernel
-//MT	.cs_change_per_word = 0,
+//#define MMC_SPI_CARD_DETECT_INT IRQ_PF7
+//
+//static int bfin_mmc_spi_init(struct device *dev, irqreturn_t (*detect_int)(int, void *), void *data)
+//{
+//        return request_irq(MMC_SPI_CARD_DETECT_INT, detect_int, IRQF_TRIGGER_FALLING, "mmc-spi-detect", data);
+//}
+//
+//static void bfin_mmc_spi_exit(struct device *dev, void *data)
+//{
+//        free_irq(MMC_SPI_CARD_DETECT_INT, data);
+//}
+
+static struct mmc_spi_platform_data bfin_mmc_spi_pdata = {
+//        .init = bfin_mmc_spi_init,
+//        .exit = bfin_mmc_spi_exit,
+        .detect_delay = 100, /* msecs */
 };
+
+static struct bfin5xx_spi_chip  mmc_spi_chip_info = {
+        .enable_dma = 0,
+        .bits_per_word = 8,
+        .pio_interrupt = 0,
+};
+
 #endif
 
-/* Notice: for blackfin, the speed_hz is the value of register
- * SPI_BAUD, not the real baudrate */
 static struct spi_board_info bfin_spi_board_info[] __initdata = {
 #if defined(CONFIG_MTD_M25P80) || defined(CONFIG_MTD_M25P80_MODULE)
         {
                 /* the modalias must be the same as spi device driver name */
-                .modalias = "m25p80", /* Name of spi_driver for this device */
-                .max_speed_hz = 25000000,     /* max spi clock (SCK) speed in HZ */
-                .bus_num = 1, /* Framework bus number */
-                .chip_select = 2, /* Framework chip select. On STAMP537 it is SPISSEL1*/
+                .modalias = "m25p80",    // Name of spi_driver for this device 
+                .max_speed_hz = 25000000,// max spi clock (SCK) speed in HZ 
+                .bus_num = 0,            // Framework bus number 
+                .chip_select = GPIO_PF2 + MAX_CTRL_CS, // Framework chip select. On IP04 it is SPISSEL2
+                                                        // SPISSEL2=PF2 and in SPI_MODE_0 software control
+                                                        // of the CS using GPIO way is preffered
                 .platform_data = &bfin_spi_flash_data,
                 .controller_data = &spi_flash_chip_info,
-                .mode = SPI_MODE_3,
+                .mode = SPI_MODE_0,      // Now it seems Mode 0 is supported and in our case
+                                         // we should use it as we have SPI_CLK pulled down
         },
+
 #endif
 
 #if defined(CONFIG_MMC_SPI) || defined(CONFIG_MMC_SPI_MODULE)
         {
                 .modalias = "mmc_spi",
-                .max_speed_hz = 20000000,     /* max spi clock (SCK) speed in HZ */
+                .max_speed_hz = 20000000,// max spi clock (SCK) speed in HZ 
                 .bus_num = 0,
-                .chip_select = 0,
-                .platform_data = NULL,
-                .controller_data = &spi_mmc_chip_info,
-                .mode = SPI_MODE_3,
+                .chip_select = GPIO_PF5 + MAX_CTRL_CS, // Framework chip select. On PR1 it is SPISSEL4 
+                                                       // SPISSEL5=PF5 and in SPI_MODE_0 software control 
+                                                       // of the CS using GPIO way is preffered
+                .platform_data = &bfin_mmc_spi_pdata,
+                .controller_data = &mmc_spi_chip_info,
+                .mode = SPI_MODE_0,      // Now it seems Mode 0 is supported and in our case                     
+                                         // we should use it as we have SPI_CLK pulled down     
         },
 #endif
+
+};
+
+/* SPI controller data */
+static struct bfin5xx_spi_master bfin_spi0_info = {
+        .num_chipselect = MAX_CTRL_CS + MAX_BLACKFIN_GPIOS,
+        .enable_dma = 1,  /* master has the ability to do dma transfer */
+        .pin_req = {P_SPI0_SCK, P_SPI0_MISO, P_SPI0_MOSI, 0},
 };
 
 /* SPI (0) */
@@ -241,13 +255,7 @@ static struct resource bfin_spi0_resource[] = {
         },
 };
 
-/* MASTER INFO */
-static struct bfin5xx_spi_master bfin_spi0_info = {
-        .num_chipselect = 8,
-        .enable_dma = 1,  /* master has the ability to do dma transfer */
-        .pin_req = {P_SPI0_SCK, P_SPI0_MISO, P_SPI0_MOSI, 0},
-};
-/* MASTER DEVICE */
+
 static struct platform_device bfin_spi0_device = {
         .name = "bfin-spi",
         .id = 0, /* Bus number */
@@ -257,7 +265,6 @@ static struct platform_device bfin_spi0_device = {
                 .platform_data = &bfin_spi0_info, /* Passed to driver */
         },
 };
-
 #endif  /* spi master and devices */
 
 #if defined(CONFIG_SERIAL_BFIN) || defined(CONFIG_SERIAL_BFIN_MODULE)
@@ -429,8 +436,6 @@ static void bfin_plat_nand_init(void)
 {
         if (gpio_request(CONFIG_BFIN_NAND_PLAT_READY, "bfin_nand_plat"))
                 printk(KERN_ERR"Requesting NAND Ready GPIO %d failed\n",CONFIG_BFIN_NAND_PLAT_READY);
-        else
-                printk(KERN_ERR"gpio_request OK\n");
 }
 #else
 static void bfin_plat_nand_init(void) {}
@@ -444,9 +449,6 @@ static struct platform_device *ip0x_devices[] __initdata = {
 	&dm9000_device2,
 #endif
 #endif
-#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-	&bfin_spi0_device,
-#endif
 #if defined(CONFIG_SERIAL_BFIN) || defined(CONFIG_SERIAL_BFIN_MODULE)
 	&bfin_uart0_device,
 #endif
@@ -456,6 +458,9 @@ static struct platform_device *ip0x_devices[] __initdata = {
 #if defined(CONFIG_MTD_NAND_PLATFORM) || defined(CONFIG_MTD_NAND_PLATFORM_MODULE)
         &bfin_async_nand_device,
 #endif  
+#if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
+        &bfin_spi0_device,
+#endif
 };
 
 /* Platform  early devices ----------------------------------------------------------------------------------- */
@@ -466,14 +471,12 @@ static struct platform_device *ip0x_early_devices[] __initdata = {
 #endif
 #endif
 };
-
+ 
 void __init native_machine_early_platform_add_devices(void)
 {
-        printk(KERN_INFO "register early platform devices\n");
-        early_platform_add_devices(ip0x_early_devices,
-                ARRAY_SIZE(ip0x_early_devices));
+	printk(KERN_INFO "register early platform devices\n");
+	early_platform_add_devices(ip0x_early_devices, ARRAY_SIZE(ip0x_early_devices));
 }
-
 
 
 /* Board Init  function --------------------------------------------------------------------------------------- */
@@ -483,16 +486,20 @@ static int __init ip0x_init(void)
 
         printk(KERN_INFO "%s(): chip_id=%08lX,dspid=%08X\n", __FUNCTION__, *((volatile unsigned long *)CHIPID), bfin_read_DSPID());
 
-	printk(KERN_INFO "%s(): registering device resources\n", __FUNCTION__);
+	printk(KERN_INFO "%s(): registering nand resources\n", __FUNCTION__);
 	bfin_plat_nand_init();
+
+	printk(KERN_INFO "%s(): registering platform devices\n", __FUNCTION__);
 	platform_add_devices(ip0x_devices, ARRAY_SIZE(ip0x_devices));
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-        for (i = 0; i < ARRAY_SIZE(bfin_spi_board_info); i ++) {
+/*        for (i = 0; i < ARRAY_SIZE(bfin_spi_board_info); i ++) {
                j = 1 << bfin_spi_board_info [i]. chip_select;
                // set spi cs to 1
                bfin_write_FIO_DIR (bfin_read_FIO_DIR() | j);
                bfin_write_FIO_FLAG_S (j);
         }
+*/
+	printk(KERN_INFO "%s(): registering spi devices\n", __FUNCTION__);
 	spi_register_board_info(bfin_spi_board_info, ARRAY_SIZE(bfin_spi_board_info));
 #endif
 	return 0;
