@@ -27,6 +27,7 @@ $(DL_DIR)/$(PERL_SOURCE):
 
 $(PERL_DIR)/.unpacked: $(DL_DIR)/$(PERL_SOURCE)
 	zcat $(DL_DIR)/$(PERL_SOURCE) | tar -C $(BUILD_DIR) -xf -
+	patch -d $(PERL_DIR) -p1 < package/perl/perl.patch
 	touch $(PERL_DIR)/.unpacked
 
 
