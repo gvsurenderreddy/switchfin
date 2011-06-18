@@ -1,0 +1,17 @@
+--- perl-5.8.6/util.c	2011-06-17 13:31:01.000000000 +0300
++++ perl-5.8.6/util.c	2011-06-17 13:32:26.000000000 +0300
+@@ -2063,12 +2063,12 @@
+     Pid_t pid;
+ #if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(HAS_PTHREAD_ATFORK)
+     atfork_lock();
+-    pid = fork();
++    pid = vfork();
+     atfork_unlock();
+ #else
+     /* atfork_lock() and atfork_unlock() are installed as pthread_atfork()
+      * handlers elsewhere in the code */
+-    pid = fork();
++    pid = vfork();
+ #endif
+     return pid;
+ #else
