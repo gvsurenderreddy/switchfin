@@ -613,7 +613,10 @@ CONFIG_BLK_DEV_RAM_BLOCKSIZE=1024
 # SCSI device support
 #
 # CONFIG_RAID_ATTRS is not set
-# CONFIG_SCSI is not set
+CONFIG_SCSI=y
+CONFIG_SCSI_DMA=y
+CONFIG_SCSI_PROC_FS=y
+CONFIG_BLK_DEV_SD=y
 # CONFIG_SCSI_NETLINK is not set
 # CONFIG_ATA is not set
 
@@ -814,12 +817,13 @@ CONFIG_SPI_BFIN=y
 #
 # USB support
 #
-# CONFIG_USB_ARCH_HAS_HCD is not set
+CONFIG_USB_ARCH_HAS_HCD=y
 # CONFIG_USB_ARCH_HAS_OHCI is not set
 # CONFIG_USB_ARCH_HAS_EHCI is not set
-# CONFIG_USB is not set
+CONFIG_USB=y
 # CONFIG_USB_OTG_WHITELIST is not set
 # CONFIG_USB_OTG_BLACKLIST_HUB is not set
+CONFIG_USB_ISP1362_HCD=m
 
 #
 # Enable Host or Gadget support to see Inventra options
@@ -828,6 +832,7 @@ CONFIG_SPI_BFIN=y
 #
 # NOTE: USB_STORAGE enables SCSI, and 'SCSI disk support'
 #
+CONFIG_USB_STORAGE=y
 
 #
 # USB Gadget Support
@@ -1304,7 +1309,7 @@ CONFIG_SPI_BFIN_LOCK=y
 #
 # Special HID drivers
 #
-# CONFIG_USB_SUPPORT is not set
+CONFIG_USB_SUPPORT=y
 # CONFIG_MEMSTICK is not set
 # CONFIG_ACCESSIBILITY is not set
 

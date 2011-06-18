@@ -329,7 +329,7 @@ static struct resource isp1362_hcd_resources[] = {
 	},{
 		.start = IRQ_PF11,
 		.end   = IRQ_PF11,
-		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
+		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_LOWEDGE,
 	},
 };
 
@@ -482,7 +482,6 @@ void __init native_machine_early_platform_add_devices(void)
 /* Board Init  function --------------------------------------------------------------------------------------- */
 static int __init ip0x_init(void)
 {
-        u_int i, j;
 
         printk(KERN_INFO "%s(): chip_id=%08lX,dspid=%08X\n", __FUNCTION__, *((volatile unsigned long *)CHIPID), bfin_read_DSPID());
 
@@ -492,13 +491,6 @@ static int __init ip0x_init(void)
 	printk(KERN_INFO "%s(): registering platform devices\n", __FUNCTION__);
 	platform_add_devices(ip0x_devices, ARRAY_SIZE(ip0x_devices));
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)
-/*        for (i = 0; i < ARRAY_SIZE(bfin_spi_board_info); i ++) {
-               j = 1 << bfin_spi_board_info [i]. chip_select;
-               // set spi cs to 1
-               bfin_write_FIO_DIR (bfin_read_FIO_DIR() | j);
-               bfin_write_FIO_FLAG_S (j);
-        }
-*/
 	printk(KERN_INFO "%s(): registering spi devices\n", __FUNCTION__);
 	spi_register_board_info(bfin_spi_board_info, ARRAY_SIZE(bfin_spi_board_info));
 #endif
