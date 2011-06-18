@@ -71,7 +71,12 @@ image.rootfs.cramfs: image.rootfs.cramfs.force
 endif
 
 .PHONY: image.rootfs.ext2 image.rootfs.ext2.force
+include $(ROOTDIR)/../../.config
+ifeq ($(strip $(SF_PACKAGE_PERL)),y)
+EXT2_BLOCKS ?= 34816 # Blocks must be a multiple of 1024, PERL takes ~ 10 MB extra of the rootfs 
+else
 EXT2_BLOCKS ?= 20480 # Blocks must be a multiple of 1024
+endif
 EXT2_INODES ?= 1024
 MKFS_EXT2_FLAGS ?= -U -m 0 -i $(EXT2_INODES) -b $(EXT2_BLOCKS)
 image.rootfs.ext2.force:
