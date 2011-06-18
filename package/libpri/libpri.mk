@@ -17,7 +17,7 @@
 #####################################################
 
 LIBPRI_SITE=http://downloads.digium.com/pub/libpri/releases
-LIBPRI_VERSION=1.4.3
+LIBPRI_VERSION=1.4.11.5
 LIBPRI_SOURCE=libpri-$(LIBPRI_VERSION).tar.gz
 LIBPRI_UNZIP=zcat
 LIBPRI_DIR=$(BUILD_DIR)/libpri-$(LIBPRI_VERSION)
@@ -40,11 +40,11 @@ $(LIBPRI_DIR)/.configured: $(LIBPRI_DIR)/.unpacked
 libpri: $(LIBPRI_DIR)/.configured
 	$(MAKE) CC=$(TARGET_CC) DESTDIR=$(TARGET_DIR) STAGEDIR=$(STAGING_DIR) \
 	INSTALL_BASE="/"  -C $(LIBPRI_DIR)
-	cp -f $(LIBPRI_DIR)/libpri.so.1.0 $(TARGET_DIR)/lib/
-	$(TARGET_STRIP) $(TARGET_DIR)/lib/libpri.so.1.0
+	cp -f $(LIBPRI_DIR)/libpri.so.1.4 $(TARGET_DIR)/lib/
+	$(TARGET_STRIP) $(TARGET_DIR)/lib/libpri.so.1.4
 	cd $(TARGET_DIR)/lib/; \
-	ln -sf libpri.so.1.0 libpri.so.1; \
-	ln -sf libpri.so.1.0 libpri.so
+	ln -sf libpri.so.1.4 libpri.so.1; \
+	ln -sf libpri.so.1.4 libpri.so
 
 libpri-clean:
 	$(MAKE) -C $(LIBPRI_DIR) clean
