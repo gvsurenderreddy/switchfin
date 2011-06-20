@@ -14,17 +14,19 @@ mount -t ramfs ramfs /var/tmp
 pr1=`cat /etc/issue | grep PR1-Appliance`
 if [ -z "$pr1" ]; then
 	vidhdroffset="512"
+	mtdn=3
 else
 	vidhdroffset="2048"
+	mtdn=5
 fi
 mknod /dev/ubi_ctrl c 10 63
-ubiattach /dev/ubi_ctrl --mtdn=5 --devn=0 --vid-hdr-offset=$vidhdroffset
+ubiattach /dev/ubi_ctrl --mtdn=$mtdn --devn=0 --vid-hdr-offset=$vidhdroffset
 mknod /dev/ubi0 c 253 0
 ubivol=`ubinfo -a | grep "Volumes count:" | grep 1`
 if [ -z "$ubivol" ]; then
-	ubidetach /dev/ubi_ctrl --mtdn=5
-	ubiformat /dev/mtd5 -y --vid-hdr-offset=$vidhdroffset			 #format
-	ubiattach /dev/ubi_ctrl --mtdn=5 --devn=0 --vid-hdr-offset=$vidhdroffset #attach it
+	ubidetach /dev/ubi_ctrl --mtdn=$mtdn
+	ubiformat /dev/mtd$mtdn -y --vid-hdr-offset=$vidhdroffset			 #format
+	ubiattach /dev/ubi_ctrl --mtdn=$mtdn --devn=0 --vid-hdr-offset=$vidhdroffset #attach it
 	ubimkvol /dev/ubi0 -m -N persistent					 #make volume	
 fi
 mount /persistent
