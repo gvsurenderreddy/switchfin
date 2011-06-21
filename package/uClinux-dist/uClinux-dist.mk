@@ -93,7 +93,7 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/mem.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/Kconfig_arch.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/BR4-APPLIANCE/pre_config/boards.patch
-#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/i2c.patch # gpio/pca953x driver needs to be used
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/i2c.patch
 endif
 
 	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/gsm.patch

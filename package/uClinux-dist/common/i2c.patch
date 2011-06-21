@@ -1,57 +1,202 @@
---- blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-01-08 10:58:03.000000000 +0200
-+++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2009-09-01 19:25:15.000000000 +0300
-@@ -2,6 +2,7 @@
-     pca9539.c - 16-bit I/O port with interrupt and reset
- 
-     Copyright (C) 2005 Ben Gardner <bgardner@wabtec.com>
+--- blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/Kconfig	1970-01-01 02:00:00.000000000 +0200
++++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/Kconfig	2011-06-21 22:54:51.000000000 +0300
+@@ -0,0 +1,22 @@
++#
++# Miscellaneous I2C chip drivers configuration
++#
++# *** DEPRECATED! Do not add new entries! See Makefile ***
++#
++
++menu "Miscellaneous I2C Chip support"
++
++config SENSORS_PCA9539
++	tristate "Philips PCA9539 16-bit I/O port (DEPRECATED)"
++	depends on GPIO_PCA953X = "n"
++	help
++	  If you say yes here you get support for the Philips PCA9539
++	  16-bit I/O port.
++
++	  This driver can also be built as a module.  If so, the module
++	  will be called pca9539.
++
++	  This driver is deprecated and will be dropped soon. Use
++	  drivers/gpio/pca953x.c instead.
++
++endmenu
+--- blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/Makefile	1970-01-01 02:00:00.000000000 +0200
++++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/Makefile	2011-06-21 23:26:50.000000000 +0300
+@@ -0,0 +1,18 @@
++#
++# Makefile for miscellaneous I2C chip drivers.
++#
++# Do not add new drivers to this directory! It is DEPRECATED.
++#
++# Device drivers are better grouped according to the functionality they
++# implement rather than to the bus they are connected to. In particular:
++# * Hardware monitoring chip drivers go to drivers/hwmon
++# * RTC chip drivers go to drivers/rtc
++# * I/O expander drivers go to drivers/gpio
++#
++
++obj-$(CONFIG_SENSORS_PCA9539)	+= pca9539.o
++
++ifeq ($(CONFIG_I2C_DEBUG_CHIP),y)
++EXTRA_CFLAGS += -DDEBUG
++endif
++
+--- blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	1970-01-01 02:00:00.000000000 +0200
++++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/chips/pca9539.c	2011-06-21 23:14:18.000000000 +0300
+@@ -0,0 +1,202 @@
++/*
++    pca9539.c - 16-bit I/O port with interrupt and reset
++
++    Copyright (C) 2005 Ben Gardner <bgardner@wabtec.com>
 +    Modified for BR4-Appliance by <mark@astfin.org> & <dpn@SwitchVoice.com)
- 
-     This program is free software; you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-@@ -14,8 +15,10 @@
- #include <linux/i2c.h>
- #include <linux/hwmon-sysfs.h>
- 
--/* Addresses to scan: none, device is not autodetected */
--static const unsigned short normal_i2c[] = { I2C_CLIENT_END };
++
++    This program is free software; you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation; version 2 of the License.
++*/
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/slab.h>
++#include <linux/i2c.h>
++#include <linux/hwmon-sysfs.h>
++
 +/* Addresses to scan */
 +static unsigned short normal_i2c[] = {0x74, I2C_CLIENT_END};
 +
 +struct i2c_client *self_i2c_client;
- 
- /* Insmod parameters */
- I2C_CLIENT_INSMOD_1(pca9539);
-@@ -98,6 +101,9 @@
- 		return -ENODEV;
- 
- 	strlcpy(info->type, "pca9539", I2C_NAME_SIZE);
++
++
++enum pca9539_cmd
++{
++	PCA9539_INPUT_0		= 0,
++	PCA9539_INPUT_1		= 1,
++	PCA9539_OUTPUT_0	= 2,
++	PCA9539_OUTPUT_1	= 3,
++	PCA9539_INVERT_0	= 4,
++	PCA9539_INVERT_1	= 5,
++	PCA9539_DIRECTION_0	= 6,
++	PCA9539_DIRECTION_1	= 7,
++};
++
++/* following are the sysfs callback functions */
++static ssize_t pca9539_show(struct device *dev, struct device_attribute *attr,
++			    char *buf)
++{
++	struct sensor_device_attribute *psa = to_sensor_dev_attr(attr);
++	struct i2c_client *client = to_i2c_client(dev);
++	return sprintf(buf, "%d\n", i2c_smbus_read_byte_data(client,
++							     psa->index));
++}
++
++static ssize_t pca9539_store(struct device *dev, struct device_attribute *attr,
++			     const char *buf, size_t count)
++{
++	struct sensor_device_attribute *psa = to_sensor_dev_attr(attr);
++	struct i2c_client *client = to_i2c_client(dev);
++	unsigned long val = simple_strtoul(buf, NULL, 0);
++	if (val > 0xff)
++		return -EINVAL;
++	i2c_smbus_write_byte_data(client, psa->index, val);
++	return count;
++}
++
++/* Define the device attributes */
++
++#define PCA9539_ENTRY_RO(name, cmd_idx) \
++	static SENSOR_DEVICE_ATTR(name, S_IRUGO, pca9539_show, NULL, cmd_idx)
++
++#define PCA9539_ENTRY_RW(name, cmd_idx) \
++	static SENSOR_DEVICE_ATTR(name, S_IRUGO | S_IWUSR, pca9539_show, \
++				  pca9539_store, cmd_idx)
++
++PCA9539_ENTRY_RO(input0, PCA9539_INPUT_0);
++PCA9539_ENTRY_RO(input1, PCA9539_INPUT_1);
++PCA9539_ENTRY_RW(output0, PCA9539_OUTPUT_0);
++PCA9539_ENTRY_RW(output1, PCA9539_OUTPUT_1);
++PCA9539_ENTRY_RW(invert0, PCA9539_INVERT_0);
++PCA9539_ENTRY_RW(invert1, PCA9539_INVERT_1);
++PCA9539_ENTRY_RW(direction0, PCA9539_DIRECTION_0);
++PCA9539_ENTRY_RW(direction1, PCA9539_DIRECTION_1);
++
++static struct attribute *pca9539_attributes[] = {
++	&sensor_dev_attr_input0.dev_attr.attr,
++	&sensor_dev_attr_input1.dev_attr.attr,
++	&sensor_dev_attr_output0.dev_attr.attr,
++	&sensor_dev_attr_output1.dev_attr.attr,
++	&sensor_dev_attr_invert0.dev_attr.attr,
++	&sensor_dev_attr_invert1.dev_attr.attr,
++	&sensor_dev_attr_direction0.dev_attr.attr,
++	&sensor_dev_attr_direction1.dev_attr.attr,
++	NULL
++};
++
++static struct attribute_group pca9539_defattr_group = {
++	.attrs = pca9539_attributes,
++};
++
++/* Return 0 if detection is successful, -ENODEV otherwise */
++static int pca9539_detect(struct i2c_client *client, struct i2c_board_info *info)
++{
++	struct i2c_adapter *adapter = client->adapter;
++
++	if (!i2c_check_functionality(adapter, I2C_FUNC_SMBUS_BYTE_DATA))
++		return -ENODEV;
++
++	strlcpy(info->type, "pca9539", I2C_NAME_SIZE);
 +	
 +	printk(KERN_ERR "In pca9539_detect\n");
 +	self_i2c_client=client;
- 
- 	return 0;
- }
-@@ -105,11 +111,13 @@
- static int pca9539_probe(struct i2c_client *client,
- 			 const struct i2c_device_id *id)
- {
++
++	return 0;
++}
++
++static int pca9539_probe(struct i2c_client *client,
++			 const struct i2c_device_id *id)
++{
 +	int ret;
- 	/* Register sysfs hooks */
--	return sysfs_create_group(&client->dev.kobj,
--				  &pca9539_defattr_group);
++	/* Register sysfs hooks */
 +	ret=sysfs_create_group(&client->dev.kobj, &pca9539_defattr_group);
 +	printk(KERN_ERR "In pca9539_probe => %d\n", ret);
 +	if (!ret) self_i2c_client=client;
 +	return(ret);
- }
--
- static int pca9539_remove(struct i2c_client *client)
- {
- 	sysfs_remove_group(&client->dev.kobj, &pca9539_defattr_group);
-@@ -143,6 +151,51 @@
- 	i2c_del_driver(&pca9539_driver);
- }
- 
++}
++static int pca9539_remove(struct i2c_client *client)
++{
++	sysfs_remove_group(&client->dev.kobj, &pca9539_defattr_group);
++	return 0;
++}
++
++static const struct i2c_device_id pca9539_id[] = {
++	{ "pca9539", 0 },
++	{ }
++};
++
++static struct i2c_driver pca9539_driver = {
++	.driver = {
++		.name	= "pca9539",
++	},
++	.probe		= pca9539_probe,
++	.remove		= pca9539_remove,
++	.id_table	= pca9539_id,
++
++	.detect		= pca9539_detect,
++//	.address_data	= &addr_data,  Don't exist in the new kernel 
++};
++
++static int __init pca9539_init(void)
++{
++	return i2c_add_driver(&pca9539_driver);
++}
++
++static void __exit pca9539_exit(void)
++{
++	i2c_del_driver(&pca9539_driver);
++}
++
 +int  pca9539_set_byte(u8 val, int cmd)
 +{
 +  /* Validate the command buffer */
@@ -97,6 +242,31 @@
 +EXPORT_SYMBOL(pca9539_get_byte);
 +
 +
- MODULE_AUTHOR("Ben Gardner <bgardner@wabtec.com>");
- MODULE_DESCRIPTION("PCA9539 driver");
- MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Ben Gardner <bgardner@wabtec.com>");
++MODULE_DESCRIPTION("PCA9539 driver");
++MODULE_LICENSE("GPL");
++
++module_init(pca9539_init);
++module_exit(pca9539_exit);
++
+--- blackfin-linux-dist/linux-2.6.x/drivers/i2c/Makefile	2011-06-21 23:26:03.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/Makefile	2011-06-21 22:03:47.000000000 +0300
+@@ -6,7 +6,7 @@
+ obj-$(CONFIG_I2C)		+= i2c-core.o
+ obj-$(CONFIG_I2C_SMBUS)		+= i2c-smbus.o
+ obj-$(CONFIG_I2C_CHARDEV)	+= i2c-dev.o
+-obj-y				+= algos/ busses/
++obj-y				+= algos/ busses/ chips/
+ 
+ ifeq ($(CONFIG_I2C_DEBUG_CORE),y)
+ EXTRA_CFLAGS += -DDEBUG
+--- blackfin-linux-dist/linux-2.6.x/drivers/i2c/Kconfig	2011-06-22 00:59:47.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/drivers/i2c/Kconfig	2011-06-22 00:54:39.000000000 +0300
+@@ -73,6 +73,7 @@
+ 
+ source drivers/i2c/algos/Kconfig
+ source drivers/i2c/busses/Kconfig
++source drivers/i2c/chips/Kconfig
+ 
+ config I2C_DEBUG_CORE
+ 	bool "I2C Core debugging messages"

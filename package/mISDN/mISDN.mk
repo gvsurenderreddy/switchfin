@@ -16,7 +16,7 @@
 # mISDN package for Astfin.org
 ##########################################
 mISDN_NAME=mISDN
-mISDN_REV=568
+mISDN_REV=571
 mISDN_DIR=$(BUILD_DIR)/$(mISDN_NAME)-$(mISDN_REV)
 mISDN_SITE=https://switchfin.svn.sourceforge.net/svnroot/switchfin/mISDN/trunk
 mISDN_UNZIP=zcat
