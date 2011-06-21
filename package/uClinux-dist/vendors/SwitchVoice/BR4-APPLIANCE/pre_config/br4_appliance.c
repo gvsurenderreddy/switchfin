@@ -95,7 +95,7 @@ static struct platform_device bfin_mac_device = {
 //We use bfsi_spi to interface the ISDN controller. We should migrate to standard SPI framework.
 //Description of the hardware:
 //	SPI0 is shared by the M25P64 and the ISDN controller
-//	MMC is connected to the SPORT1 CLK is not pulled up so we need to test SPI_MODE_3 first  
+//	MMC is connected to the SPORT1, CLK is not pulled up so we need to test SPI_MODE_3 first  
 //Currently CONFIG_MTD_M25P80 is enabled as module. We will load it staticaly later  
 
 #if defined(CONFIG_SPI_BFIN) || defined(CONFIG_SPI_BFIN_MODULE)

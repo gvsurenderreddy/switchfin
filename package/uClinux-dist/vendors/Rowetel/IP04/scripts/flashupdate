@@ -4,11 +4,11 @@ SCRIPTNAME=`basename $0`
 case ${SCRIPTNAME} in
 	"flashupdate" )
 		DEFAULTFILENAME=uImage
-		MTDPART=/dev/mtd1
+		MTDPART=/dev/mtd3
 		;;
 	"bootloaderupdate" )
 		DEFAULTFILENAME=app.ldr
-		MTDPART=/dev/mtd4
+		MTDPART=/dev/mtd1
 		;;
 	* )
 		echo "Could not determine what to update.  Exiting."
