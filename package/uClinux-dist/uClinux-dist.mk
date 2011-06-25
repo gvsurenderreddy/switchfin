@@ -99,6 +99,7 @@ endif
 	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/gsm.patch
 #	patch -d $(UCLINUX_DIR) -u -p0 < package/uClinux-dist/common/mkuclinux.patch #Tempprary removed
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dropbear.patch     #Tempprary removed
+	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/makefile_mixed_rules.patch
 
 	touch $(UCLINUX_DIR)/.unpacked
 
