@@ -67,10 +67,6 @@ ifeq ($(strip $(SF_IP04)),y)
 TARGET_MACHINE=ip04
 endif
 
-ifeq ($(strip $(SF_IP08)),y)
-TARGET_MACHINE=ip04
-endif
-
 ifeq ($(strip $(SF_FX08)),y)
 TARGET_MACHINE=fx08
 endif

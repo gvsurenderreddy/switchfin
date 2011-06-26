@@ -37,9 +37,6 @@ endif
 ifeq ($(strip $(SF_FX08)),y)
 SF_ANALOG=y
 endif
-ifeq ($(strip $(SF_IP08)),y)
-SF_IP04=y
-endif
 
 ################################################
 # uClinux Dep....
@@ -61,7 +58,6 @@ $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR);
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/ncpu.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/wget.patch
-#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/curl.patch #Tempprary removed
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/mem.patch
@@ -97,8 +93,6 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 endif
 
 	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/gsm.patch
-#	patch -d $(UCLINUX_DIR) -u -p0 < package/uClinux-dist/common/mkuclinux.patch #Tempprary removed
-#	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dropbear.patch     #Tempprary removed
 	patch -d $(UCLINUX_DIR) -u -p1 < package/uClinux-dist/common/makefile_mixed_rules.patch
 
 	touch $(UCLINUX_DIR)/.unpacked
@@ -188,10 +182,16 @@ ifeq ($(strip $(SF_IP04)),y)
 	cat $(VARIABLE_CONFIG_FILE) >> $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x
 	ln -sf $(UCLINUX_DIR)/vendors/Rowetel/IP04/config.linux-2.6.x $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
 
-ifeq ($(strip $(SF_IP08)),y)
+ifeq ($(strip $(SF_BF533)),y)
 	sed -i 's/# CONFIG_BF533 is not set/CONFIG_BF533=y/' $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
 else
 	sed -i 's/# CONFIG_BF532 is not set/CONFIG_BF532=y/' $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
+endif
+
+ifeq ($(strip $(SF_BF53X_REV_0_5)),y)
+	sed -i 's/# CONFIG_BF_REV_0_5 is not set/CONFIG_BF_REV_0_5=y/' $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
+else
+	sed -i 's/# CONFIG_BF_REV_0_6 is not set/CONFIG_BF_REV_0_6=y/' $(UCLINUX_DIR)/linux-2.6.x/arch/blackfin/configs/IP04_defconfig
 endif
 
 	$(MAKE) -C $(UCLINUX_DIR) Rowetel/IP04_defconfig

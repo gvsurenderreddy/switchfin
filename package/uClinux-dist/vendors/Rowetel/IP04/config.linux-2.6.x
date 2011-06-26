@@ -152,7 +152,7 @@ CONFIG_PREEMPT_NONE=y
 # CONFIG_BF_REV_0_3 is not set
 # CONFIG_BF_REV_0_4 is not set
 # CONFIG_BF_REV_0_5 is not set
-CONFIG_BF_REV_0_6=y
+# CONFIG_BF_REV_0_6 is not set
 # CONFIG_BF_REV_ANY is not set
 # CONFIG_BF_REV_NONE is not set
 CONFIG_BF53x=y

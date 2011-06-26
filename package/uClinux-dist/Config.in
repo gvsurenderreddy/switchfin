@@ -67,6 +67,46 @@ config SF_CPU_REV_3
 
 endchoice
 
+
+choice
+        prompt "CPU"
+        default SF_BF532
+        depends on (SF_IP04)
+
+config SF_BF532
+        bool "BF532"
+        depends on (SF_IP04)
+        help
+          Use this option if your CPU is AD DSP BF532
+
+config SF_BF533
+        bool "BF533"
+        depends on (SF_IP04)
+        help
+          Use this option if your CPU is AD DSP BF533
+
+endchoice
+
+choice
+        prompt "BF53X Silicon Revisions"
+        default SF_BF53X_REV_0_6
+        depends on (SF_IP04)
+
+config SF_BF53X_REV_0_6
+        bool "REV 0.6"
+        depends on (SF_IP04)
+        help
+          Use this option if you have BF532/BF533 silicon revision 0.6
+
+config SF_BF53X_REV_0_5
+        bool "REV 0.5"
+        depends on (SF_IP04)
+        help
+          Use this option if you have BF532/BF533 silicon revision 0.5
+
+endchoice
+
+
 choice  
         prompt "Amount of SDRAM"
         default SF_SDRAM_64 if (SF_BR4_APPLIANCE)

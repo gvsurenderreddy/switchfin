@@ -36,9 +36,6 @@ restore-clean:
 ifeq ($(strip $(SF_IP04)),y)
 TARGETS+= restore
 endif
-ifeq ($(strip $(SF_IP08)),y)
-TARGETS+= restore
-endif
 ifeq ($(strip $(SF_FX08)),y) 
 TARGETS+= restore
 endif

@@ -26,9 +26,6 @@ LEC_SOURCES=$(SOURCES_DIR)/lec
 DAHDI_MODULES_EXTRA=
 TARGET_KERNEL_MODULES=$(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)
 
-ifeq ($(strip $(SF_IP08)),y)
-SF_IP04=y
-endif
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 DAHDI_MODULES_EXTRA+= wpr1
 DAHDI_EXTRA_CFLAGS+= -DCONFIG_PR1_CLOCK_10
