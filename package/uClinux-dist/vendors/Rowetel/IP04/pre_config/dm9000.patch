@@ -93,3 +93,45 @@
  	return 0;
  }
  
+--- blackfin-linux-dist/linux-2.6.x/drivers/net/dm9000.c	2011-06-26 16:10:49.000000000 +0300
++++ blackfin-linux-dist/linux-2.6.x/drivers/net/dm9000.c	2011-06-26 16:32:57.000000000 +0300
+Stack dump was observed on BF533rev0.5 systems with DM9000AEP by Jason
+@@ -909,7 +909,6 @@
+ static int
+ dm9000_start_xmit(struct sk_buff *skb, struct net_device *dev)
+ {
+-	unsigned long flags;
+ 	board_info_t *db = netdev_priv(dev);
+ 
+ 	dm9000_dbg(db, 3, "%s:\n", __func__);
+@@ -917,7 +916,10 @@
+ 	if (db->tx_pkt_cnt > 1)
+ 		return NETDEV_TX_BUSY;
+ 
+-	spin_lock_irqsave(&db->lock, flags);
++	netif_stop_queue(dev);
++	/* Disable all interrupts */
++	iow(db, DM9000_IMR, IMR_PAR);
++
+ 
+ 	/* Move data to DM9000 TX RAM */
+ 	writeb(DM9000_MWCMD, db->io_addr);
+@@ -936,11 +938,16 @@
+ 		netif_stop_queue(dev);
+ 	}
+ 
+-	spin_unlock_irqrestore(&db->lock, flags);
+-
+ 	/* free this SKB */
+ 	dev_kfree_skb(skb);
+ 
++	/* Re-enable resource check */
++	if (db->tx_pkt_cnt == 1)
++		netif_wake_queue(dev);
++
++	/* Re-enable interrupt */
++	iow(db, DM9000_IMR, IMR_PAR | IMR_PTM | IMR_PRM);
++
+ 	return NETDEV_TX_OK;
+ }
+ 
