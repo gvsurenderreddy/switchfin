@@ -1,24 +1,46 @@
-#!/bin/sh
+#!/bin/hush
 # Start up file for cron
+# David Rowe 8 Feb 2008
+
+cron_pid=`ps -aux | grep "/bin/cron" | grep -v grep | cut -c 1-5`
 
 case $1 in
-	start) /bin/cron&;;
-	stop) killall -9 cron;;
-	restart) killall -9 cron;
-		 /bin/cron&;;
+	start) if [ -z "$cron_pid" ]; then
+	           /bin/cron&;
+	           echo "[Cron started]";
+	       else
+	           echo "[Cron already started]";     
+	       fi;;
+	stop) if [ -n "$cron_pid" ]; then
+	          kill -9 "$cron_pid";
+		  if [ "$?" -eq "0" ]; then
+		     echo "[Cron stopped]";
+		  fi;
+	      else
+	          echo "[Cron is not started]"; 	  
+	      fi;;
+	restart) if [ -z "$cron_pid" ]; then                       
+		     /bin/cron&;                                   
+		     echo "[Cron started]";        
+		 else                              
+		     kill -9 "$cron_pid";
+		     if [ "$?" -eq "0" ]; then                                     
+		         echo "[Cron stopped]";                                     
+		     fi;
+		     /bin/cron&;		     
+		     echo "[Cron started]";
+		 fi;;
 	enable) rm -f /persistent/etc/rc.d/S35cron; 
 		ln -s /persistent/etc/crontab /etc/config/;
 	        ln -s /persistent/etc/init.d/cron /persistent/etc/rc.d/S35cron;;
 	disable) rm -f /persistent/etc/rc.d/S35cron;;
-        *) cat <<EOF;;
-Syntax: /etc/init.d/cron [command]
-
-Available commands:
-        start   Start the service
-        stop    Stop the service
-        restart Restart the service
-        enable  Enable service autostart
-        disable Disable service autostart
-EOF
+        *) echo 'Syntax: /etc/init.d/cron [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
 esac
 
