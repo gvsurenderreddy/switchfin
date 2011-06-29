@@ -2,45 +2,18 @@
 # Start up file for cron
 # David Rowe 8 Feb 2008
 
-cron_pid=`ps -aux | grep "/bin/cron" | grep -v grep | cut -c 1-5`
-
 case $1 in
-	start) if [ -z "$cron_pid" ]; then
-	           /bin/cron&;
-	           echo "[Cron started]";
-	       else
-	           echo "[Cron already started]";     
-	       fi;;
-	stop) if [ -n "$cron_pid" ]; then
-	          kill -9 "$cron_pid";
-		  if [ "$?" -eq "0" ]; then
-		     echo "[Cron stopped]";
-		  fi;
-	      else
-	          echo "[Cron is not started]"; 	  
-	      fi;;
-	restart) if [ -z "$cron_pid" ]; then                       
-		     /bin/cron&;                                   
-		     echo "[Cron started]";        
-		 else                              
-		     kill -9 "$cron_pid";
-		     if [ "$?" -eq "0" ]; then                                     
-		         echo "[Cron stopped]";                                     
-		     fi;
-		     /bin/cron&;		     
-		     echo "[Cron started]";
-		 fi;;
-	enable) rm -f /persistent/etc/rc.d/S35cron; 
-		ln -s /persistent/etc/crontab /etc/config/;
-	        ln -s /persistent/etc/init.d/cron /persistent/etc/rc.d/S35cron;;
+	start)   start-stop-daemon -S -p /var/run/cron.pid -m -b -x cron;;
+	stop)    start-stop-daemon -K -p /var/run/cron.pid;;
+	restart) $0 stop; $0 start;;
+	enable)  ln -snf /persistent/etc/init.d/cron /persistent/etc/rc.d/S35cron;;
 	disable) rm -f /persistent/etc/rc.d/S35cron;;
-        *) echo 'Syntax: /etc/init.d/cron [command]'
-           echo ''
-           echo '       Available commands:'
-           echo '               start   Start the service'
-           echo '               stop    Stop the service'
-           echo '               restart Restart the service'
-           echo '               enable  Enable service autostart'
-           echo '               disable Disable service autostart'
+	*) echo 'Syntax: /etc/init.d/cron [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
 esac
-
