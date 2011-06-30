@@ -1,22 +1,19 @@
 #!/bin/hush
 # Start up file for ntp
 
-. /persistent/etc/network.conf
 case $1 in
-	start) echo "export TZ=$TIMEZONE" >> /etc/profile;
-	       ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
-	stop) killall -9 ntpd;;
-	restart) killall -9 ntpd; 
-		ntpd -4 -c /etc/ntp.conf -g -n 2>&1 &;;
-	enable) rm -f /persistent/etc/rc.d/S30ntp; 
-	        ln -s /persistent/etc/init.d/ntp /persistent/etc/rc.d/S30ntp;;
+	start)   echo "export TZ=`cat /etc/TZ`" >> /etc/profile;
+	         start-stop-daemon -S -p /var/run/ntp.pid -x ntpd -- -p /var/run/ntp.pid -c /etc/ntp.conf -g -4;;
+	stop)    start-stop-daemon -K -p /var/run/ntp.pid;;
+	restart) $0 stop; $0 start;;
+	enable)  ln -snf /persistent/etc/init.d/ntp /persistent/etc/rc.d/S30ntp;;
 	disable) rm -f /persistent/etc/rc.d/S30ntp;;
-        *) echo 'Syntax: /etc/init.d/ntp [command]'
-           echo ''
-           echo '       Available commands:'
-           echo '               start   Start the service'
-           echo '               stop    Stop the service'
-           echo '               restart Restart the service'
-           echo '               enable  Enable service autostart'
-           echo '               disable Disable service autostart'
+	*) echo 'Syntax: /etc/init.d/ntp [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
 esac

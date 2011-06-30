@@ -1,22 +1,19 @@
-#!/bin/sh
+#!/bin/hush
 # Start up file for Asterisk Watchdog timer
 
 case $1 in
-	start)  procwatch -t 6000 -w 27 -p asterisk -c 5000 -l /var/log/asterisk/procwatch.log & ;;
-	stop) killall -9 procwatch;;
-	restart) killall -9 procwatch;
-		 procwatch -t 6000 -w 27 -p asterisk -c 5000 -l /var/log/asterisk/procwatch.log & ;;
-	enable) rm -f /persistent/etc/rc.d/S90asteriskwatch; 
-	        ln -s /persistent/etc/init.d/asteriskwatch /persistent/etc/rc.d/S90asteriskwatch;;
+	start)   LOG=/var/log/asterisk/procwatch.log
+	         start-stop-daemon -S -p /var/run/asteriskwatch.pid -m -b -x procwatch -- -t 6000 -w 27 -p asterisk -c 5000 -l "${LOG}";;
+	stop)    start-stop-daemon -K -p /var/run/asteriskwatch.pid;;
+	restart) $0 stop; $0 start;;
+	enable)  ln -snf /persistent/etc/init.d/asteriskwatch /persistent/etc/rc.d/S90asteriskwatch;;
 	disable) rm -f /persistent/etc/rc.d/S90asteriskwatch;;
-        *) cat <<EOF;;
-Syntax: /etc/init.d/asteriskwatch [command]
-
-Available commands:
-        start   Start the service
-        stop    Stop the service
-        restart Restart the service
-        enable  Enable service autostart
-        disable Disable service autostart
-EOF
+	*) echo 'Syntax: /etc/init.d/asteriskwatch [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
 esac

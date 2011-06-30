@@ -1,23 +1,17 @@
 #!/bin/hush
 
 case $1 in
-        start) sh /persistent/etc/network.sh start;;
-			#   rm -f /var/run/dhcpcd*;
-            #   dhcpcd & sleep 5;;
-        stop) sh /persistent/etc/network.sh stop;;
-			#  killall -9 dhcpcd;
-            #  rm -f /var/run/dhcpcd*;;
-	restart) sh /persistent/etc/network.sh stop;
-		sh /persistent/etc/network.sh start;;
-        enable) rm -f /persistent/etc/rc.d/S10network;
-                ln -s /persistent/etc/init.d/network /persistent/etc/rc.d/S10network;;
-        disable) rm -f /persistent/etc/rc.d/S10network;;
-        *) echo 'Syntax: /etc/init.d/network [command]'
-           echo ''
-           echo '       Available commands:'
-           echo '               start   Start the service'
-           echo '               stop    Stop the service'
-           echo '               restart Restart the service'
-           echo '               enable  Enable service autostart'
-           echo '               disable Disable service autostart'
+	start)   /persistent/etc/network.sh start;;
+	stop)    /persistent/etc/network.sh stop;;
+	restart) $0 stop; $0 start;;
+	enable)  ln -snf /persistent/etc/init.d/network /persistent/etc/rc.d/S10network;;
+	disable) rm -f /persistent/etc/rc.d/S10network;;
+	*) echo 'Syntax: /etc/init.d/network [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
 esac

@@ -2,20 +2,18 @@
 # Start up file for dhcpd                                                       
                                                                                 
 case $1 in                                                                      
-        start) if test ! -e /tmp/udhcpd.leases; then; touch /tmp/udhcpd.leases; fi; 
-		/usr/sbin/udhcpd > /dev/null 2>&1 &;;                                              
-        stop) killall -9 udhcpd;;                                               
-        restart) killall -9 udhcpd;                                             
-                 /usr/sbin/udhcpd > /dev/null 2>&1 &;;                                            
-        enable) rm -f /persistent/etc/rc.d/S85dhcpd;                            
-                ln -s /persistent/etc/init.d/dhcpd /persistent/etc/rc.d/S85dhcpd;;
-        disable) rm -f /persistent/etc/rc.d/S85dhcpd;;                          
-        *) echo 'Syntax: /etc/init.d/dhcpd [command]'
-           echo ''
-           echo '       Available commands:'
-           echo '               start   Start the service'
-           echo '               stop    Stop the service'
-           echo '               restart Restart the service'
-           echo '               enable  Enable service autostart'
-           echo '               disable Disable service autostart'
-esac 
+	start)   touch /tmp/udhcpd.leases;
+	         start-stop-daemon -S -p /var/run/dhcpd.pid -m -b -x /usr/sbin/udhcpd -- -f;;
+	stop)    start-stop-daemon -K -p /var/run/dhcpd.pid;;
+	restart) $0 stop; $0 start;;
+	enable)  ln -snf /persistent/etc/init.d/dhcpd /persistent/etc/rc.d/S85dhcpd;;
+	disable) rm -f /persistent/etc/rc.d/S85dhcpd;;
+	*) echo 'Syntax: /etc/init.d/dhcpd [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
+esac

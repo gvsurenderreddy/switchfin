@@ -1,26 +1,20 @@
 #!/bin/hush
 # Start up file for DAHDI
 
-opermode=`cat /etc/asterisk/guipreferences.conf | grep opermode | sed 's/opermode = */\1/'`
-
 case $1 in
-	start) 	modprobe wcfxs opermode=$opermode;
-		wctdm=`dahdi_scan | grep WCTDM`;
-		if test -z $wctdm; then; modprobe dahdi_dummy; fi;
-		dahdi_cfg;;
-	stop) modprobe -r wcfxs;;
-	restart) modprobe -r wcfxs;
-		modprobe wcfxs;
-		dahdi_cfg;;
-	enable) rm -f /persistent/etc/rc.d/S40dahdi; 
-	        ln -s /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
+	start)   modprobe wcfxs opermode=`sed -n 's/^opermode *= *//p' /etc/asterisk/guipreferences.conf`;
+	         if dahdi_scan | grep -q WCTDM; then; modprobe dahdi_dummy; fi;
+	         dahdi_cfg;;
+	stop)    modprobe -r wcfxs dahdi_dummy;;
+	restart) $0 stop; $0 start;;
+	enable)  ln -snf /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
 	disable) rm -f /persistent/etc/rc.d/S40dahdi;;
-        *) echo 'Syntax: /etc/init.d/dahdi [command]'
-           echo ''
-           echo '       Available commands:'
-           echo '               start   Start the service'
-           echo '               stop    Stop the service'
-           echo '               restart Restart the service'
-           echo '               enable  Enable service autostart'
-           echo '               disable Disable service autostart'
+	*) echo 'Syntax: /etc/init.d/dahdi [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
 esac
