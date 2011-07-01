@@ -31,7 +31,7 @@ $(DL_DIR)/$(LIGHTTPD_SOURCE):
 
 $(LIGHTTPD_DIR)/.unpacked: $(DL_DIR)/$(LIGHTTPD_SOURCE)
 	$(LIGHTTPD_UNZIP) $(DL_DIR)/$(LIGHTTPD_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
-	$(PATCH_KERNEL) $(LIGHTTPD_DIR) package/lighttpd lighttpd.patch
+	patch -p0 -d $(LIGHTTPD_DIR) < package/lighttpd/lighttpd.patch;
 	touch $(LIGHTTPD_DIR)/.unpacked
 
 $(LIGHTTPD_DIR)/.configured: $(LIGHTTPD_DIR)/.unpacked

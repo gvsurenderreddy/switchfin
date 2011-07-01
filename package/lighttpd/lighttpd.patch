@@ -1,5 +1,5 @@
---- lighttpd-1.4.18-orig/src/stream.c	2006-10-04 22:56:23.000000000 +0930
-+++ lighttpd-1.4.18/src/stream.c	2008-02-09 07:50:42.000000000 +1030
+--- src/stream.c	2006-10-04 22:56:23.000000000 +0930
++++ src/stream.c	2008-02-09 07:50:42.000000000 +1030
 @@ -37,7 +37,7 @@
  		return -1;
  	}
@@ -9,8 +9,8 @@
  
  	close(fd);
 
---- lighttpd-1.4.18-orig/src/network_writev.c	2007-04-11 01:45:21.000000000 +0930
-+++ lighttpd-1.4.18/src/network_writev.c	2008-02-09 07:50:42.000000000 +1030
+--- src/network_writev.c	2007-04-11 01:45:21.000000000 +0930
++++ src/network_writev.c	2008-02-09 07:50:42.000000000 +1030
 @@ -243,7 +243,7 @@
  #endif
  				}
@@ -20,8 +20,8 @@
  					/* close it here, otherwise we'd have to set FD_CLOEXEC */
  
  					log_error_write(srv, __FILE__, __LINE__, "ssbd", "mmap failed:",
---- lighttpd-1.4.18-orig/src/mod_cgi.c	2007-08-18 21:55:52.000000000 +0930
-+++ lighttpd-1.4.18/src/mod_cgi.c	2008-02-09 10:42:28.000000000 +1030
+--- src/mod_cgi.c	2007-08-18 21:55:52.000000000 +0930
++++ src/mod_cgi.c	2008-02-09 10:42:28.000000000 +1030
 @@ -749,7 +749,7 @@
  	}
  
@@ -31,3 +31,36 @@
  	case 0: {
  		/* child */
  		char **args;
+--- src/spawn-fcgi.c	2011-07-01 11:24:55.000000000 +0300
++++ src/spawn-fcgi.c	2011-07-01 11:25:28.000000000 +0300
+@@ -136,7 +136,7 @@
+ 	}
+ 
+ 	if (!nofork) {
+-		child = fork();
++		child = vfork();
+ 	} else {
+ 		child = 0;
+ 	}
+--- src/proc_open.c	2011-07-01 11:31:15.000000000 +0300
++++ src/proc_open.c	2011-07-01 11:37:14.000000000 +0300
+@@ -244,7 +244,7 @@
+ 
+ 	/* the unix way */
+ 
+-	child = fork();
++	child = vfork();
+ 
+ 	if (child == 0) {
+ 		/* this is the child process */
+--- src/lighttpd-angel.c	2011-07-01 11:42:52.000000000 +0300
++++ src/lighttpd-angel.c	2011-07-01 11:43:25.000000000 +0300
+@@ -88,7 +88,7 @@
+ 		int exitcode = 0;
+ 
+ 		if (start_process) {
+-			pid = fork();
++			pid = vfork();
+ 
+ 			if (0 == pid) {
+ 				/* i'm the child */
