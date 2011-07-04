@@ -1,0 +1,91 @@
+diff -Naur rsync-2.6.8.orig/clientserver.c rsync-2.6.8/clientserver.c
+--- rsync-2.6.8.orig/clientserver.c	2006-04-11 01:28:02.000000000 +0100
++++ rsync-2.6.8/clientserver.c	2011-07-04 12:35:49.967104002 +0100
+@@ -416,7 +416,7 @@
+ 		 * daemon while this process waits for the exit status and
+ 		 * runs the indicated command at that point. */
+ 		if (*lp_postxfer_exec(i)) {
+-			pid_t pid = fork();
++			fprintf(stderr, "UNSUPPORTED!\n"); abort(); pid_t pid;
+ 			if (pid < 0) {
+ 				rsyserr(FLOG, errno, "fork failed");
+ 				io_printf(f_out, "@ERROR: fork failed\n");
+@@ -443,7 +443,7 @@
+ 		 * send us the user's request via a pipe. */
+ 		if (*lp_prexfer_exec(i)) {
+ 			int fds[2];
+-			if (pipe(fds) < 0 || (pre_exec_pid = fork()) < 0) {
++			fprintf(stderr, "UNSUPPORTED!\n"); abort(); if (0) {
+ 				rsyserr(FLOG, errno, "pre-xfer exec preparation failed");
+ 				io_printf(f_out, "@ERROR: pre-xfer exec preparation failed\n");
+ 				return -1;
+diff -Naur rsync-2.6.8.orig/pipe.c rsync-2.6.8/pipe.c
+--- rsync-2.6.8.orig/pipe.c	2011-07-04 12:30:51.595046474 +0100
++++ rsync-2.6.8/pipe.c	2011-07-04 12:35:50.032103145 +0100
+@@ -56,7 +56,7 @@
+ 		exit_cleanup(RERR_IPC);
+ 	}
+ 
+-	pid = fork();
++	fprintf(stderr, "UNSUPPORTED!\n"); abort();
+ 	if (pid == -1) {
+ 		rsyserr(FERROR, errno, "fork");
+ 		exit_cleanup(RERR_IPC);
+@@ -120,7 +120,7 @@
+ 		exit_cleanup(RERR_IPC);
+ 	}
+ 
+-	pid = fork();
++	fprintf(stderr, "UNSUPPORTED!\n"); abort();
+ 	if (pid == -1) {
+ 		rsyserr(FERROR, errno, "fork");
+ 		exit_cleanup(RERR_IPC);
+diff -Naur rsync-2.6.8.orig/socket.c rsync-2.6.8/socket.c
+--- rsync-2.6.8.orig/socket.c	2006-04-11 01:48:28.000000000 +0100
++++ rsync-2.6.8/socket.c	2011-07-04 12:35:50.045102974 +0100
+@@ -535,7 +535,7 @@
+ 
+ 		SIGACTION(SIGCHLD, sigchld_handler);
+ 
+-		if ((pid = fork()) == 0) {
++		fprintf(stderr, "UNSUPPORTED!\n"); abort(); if (0) {
+ 			int ret;
+ 			for (i = 0; sp[i] >= 0; i++)
+ 				close(sp[i]);
+@@ -679,7 +679,7 @@
+ {
+ 	int i;
+ 
+-	if (fork()) {
++	fprintf(stderr, "UNSUPPORTED!\n"); abort(); if (0) {
+ 		_exit(0);
+ 	}
+ 
+@@ -801,7 +801,7 @@
+ 	}
+ 	if (verbose >= 2)
+ 		rprintf(FINFO, "Running socket program: \"%s\"\n", prog);
+-	if (fork() == 0) {
++	fprintf(stderr, "UNSUPPORTED!\n"); abort(); if (0) {
+ 		close(fd[0]);
+ 		close(0);
+ 		close(1);
+diff -Naur rsync-2.6.8.orig/options.c rsync-2.6.8/options.c
+--- rsync-2.6.8.orig/options.c	2011-07-04 17:19:20.357931292 +0100
++++ rsync-2.6.8/options.c	2011-07-04 17:26:44.402323935 +0100
+@@ -333,7 +333,6 @@
+   rprintf(F,"     --size-only             skip files that match in size\n");
+   rprintf(F,"     --modify-window=NUM     compare mod-times with reduced accuracy\n");
+   rprintf(F," -T, --temp-dir=DIR          create temporary files in directory DIR\n");
+-  rprintf(F," -y, --fuzzy                 find similar file for basis if no dest file\n");
+   rprintf(F,"     --compare-dest=DIR      also compare destination files relative to DIR\n");
+   rprintf(F,"     --copy-dest=DIR         ... and include copies of unchanged files\n");
+   rprintf(F,"     --link-dest=DIR         hardlink to files in DIR when unchanged\n");
+@@ -481,7 +480,6 @@
+   {"compare-dest",     0,  POPT_ARG_STRING, 0, OPT_COMPARE_DEST, 0, 0 },
+   {"copy-dest",        0,  POPT_ARG_STRING, 0, OPT_COPY_DEST, 0, 0 },
+   {"link-dest",        0,  POPT_ARG_STRING, 0, OPT_LINK_DEST, 0, 0 },
+-  {"fuzzy",           'y', POPT_ARG_NONE,   &fuzzy_basis, 0, 0, 0 },
+   {"compress",        'z', POPT_ARG_NONE,   0, 'z', 0, 0 },
+   {"compress-level",   0,  POPT_ARG_INT,    &def_compress_level, 'z', 0, 0 },
+   {0,                 'P', POPT_ARG_NONE,   0, 'P', 0, 0 },

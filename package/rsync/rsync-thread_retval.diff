@@ -1,0 +1,35 @@
+The return value of pthread_create is not checked correctly in the
+original threaded receiver patch by wayned@samba.org.  This fixes it.
+Apply this patch after the threaded receiver patch.
+
+-- Jamie Lokier <jamie@jlokier.co.uk>, June 2006
+
+diff -ur rsync-HEAD-20051208-threaded-reciever/main.c rsync/main.c
+--- rsync-HEAD-20051208-threaded-reciever/main.c	2006-06-30 02:23:50.000000000 +0100
++++ rsync/main.c	2006-06-30 02:20:55.000000000 +0100
+@@ -566,6 +566,7 @@
+ {
+ 	void *value_ptr;
+ 	struct thread_args args;
++	int err;
+ 
+ 	/* The receiving side mustn't obey this, or an existing symlink that
+ 	 * points to an identical file won't be replaced by the referent. */
+@@ -577,8 +578,15 @@
+ 	args.f_in = f_in;
+ 	args.flist = flist;
+ 	args.local_name = local_name;
+-	if (pthread_create(&receiver_tid, NULL, start_receiver_thread, &args) < 0) {
+-		rsyserr(FERROR, errno, "pthread_create failed in do_recv");
++
++	/* pthread functions return zero or an error code directly;
++	   they don't set errno and don't return -1.  This changed in
++	   some old pthread draft specification, so there are old
++	   implementations which use -1 and errno.  The code below
++	   will work with either. */
++	if ((err = pthread_create(&receiver_tid, NULL, start_receiver_thread, &args)) != 0) {
++		rsyserr(FERROR, err != -1 ? err : errno,
++			"pthread_create failed in do_recv");
+ 		exit_cleanup(RERR_IPC);
+ 	}
+ 

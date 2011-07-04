@@ -16,5 +16,7 @@ config SF_PACKAGE_RSYNC
 	bool "rsync"
 	default n
 	help
-		rsync package for Switchfin
-
+		Limited rsync package for Switchfin. Currently only works with one
+		rsync:// source or destination. SSH transfers are not possible and
+		neither are entirely local transfers. Daemon functionality and the
+		--fuzzy option are also disabled.
