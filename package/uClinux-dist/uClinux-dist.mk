@@ -58,6 +58,7 @@ $(UCLINUX_DIR)/.unpacked: $(DL_DIR)/$(UCLINUX_SOURCE)
 	tar xjf $(DL_DIR)/$(UCLINUX_SOURCE) -C $(BUILD_DIR);
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/ncpu.patch
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/wget.patch
+	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/curl.patch
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/vendors/SwitchVoice/PR1-APPLIANCE/pre_config/mem.patch

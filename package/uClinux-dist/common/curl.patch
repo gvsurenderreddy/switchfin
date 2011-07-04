@@ -1,5 +1,5 @@
---- uClinux-dist/lib/libcurl/Makefile	2010-04-11 19:58:13.000000000 +0300
-+++ uClinux-dist/lib/libcurl/Makefile	2010-04-11 19:58:00.000000000 +0300
+--- blackfin-linux-dist/lib/libcurl/Makefile	2010-04-11 19:58:13.000000000 +0300
++++ blackfin-linux-dist/lib/libcurl/Makefile	2010-04-11 19:58:00.000000000 +0300
 @@ -5,5 +5,5 @@
  include $(ROOTDIR)/tools/autotools.mk
  
