@@ -97,6 +97,14 @@ TARGET_RANLIB=$(TARGET_CROSS)ranlib
 TARGET_AR=$(TARGET_CROSS)ar
 TARGET_STRIP=$(TARGET_CROSS)strip
 
+FLAT_COMPILE=bfin-uclinux
+FLAT_CROSS=$(BASE_DIR)/toolchain/opt/uClinux/$(FLAT_COMPILE)/bin/bfin-uclinux-
+FLAT_CC=$(FLAT_CROSS)gcc
+FLAT_CXX=$(FLAT_CROSS)g++
+FLAT_RANLIB=$(FLAT_CROSS)ranlib
+FLAT_AR=$(FLAT_CROSS)ar
+FLAT_STRIP=$(FLAT_CROSS)strip
+
 INSTALL=/usr/bin/install
 
 ##############################################
