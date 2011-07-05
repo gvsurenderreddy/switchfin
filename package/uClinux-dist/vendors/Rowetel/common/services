@@ -1,3 +1,5 @@
+ftp-data	20/tcp
+ftp-data	20/udp
 ftp	21/tcp
 ftp	21/udp
 ssh	22/tcp
