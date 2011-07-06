@@ -32,7 +32,7 @@ $(RSYNC_DIR)/.configured: $(RSYNC_DIR)/.unpacked
 
 rsync: $(RSYNC_DIR)/.configured
 	make -C $(RSYNC_DIR)/ rsync
-	cp -f $(RSYNC_DIR)/rsync $(TARGET_DIR)/bin/rsync
+	install -m0755 $(RSYNC_DIR)/rsync $(TARGET_DIR)/bin/rsync
 
 rsync-dirclean:
 	rm -rf $(RSYNC_DIR)
