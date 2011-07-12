@@ -79,6 +79,9 @@ PATH:= /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
 PATH:= $(PATH):$(TOOLS_BIN1):$(TOOLS_BIN2)
 
 world: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) $(TARGETS)
+ifeq ($(strip $(SF_INSTALL_ELF_TRIM_LIBS)),y)
+	ROMFSDIR=$(TARGET_DIR) $(UCLINUX_DIR)/vendors/AnalogDevices/trim-libs.sh
+endif
 
 .PHONY: all world clean dirclean distclean source $(TARGETS) \
         $(TARGETS_CLEAN) $(TARGETS_DIRCLEAN) $(TARGETS_SOURCE) $(TARGETS_IMAGE) \

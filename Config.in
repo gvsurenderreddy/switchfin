@@ -123,4 +123,19 @@ config SF_JLEVEL
 	help
 	    Number of jobs to run simultanesouly
 
+config SF_INSTALL_ELF_TRIM_LIBS
+	bool "Cull unused ELF shared libraries"
+	default n
+	help
+		Automatically scan the filesystem and remove all ELF libraries that
+		are not explicitly required by other ELF binaries.
+
+		The script that does this is part of uClinux-dist and it is normally
+		run after that has finished building. We run it after building the
+		rest of Switchfin instead so that all the additional installed
+		binaries and libraries will be considered.
+
+		Note: this requires "scanelf" from the "pax-utils" package:
+			http://hardened.gentoo.org/pax-utils.xml
+
 endmenu
