@@ -108,3 +108,27 @@
  		fprintf(ser->f,
  			"HTTP/1.1 %d %s\r\n"
  			"Server: Asterisk/%s\r\n"
+diff -Naur asterisk-1.6.2.6.orig/main/app.c asterisk-1.6.2.6/main/app.c
+--- asterisk-1.6.2.6.orig/main/app.c	2009-11-30 21:36:06.000000000 +0000
++++ asterisk-1.6.2.6/main/app.c	2011-07-06 12:20:20.544179397 +0100
+@@ -2014,7 +2014,7 @@
+ 	sigfillset(&signal_set);
+ 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
+ 
+-	pid = fork();
++	pid = vfork();
+ 
+ 	if (pid != 0) {
+ 		/* Fork failed or parent */
+diff -Naur asterisk-1.6.2.6.orig/main/asterisk.c asterisk-1.6.2.6/main/asterisk.c
+--- asterisk-1.6.2.6.orig/main/asterisk.c	2010-02-25 21:25:05.000000000 +0000
++++ asterisk-1.6.2.6/main/asterisk.c	2011-07-06 12:20:30.249049290 +0100
+@@ -3500,7 +3500,7 @@
+ 		/* Don't let the canary child kill Asterisk, if it dies immediately */
+ 		signal(SIGPIPE, SIG_IGN);
+ 
+-		canary_pid = fork();
++		canary_pid = vfork();
+ 		if (canary_pid == 0) {
+ 			char canary_binary[128], *lastslash, ppid[12];
+ 
