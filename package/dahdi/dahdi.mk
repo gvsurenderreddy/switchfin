@@ -110,8 +110,7 @@ $(DAHDI_DIR)/.linux: $(DAHDI_DIR)/.unpacked
 	touch $(DAHDI_DIR)/.linux
 
 $(DAHDI_DIR)/.configured: $(DAHDI_DIR)/.linux
-
-	cd $(DAHDI_DIR)/tools; ./configure --host=bfin-linux-uclibc --with-dahdi=$(DAHDI_DIR)/linux
+	cd $(DAHDI_DIR)/tools; ./configure --host=bfin-linux-uclibc --with-dahdi=$(DAHDI_DIR)/linux --includedir=$(STAGING_INC) --libdir=$(TARGET_DIR)/lib
 	cp -rf $(DAHDI_DIR)/linux/include/dahdi/ $(STAGING_INC)
 	touch $(DAHDI_DIR)/.configured
 
@@ -120,12 +119,10 @@ dahdi: $(ZARLINK_LEC) $(OSLEC_IN) $(DAHDI_DIR)/.configured
 	mkdir -p $(TARGET_KERNEL_MODULES)/misc
 	cp -f $(DAHDI_DIR)/linux/drivers/dahdi/dahdi.ko $(TARGET_KERNEL_MODULES)/misc
 
-	cd $(DAHDI_DIR)/tools; make all
-
-	cp $(DAHDI_DIR)/tools/tonezone.h $(STAGING_INC)/dahdi
-	cp $(DAHDI_DIR)/tools/libtonezone.so $(STAGING_LIB)
-	cp $(DAHDI_DIR)/tools/libtonezone.so $(TARGET_DIR)/lib
-	$(TARGET_STRIP) $(TARGET_DIR)/lib/libtonezone.so
+	cd $(DAHDI_DIR)/tools; make all install-libs
+	rm -f $(TARGET_DIR)/lib/libtonezone.a
+	$(TARGET_STRIP) --strip-unneeded $(TARGET_DIR)/lib/libtonezone.so
+	ln -snf $(TARGET_DIR)/lib/libtonezone.* $(STAGING_LIB)/
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	cp -f $(DAHDI_DIR)/tools/dahdi_cfg $(DAHDI_DIR)/tools/dahdi_scan  $(TARGET_DIR)/bin
