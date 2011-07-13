@@ -49,34 +49,27 @@ APP_FAX_REV=69
 ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
 ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
 ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
-ASTERISK_DEP=sqlite3 dahdi
-ifeq ($(strip $(SF_SPANDSP_CALLERID)),y)
-ASTERISK_CFLAGS+= -DUSE_SPANDSP_CALLERID
+ASTERISK_DEP=sqlite3 $(if $(filter $(SF_PR1_APPLIANCE),y), libpri) $(if $(filter $(SF_PACKAGE_LUA),y), _lua)
+ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl
+ASTERISK_CONFIGURE_OPTS+= --without-curl --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux
+
+ifeq ($(filter $(SF_SPANDSP_FAX) $(SF_SPANDSP_CALLERID),y),y)
+ASTERISK_CFLAGS+= $(if $(filter $(SF_SPANDSP_CALLERID),y), -DUSE_SPANDSP_CALLERID)
 ASTERISK_LDFLAGS+= -lspandsp -ltiff
 ASTERISK_DEP+= spandsp
 endif
-ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-ASTERISK_DEP+= libpri
-endif
-ifeq ($(strip $(SF_PACKAGE_LUA)),y)
-ASTERISK_DEP+= lua_
-endif
-ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl
-ASTERISK_CONFIGURE_OPTS+= --without-curl --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux
 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
 ASTERISK_DEP+= mISDNuser
 ASTERISK_CONFIGURE_OPTS+= --with-misdn
+else
+ASTERISK_DEP+= dahdi
 endif
 
 ifeq ($(strip $(SF_PACKAGE_UW-IMAP)),y)
 ASTERISK_DEP+= uw-imap
 ASTERISK_CONFIGURE_OPTS+= --with-imap=$(BUILD_DIR)/imap-2007e
 endif
-
-ASTERISK_CONFIGURE_OPTS+= CFLAGS="$(ASTERISK_CFLAGS)" LDFLAGS="$(ASTERISK_LDFLAGS)"
-
-GNU_LD=0
 
 $(DL_DIR)/$(ASTERISK_SOURCE):
 	$(WGET) -P $(DL_DIR) $(ASTERISK_SITE)/$(ASTERISK_SOURCE)
@@ -109,31 +102,28 @@ endif
 	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
 	touch $(ASTERISK_DIR)/.unpacked
 
-ifeq ($(strip $(SF_PACKAGE_ATTRAFAX)),y)
-$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DIR)/.unpacked $(ATTRAFAX_DIR)/.unpacked
-else
-$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DIR)/.unpacked
-endif 
-ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
-	cp -v package/asterisk/$(ASTERISK_MAKEOPTS)_misdn.makeopts $(ASTERISK_DIR)/menuselect.makeopts
-else
+$(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DEP) $(ASTERISK_DIR)/.unpacked $(if $(filter $(SF_PACKAGE_ATTRAFAX),y), $(ATTRAFAX_DIR)/.unpacked)
 	cp -v package/asterisk/$(ASTERISK_MAKEOPTS).makeopts $(ASTERISK_DIR)/menuselect.makeopts
+ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
+	sed -i 's/\b\S*misdn\S*\b//g' $(ASTERISK_DIR)/menuselect.makeopts
+else
+	sed -i 's/\b\S*dahdi\S*\b//g' $(ASTERISK_DIR)/menuselect.makeopts
 endif
-
 ifeq ($(strip $(SF_PACKAGE_UW-IMAP)),y)
-	sed -i 's/MENUSELECT_OPTS_app_voicemail=/MENUSELECT_OPTS_app_voicemail=IMAP_STORAGE/' $(ASTERISK_DIR)/menuselect.makeopts
+	sed -i 's/^MENUSELECT_OPTS_app_voicemail=/\0IMAP_STORAGE/' $(ASTERISK_DIR)/menuselect.makeopts
 endif
-	cd $(ASTERISK_DIR); ./configure $(ASTERISK_CONFIGURE_OPTS)
+	cd $(ASTERISK_DIR); CFLAGS="$(ASTERISK_CFLAGS)" LDFLAGS="$(ASTERISK_LDFLAGS)" GNU_LD=0 ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
 	echo LUA=1 >> $(ASTERISK_DIR)/build_tools/menuselect-deps
-
-ifeq ($(strip $(SF_PACKAGE_SPANDSPFAX)),y)	
+ifeq ($(strip $(SF_SPANDSP_FAX)),y)	
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	cd $(ASTERISK_DIR)/apps/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/app-spandsp/app_fax.c 
 	cd $(ASTERISK_DIR)/; svn -r$(APP_FAX_REV) export $(APP_FAX_SITE)/addon_version.h
 endif
+	sed -i '/MENUSELECT_APPS=/s/\bapp_fax\b//g' $(ASTERISK_DIR)/menuselect.makeopts
+endif
 	cp -v package/sources/nvfax/app_nv_faxdetect.c $(ASTERISK_DIR)/apps/app_nvfaxdetect.c
-
 ifeq ($(strip $(SF_PACKAGE_ATTRAFAX)),y)
         #Patch Asterisk for Attrafax if not already patched
 	patch -p1 -d $(ASTERISK_DIR) < package/asterisk/asterisk-attrafax.patch; \
@@ -166,7 +156,7 @@ ifeq ($(strip $(SF_ASTERISK_1_6)),y)
 	fi
 endif
 
-asterisk: check_prev_ver $(ASTERISK_DEP) $(ASTERISK_DIR_LINK)/.configured
+asterisk: check_prev_ver $(ASTERISK_DIR_LINK)/.configured
 
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_VERBOSE)),y)
 #	-$(MAKE1) -C $(ASTERISK_DIR) menuselect

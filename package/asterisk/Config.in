@@ -43,12 +43,20 @@ config SF_PACKAGE_ASTERISK_VERBOSE
 	help
 		Custom setting for Asterisk menuconfig
 
+config SF_SPANDSP_FAX
+		bool "SpanDSP-based Fax"
+		default n
+		depends SF_PACKAGE_ASTERISK
+		help
+			SpanDSP-based app_fax Asterisk application for sending/receiving
+			TIFF faxes.
+
 config SF_SPANDSP_CALLERID
-        bool "SpanDSP based CallerID"
-        default y
-        depends SF_PACKAGE_ASTERISK
-        help    
-                SpanDSP based CallerID decoding, experimental
+		bool "SpanDSP-based Caller ID (EXPERIMENTAL)"
+		default y
+		depends SF_PACKAGE_ASTERISK
+		help    
+			SpanDSP-based Caller ID decoding.
 
 config SF_PACKAGE_ASTERISK-H323
         bool "h.323 support for Asterisk"
