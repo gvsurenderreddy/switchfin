@@ -29,7 +29,7 @@ $(PROCWATCH_DIR)/.unpacked:
 	touch $(PROCWATCH_DIR)/.unpacked
 
 procwatch: $(PROCWATCH_DIR)/.unpacked
-	$(CC) $(PROCWATCH_FILE) $(BUILD_CFLAGS) $(LDFLAGS) -o $(PROCWATCH_DIR)/$@ $(LDLIBS$(LDLIBS_$@))
+	$(TARGET_CC) $(PROCWATCH_FILE) $(BUILD_CFLAGS) $(LDFLAGS) -o $(PROCWATCH_DIR)/$@ $(LDLIBS$(LDLIBS_$@))
 	cp -f $(PROCWATCH_DIR)/procwatch $(TARGET_DIR)/bin 
 	touch $(PROCWATCH_DIR)/.built
 	
