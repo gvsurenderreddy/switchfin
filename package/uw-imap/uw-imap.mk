@@ -34,7 +34,7 @@ $(UW-IMAP_DIR)/.configured: $(UW-IMAP_DIR)/.unpacked
 	touch $(UW-IMAP_DIR)/.configured
 
 uw-imap: $(UW-IMAP_DIR)/.configured
-	$(MAKE) -C $(UW-IMAP_DIR) lnx IP=4 SSLTYPE=none CC=$(CC) LDFLAGS=$(LDFLAGS)
+	$(MAKE) -C $(UW-IMAP_DIR) lnx IP=4 SSLTYPE=none CC=$(TARGET_CC) LDFLAGS=$(LDFLAGS)
 
 uw-imap-clean:
 	rm -f $(UW-IMAP_DIR)/.configured
