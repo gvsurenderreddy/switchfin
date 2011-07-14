@@ -1,0 +1,19 @@
+#!/bin/hush
+# Start up file for WireLess Tele Controller.
+#The module is used to enable home automation extensions in your PBX 
+
+case $1 in
+	start)   modprobe wltc;;
+	stop)    rmmod wltc;;
+	restart) rmmod wltc; modprobe wltc;;
+	enable)  ln -snf /persistent/etc/init.d/wltc /persistent/etc/rc.d/S85wltc;;
+	disable) rm -f /persistent/etc/rc.d/S85wltc;;
+	*) echo 'Syntax: /etc/init.d/wltc [command]'
+	   echo ''
+	   echo '       Available commands:'
+	   echo '               start   Start the service'
+	   echo '               stop    Stop the service'
+	   echo '               restart Restart the service'
+	   echo '               enable  Enable service autostart'
+	   echo '               disable Disable service autostart'
+esac

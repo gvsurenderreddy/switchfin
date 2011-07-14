@@ -1,17 +1,19 @@
 /*
- * File:	sport_interface.c
+ * File:	 sport_interface.c
  *
- * Author:	Alex Tao <wosttq@gmail.com>
- * Mods:	Added partial support for BF536/Bf537 mark@astfin.org
+ * Author:	 Alex Tao <wosttq@gmail.com>
+ * Mods:	 Added partial support for BF536/Bf537 mark@astfin.org
  *
- * Based on:	bfsi.c    by David Rowe 
+ * Based on:	 bfsi.c    by David Rowe 
  *                  bfin_sport.c   by Roy Huang (roy.huang@analog.com)
  * 
- * Created:	Jun 3, 2007
- * Description: This device driver enables SPORT1 on Blackfin532 interfacing 
- *              to Silicon Labs chips.
+ * Created:	 Jun 3, 2007
+ * Description:  This device driver enables SPORT1 on Blackfin532 interfacing 
+ *               to Silicon Labs chips.
  * Dimitar Penev 21.04.2010 Improved sport_tx_byte so no udelay necesery.
- *		Long term we need to move to bfin_sport_spi_	   
+ *		 Long term we need to move to bfin_sport_spi_	   
+ * Dimitar Penev 10.July.2011 added sport_get_params() to help sharing the 
+ *		 SPI bus from different drivers.
 */
 
 /*
@@ -248,9 +250,16 @@ u8 sport_rx_byte(u16 chip_select)
 	__builtin_bfin_ssync();
 }
 
+//We will keep those values so a cliant can take it and restore it later. 
+int _baud=-1;
+u16 _new_chip_select_mask;
 
 int sport_interface_init(int baud, u16 new_chip_select_mask)
 {
+
+	_baud=baud;
+	_new_chip_select_mask=new_chip_select_mask;
+
 	sport_configure(baud); /* Default should be 0x1 */
 
 	PRINTK("Before setting, FIOD_DIR = 0x%04x\n", bfin_read_FIO_DIR());
@@ -281,6 +290,14 @@ int sport_interface_init(int baud, u16 new_chip_select_mask)
 	sport1_write_TCR1( sport1_read_TCR1() | TSPEN );
 
 	return 0; /* succeed */
+}
+
+//Returs baud and new_chip_select_mask already set. So the client can change it, 
+//performe SPI transaction and restore it 
+void sport_get_params(int *params){
+		
+	params[0]=_baud;
+	params[1]=(int)_new_chip_select_mask;
 }
 
 void sport_interface_reset(int reset_bit)
@@ -324,6 +341,7 @@ EXPORT_SYMBOL( sport_rx_byte );
 EXPORT_SYMBOL( sport_interface_init );
 EXPORT_SYMBOL( sport_interface_reset );
 EXPORT_SYMBOL( sport_interface_cleanup );
+EXPORT_SYMBOL( sport_get_params );
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alex Tao <wosttq@gmail.com>");

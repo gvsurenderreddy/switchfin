@@ -40,5 +40,6 @@ extern int sport_interface_init(int baud, u16 new_chip_select_mask);
 
 extern void sport_interface_reset(int reset_bit);
 
+extern void sport_get_params(int *params);
 #endif
 

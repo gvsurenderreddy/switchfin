@@ -1,0 +1,19 @@
+#########################################################################
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# The Free Software Foundation; version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# Copyright @ 2011 SwitchFin <dpn@switchfin.org>
+#########################################################################
+
+config SF_PACKAGE_HOME_AUTO
+        bool "home-auto"
+        default n
+	depends on SF_IP04
+        help
+                This option will enable variours home automation extensions in the IP0x Switchfin kernel. To use it you need to have WireLess Tele Controller (WLTC) hardware module.
+

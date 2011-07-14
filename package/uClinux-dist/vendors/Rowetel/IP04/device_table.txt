@@ -215,3 +215,5 @@
 #UBIFS nodes
 #/dev/ubi_ctrl	c	644	0	0	10	63	0	0	-
 #/dev/ubi0	c	644	0	0	253	0	0	0	-
+
+/dev/wltc	c	644	0	0	242	0	0	0	-    
