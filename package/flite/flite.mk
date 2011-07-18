@@ -24,14 +24,14 @@ $(FLITE_DIR)/.configured: $(FLITE_DIR)/.unpacked
 	touch $(FLITE_DIR)/.configured
 
 flite: $(FLITE_DIR)/.configured
-	make -C $(FLITE_DIR)/include/
-	make -C $(FLITE_DIR)/src/
-	make -C $(FLITE_DIR)/lang/ VOXES="$(FLITE_SELECTED_VOXES)"
-	make -C $(FLITE_DIR)/main/ ../bin/flite VOXES="$(FLITE_SELECTED_VOXES)"
-	cp -f $(FLITE_DIR)/bin/flite $(TARGET_DIR)/usr/bin/flite
+	$(MAKE) -C $(FLITE_DIR)/include/
+	$(MAKE) -C $(FLITE_DIR)/src/
+	$(MAKE) -C $(FLITE_DIR)/lang/ VOXES="$(FLITE_SELECTED_VOXES)"
+	$(MAKE) -C $(FLITE_DIR)/main/ ../bin/flite VOXES="$(FLITE_SELECTED_VOXES)"
+	$(INSTALL) -m0755 $(FLITE_DIR)/bin/flite $(TARGET_DIR)/usr/bin/flite
 
 flite-clean:
-	make -C $(FLITE_DIR)/ clean
+	$(MAKE) -C $(FLITE_DIR)/ clean
 
 flite-dirclean:
 	rm -rf $(FLITE_DIR)/

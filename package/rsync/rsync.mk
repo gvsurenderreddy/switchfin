@@ -31,8 +31,8 @@ $(RSYNC_DIR)/.configured: $(RSYNC_DIR)/.unpacked
 	mkdir -p $(TARGET_DIR)/bin
 
 rsync: $(RSYNC_DIR)/.configured
-	make -C $(RSYNC_DIR)/ rsync
-	install -m0755 $(RSYNC_DIR)/rsync $(TARGET_DIR)/bin/rsync
+	$(MAKE) -C $(RSYNC_DIR)/ rsync
+	$(INSTALL) -m0755 $(RSYNC_DIR)/rsync $(TARGET_DIR)/bin/rsync
 
 rsync-dirclean:
 	rm -rf $(RSYNC_DIR)
