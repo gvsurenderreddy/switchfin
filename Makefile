@@ -146,7 +146,7 @@ image: $(TARGETS_IMAGE)
 	@echo "" 
 	@echo "" 
 	@sleep 5;
-	-$(MAKE) -C $(UCLINUX_DIR) ROMFSDIR=$(TARGET_DIR) IMAGEDIR=$(IMAGE_DIR)
+	-$(MAKE) -C $(UCLINUX_DIR) image ROMFSDIR=$(TARGET_DIR) IMAGEDIR=$(IMAGE_DIR)
 	gcc $(SOURCES_DIR)/zeropad.c -o $(IMAGE_DIR)/zeropad -Wall
 	$(IMAGE_DIR)/zeropad $(IMAGE_DIR)/uImage $(IMAGE_DIR)/fix_image.astfin 0x20000
 	mv -f $(IMAGE_DIR)/fix_image.astfin $(IMAGE_DIR)/uImage
