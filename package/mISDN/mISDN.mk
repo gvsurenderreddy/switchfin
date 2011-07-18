@@ -57,13 +57,13 @@ else
 
 endif
 
-	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)/misc
+	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin* | tail -n1)/misc
 
 	# Install 
 	mkdir -p $(STAGING_INC)/linux
 	cp -f $(mISDN_DIR)/include/linux/*.h $(STAGING_INC)/linux
 	cp -f $(mISDN_DIR)/drivers/isdn/hardware/mISDN/*.ko \
-        $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)/misc
+        $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin* | tail -n1)/misc
 
 
 mISDN-configure: $(mISDN_DIR)/.configured

@@ -30,9 +30,9 @@ home-auto: $(HA_WORKING)/.unpacked
 	make -f Makefile.1 CC=$(TARGET_CC) -C $(HA_WORKING)
 	
 	# install
-	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)/misc
+	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin* | tail -n1)/misc
 
-	cp -f $(HA_WORKING)/wltc.ko $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)/misc
+	cp -f $(HA_WORKING)/wltc.ko $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin* | tail -n1)/misc
 	cp -f $(HA_WORKING)/home-auto $(TARGET_DIR)/bin/
 	$(TARGET_STRIP) $(TARGET_DIR)/bin/home-auto
 

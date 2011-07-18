@@ -53,10 +53,10 @@ lec: $(LEC_WORKING)/.configured
 	$(MAKE) EXTRA_CFLAGS="$(LEC_EXTRA_CFLAGS)" -C $(UCLINUX_DIR)/linux-2.6.x SUBDIRS=$(LEC_WORKING)
 
         # install
-	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)/misc
+	mkdir -p $(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin* | tail -n1)/misc
 
 	cp -f $(LEC_WORKING)/ec_module.ko \
-        	$(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin | tail -n1)/misc
+        	$(shell ls -d $(TARGET_DIR)/lib/modules/*switchfin* | tail -n1)/misc
 
 
 
