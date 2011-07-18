@@ -1,0 +1,12 @@
+diff -Naur flite-1.4-release.orig/config.sub flite-1.4-release/config.sub
+--- flite-1.4-release.orig/config.sub	2009-04-08 14:18:42.000000000 +0100
++++ flite-1.4-release/config.sub	2011-07-17 12:22:58.978233222 +0100
+@@ -118,7 +118,7 @@
+ # Here we must recognize all the valid KERNEL-OS combinations.
+ maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
+ case $maybe_os in
+-  nto-qnx* | linux-gnu* | storm-chaos* | os2-emx* | windows32-*)
++  nto-qnx* | linux-gnu* | linux-uclibc* | storm-chaos* | os2-emx* | windows32-*)
+     os=-$maybe_os
+     basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
+     ;;

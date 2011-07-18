@@ -1,0 +1,31 @@
+config SF_PACKAGE_FLITE
+	bool "Flite"
+	default n
+	help
+		Smaller, faster and more portable alternative to the Festival
+		speech synthesis engine.
+
+config SF_FLITE_VOX_cmu_time_awb
+		bool "CMU Time AWB"
+		depends on SF_PACKAGE_FLITE
+
+config SF_FLITE_VOX_cmu_us_awb
+		bool "CMU US AWB"
+		depends on SF_PACKAGE_FLITE
+
+config SF_FLITE_VOX_cmu_us_kal
+		bool "CMU US KAL"
+		depends on SF_PACKAGE_FLITE
+		default y
+
+config SF_FLITE_VOX_cmu_us_kal16
+		bool "CMU US KAL (16KHz)"
+		depends on SF_PACKAGE_FLITE
+
+config SF_FLITE_VOX_cmu_us_rms
+		bool "CMU US RMS"
+		depends on SF_PACKAGE_FLITE
+
+config SF_FLITE_VOX_cmu_us_slt
+		bool "CMU US SLT"
+		depends on SF_PACKAGE_FLITE
