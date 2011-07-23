@@ -140,8 +140,8 @@ ifeq ($(strip $(SF_NAND_1GB)),y)
 endif
 endif
 ifeq ($(strip $(SF_PACKAGE_IPTABLES)),y)
-	rm -rf $(UCLINUX_DIR)/user/iptables/;
-	svn checkout --revision 9614 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/iptables $(UCLINUX_DIR)/user/iptables
+	#rm -rf $(UCLINUX_DIR)/user/iptables/;
+	#svn checkout --revision 9614 svn://sources.blackfin.uclinux.org/uclinux-dist/trunk/user/iptables $(UCLINUX_DIR)/user/iptables
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/iptables.patch
 
 	cat package/iptables/config.iptables >> $(VARIABLE_CONFIG_FILE)
