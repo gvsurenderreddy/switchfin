@@ -57,12 +57,18 @@
 #endif
 
 #define WLTC_ID		0xD5
-
-//ioctl commands 
-#define WLTC_GET	10
-#define WLTC_SET   	11
-
-
+#define MAX_WLRR_NUM 	10
+//ioctl commands
+enum commands {WLTC_GET_ID=10,           //Host send this command if wnats to read the ID of the WLTC,
+                                        //so the host CPU can detect it
+               WLTC_GET_ADDRESS_LIST,   //HOst request the list of the WLRR devices available 
+               WLTC_SET_DEVICE,         //Host will send command to switch on / off of the certain WLRR 
+               WLTC_GET_DEVICE,         //Host request status of given WLRR
+               WLTC_READ = 0xff         //Host reads byte
+              };
+#define WLTC_OK                      0x55
+#define WLTC_CRC_ERROR               0x56
+#define WLTC_DEVICE_UNAVAILABLE      0x57 
 static int debug = 0;
 int card=-1; //Port index of the WLTC in the IP0x 
 
@@ -104,66 +110,163 @@ static void wait(int seconds)
         schedule_timeout(seconds);
 }
 
-
 // Char device ioctl -----------------------------------------------------------------
+unsigned char WLRR_addrs[MAX_WLRR_NUM*8+1];//Keeps the WLRR count and the addresses of the available WLRR
 int wltc_ioctl( struct inode *inodep, struct file *filep, unsigned int cmd, unsigned long arg)
 {
-	unsigned char data;
-	int i, sport_params[2];
+	unsigned char data, sum;
+	int i, j, sport_params[2];
 	spinlock_t lock = SPIN_LOCK_UNLOCKED;
 	unsigned long flags;
 
         switch(cmd) {
 
-                case WLTC_SET:
-			// Write byte to the WLTC register. 
-			// The LSB is used to control the appliance
+                case WLTC_GET_ADDRESS_LIST:
+			//Retrieves the MAC addresses of the WLRR devices available in the network
+			//in the arg the data addresses are return like this
+			//
+			//	WLRRaddrs = WLRRnum WLRRaddr[0][8] .. WLRRaddr[0][0] ...
+                        if (card == -1) {
+                                printk("No WLTC in the system detected\n");
+                                return -EFAULT;
+                        }
+
+                        spin_lock_irqsave(&lock, flags);
+                        //get the sport parametsr (baud and mask)
+                        sport_get_params(sport_params);
+                        sport_interface_init(SPI_BAUDS, (1<<SPI_NCSA) | (1<<SPI_NCSB));
+                        wltc_setcard(card);
+			write_byte(WLTC_GET_ADDRESS_LIST);
+			udelay(150);
+			WLRR_addrs[0]=read_byte();		//Reads the total addresses available
+			sum=WLRR_addrs[0];			
+
+			if (WLRR_addrs[0] > MAX_WLRR_NUM) {
+                                printk("WLTC supports up to %d WLRR devices\n", MAX_WLRR_NUM);
+                                return -EFAULT;
+                        }
+			for(i=0;i<WLRR_addrs[0];i++){		//Reads the address list
+				for(j=0;j<8;j++){
+					udelay(150);
+					WLRR_addrs[8*i+j+1]=read_byte();
+					sum += WLRR_addrs[8*i+j+1];
+				}
+			}
+			udelay(150);
+			if (sum != read_byte()){                //Reads the check_sum
+				WLRR_addrs[0]=0;
+				printk("Check sum failer\n");
+                                return -EFAULT;
+			}
+                        sport_restore_params(sport_params);
+                        spin_unlock_irqrestore(&lock, flags);
+                        
+			if (copy_to_user((char *)arg, WLRR_addrs, 8*WLRR_addrs[0]+1)) {
+                                printk("Error copying the data\n");
+                                return -EFAULT;
+                        }
+
+                        break;
+
+                case WLTC_SET_DEVICE:
+			// Set the relay of the specified WLRR. 
+			// arg = WLRRaddr[8] WLRRaddr[7] .. WLRRaddr[0] [on_off]
 
                         if (card == -1) {
                                 printk("No WLTC in the system detected\n");
                                 return -EFAULT;
                         }
+
 			spin_lock_irqsave(&lock, flags);
 			//get the sport parametsr (baud and mask)
 			sport_get_params(sport_params);
         		sport_interface_init(SPI_BAUDS, (1<<SPI_NCSA) | (1<<SPI_NCSB));	
 			wltc_setcard(card);
-                	write_byte((*(char *)arg) > 0);		//1 Switch on the Relay
-								//0 Switch off the Relay
+
+			//Write the command
+			write_byte(WLTC_SET_DEVICE);
+                        udelay(150);
+			
+			//Write the WLRR address
+			sum=0;
+			for(i=0; i<8; i++){
+                		write_byte(*((char *)arg+i));
+				sum += *((char *)arg+i);
+				udelay(150);
+			}
+
+			//Write the on_off byte
+			write_byte(*((char *)arg+8));
+			sum += *((char *)arg+8);
+	
+			//Send the check sum
+			udelay(150);	
+			write_byte(sum);
+
+			//read the acknowledge
+			udelay(150);
+			data=read_byte();
+			if (data == WLTC_CRC_ERROR){            
+                                printk("Check sum failed\n");
+                                return -EFAULT;
+                        } else if (data == WLTC_DEVICE_UNAVAILABLE) {
+				printk("The address is unavailable\n");
+                                return -EFAULT;
+			} else if (data != WLTC_OK) {
+                                printk("Device set failer\n");
+                                return -EFAULT;
+			}	
+
 			sport_restore_params(sport_params);	
 			spin_unlock_irqrestore(&lock, flags);
-			for (i=0;i<(int)(WLTC_TIME_OUT*10); i++){
-				wait(HZ/10);
-				spin_lock_irqsave(&lock, flags);
-				sport_get_params(sport_params);
-				sport_interface_init(SPI_BAUDS, (1<<SPI_NCSA) | (1<<SPI_NCSB));
-				wltc_setcard(card);
-				data=read_byte();
-				sport_restore_params(sport_params);
-				spin_unlock_irqrestore(&lock, flags);
-				if(data == (WLTC_ID & 0xfe)) break;	//The acknolwadge is WLTC ID with LSB cleared
-			}				
 			
-			if(i==(int)(WLTC_TIME_OUT*10)) return -EFAULT;  //Time out 
-
                         break;
 
-                case WLTC_GET:
-                        // Read byte from the WLTC register. 
-                        // The LSB is the state of the appliance
-			// Currently this command is not supported.
+                case WLTC_GET_DEVICE:
+			// Get the status of the relay of WLRR. 
+                        // arg = WLRRaddr[8] WLRRaddr[7] .. WLRRaddr[0]
 
                         if (card == -1) {
                                 printk("No WLTC in the system detected\n");
                                 return -EFAULT;
                         }
 
+                        spin_lock_irqsave(&lock, flags);
                         //get the sport parametsr (baud and mask)
                         sport_get_params(sport_params);
-                        sport_interface_init(SPI_BAUDS, (1<<SPI_NCSA) | (1<<SPI_NCSB));                        
+                        sport_interface_init(SPI_BAUDS, (1<<SPI_NCSA) | (1<<SPI_NCSB));
                         wltc_setcard(card);
+
+                        //Write the command
+                        write_byte(WLTC_GET_DEVICE);
+                        udelay(150);
+
+                        //Write the WLRR address
+                        sum=0;
+                        for(i=0; i<8; i++){
+                                write_byte(*((char *)arg+i));
+                                sum += *((char *)arg+i);
+                                udelay(150);
+                        }
+
+                        //Send the check sum
+                        udelay(150);
+                        write_byte(sum);
+
+                        //read the acknowledge
+                        udelay(150);
                         data=read_byte();
-			sport_restore_params(sport_params);
+                        if (data == WLTC_CRC_ERROR){
+                                printk("Check sum failed\n");
+                                return -EFAULT;
+                        } else if (data == WLTC_DEVICE_UNAVAILABLE) {
+                                printk("The address is unavailable\n");
+                                return -EFAULT;
+                        }
+
+                        sport_restore_params(sport_params);
+                        spin_unlock_irqrestore(&lock, flags);
+
 
 			if (copy_to_user((char *)arg, &data, 1)) {
                                 printk("Error copying the data\n");
@@ -224,7 +327,7 @@ static inline void wltc_setcard(int card){
 //         -1 otherwise
 static int wltc_detect(void){
 	int i;
-	unsigned char data;
+	unsigned char id, check_sum;
 	int sport_params[2];
 	spinlock_t lock = SPIN_LOCK_UNLOCKED;
 	unsigned long flags;
@@ -235,15 +338,19 @@ static int wltc_detect(void){
 		sport_get_params(sport_params);
         	sport_interface_init(SPI_BAUDS, (1<<SPI_NCSA) | (1<<SPI_NCSB));
 		wltc_setcard(i+1);
-		data=read_byte();
+		write_byte(WLTC_GET_ID);
+		udelay(100);
+		id=read_byte();
+		udelay(100);
+		check_sum=read_byte();
 		sport_restore_params(sport_params);
 		spin_unlock_irqrestore(&lock, flags);
-		if((data & 0xfe) == (WLTC_ID & 0xfe)) { //LSB is an acknowledge bit
+		if((id == check_sum) && (id==WLTC_ID )) {
 			card=i+1;
 			break;
 		}
 		else
-			read_byte();       //Slicks gets confused if only one read 
+			read_byte();       //Slicks gets confused if 3 reads
 	}
 	return -(i == NUM_CARDS);
 
