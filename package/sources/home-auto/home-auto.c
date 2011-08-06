@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
 {
 	int fd, res, i, j, data, addr1[9];
 	unsigned char addr[9], address_list[8*MAX_WLRR_NUM+1];
-	char a[]="fe:00";
 	//Those variables keeps
 	//	addr = a7 a6 .. a0 		- in case of get_device
 	//	addr = a7 a6 .. a0 on_off	- in case of set_device
