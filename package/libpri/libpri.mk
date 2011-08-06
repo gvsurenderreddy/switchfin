@@ -17,7 +17,8 @@
 #####################################################
 
 LIBPRI_SITE=http://downloads.digium.com/pub/libpri/releases
-LIBPRI_VERSION=1.4.11.5
+#LIBPRI_VERSION=1.4.11.5
+LIBPRI_VERSION=1.4.12
 LIBPRI_SOURCE=libpri-$(LIBPRI_VERSION).tar.gz
 LIBPRI_UNZIP=zcat
 LIBPRI_DIR=$(BUILD_DIR)/libpri-$(LIBPRI_VERSION)
