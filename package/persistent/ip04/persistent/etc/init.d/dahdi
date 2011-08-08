@@ -3,7 +3,7 @@
 
 case $1 in
 	start)   modprobe wcfxs opermode=`sed -n 's/^opermode *= *//p' /etc/asterisk/guipreferences.conf`;
-	         if dahdi_scan | grep -q WCTDM; then; modprobe dahdi_dummy; fi;
+	         if dahdi_scan | grep -q "Blackfin IP0x Board"; then; else; modprobe dahdi_dummy; fi;
 	         dahdi_cfg;;
 	stop)    modprobe -r wcfxs dahdi_dummy;;
 	restart) $0 stop; $0 start;;
