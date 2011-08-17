@@ -33,6 +33,10 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 	cd package/persistent/pr1/persistent/etc/rc.d; \
 	ln -sf ../init.d/asteriskwatch S90asteriskwatch
 endif
+#ifeq ($(strip $(SF_PACKAGE_VTUN)),y)
+#	cp package/persistent/vtun/vtund package/persistent/pr1/persistent/etc/init.d; \
+#	cp package/persistent/vtun/vtund.conf package/persistent/pr1/persistent/etc
+#endif
 	cd package/persistent/pr1; \
 	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
@@ -51,6 +55,10 @@ endif
 ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 	cd package/persistent/br4/persistent/etc/rc.d; \
 	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
+ifeq ($(strip $(SF_PACKAGE_VTUN)),y)
+	cp package/persistent/vtun/vtund package/persistent/br4/persistent/etc/init.d/; \
+	cp package/persistent/vtun/vtund.conf package/persistent/br4/persistent/etc/
 endif
 	cd package/persistent/br4; \
 	chmod +x persistent/etc/init.d/*; \
@@ -74,6 +82,10 @@ endif
 ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
 	patch -p0 package/persistent/ip04/persistent/etc/init.d/dahdi < package/persistent/dahdi.patch
 endif
+ifeq ($(strip $(SF_PACKAGE_VTUN)),y)
+	cp package/persistent/vtun/vtund package/persistent/ip04/persistent/etc/init.d/; \
+	cp package/persistent/vtun/vtund.conf package/persistent/ip04/persistent/etc/
+endif
 	cd package/persistent/ip04; \
 	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
@@ -92,6 +104,10 @@ ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 	cd package/persistent/ip01/persistent/etc/rc.d; \
 	ln -sf ../init.d/asteriskwatch S90asteriskwatch
 endif
+ifeq ($(strip $(SF_PACKAGE_VTUN)),y)
+	cp package/persistent/vtun/vtund package/persistent/ip01/persistent/etc/init.d/; \
+	cp package/persistent/vtun/vtund.conf package/persistent/ip01/persistent/etc/
+endif
 	cd package/persistent/ip01; \
 	chmod +x persistent/etc/init.d/*; \
 	tar zcvf $(PERSISTENT_LOC) --owner 0 --group 0 --exclude '.svn' persistent/
@@ -107,6 +123,10 @@ endif
 ifeq ($(strip $(SF_PACKAGE_PROCWATCH)),y)
 	cd package/persistent/fx08/persistent/etc/rc.d; \
 	ln -sf ../init.d/asteriskwatch S90asteriskwatch
+endif
+ifeq ($(strip $(SF_PACKAGE_VTUN)),y)
+	cp package/persistent/vtun/vtund package/persistent/fx08/persistent/etc/init.d/; \
+	cp package/persistent/vtun/vtund.conf package/persistent/fx08/persistent/etc/
 endif
 	cd package/persistent/fx08; \
 	chmod +x persistent/etc/init.d/*; \

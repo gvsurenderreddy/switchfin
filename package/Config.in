@@ -53,5 +53,6 @@ source "package/lua/Config.in"
 source "package/uw-imap/Config.in"
 source "package/iptables/Config.in"
 source "package/nfs/Config.in"
+source "package/vtun/Config.in"
 endmenu
 

@@ -1,0 +1,28 @@
+#!/bin/hush
+# Start up file for vtun
+
+PROFILE=server
+SERVER=none
+
+if [ $PROFILE == "server" ]; then
+args="-s"
+else
+args="-p $PROFILE $SERVER"
+fi
+
+case $1 in
+        start)   start-stop-daemon -S -p /var/run/vtund/vtund.pid -b -x vtund -- $args;;
+        stop)    start-stop-daemon -K -p /var/run/vtund.pid;;
+        restart) $0 stop; sleep 3; $0 start;;
+        enable)  ln -snf /persistent/etc/init.d/vtund /persistent/etc/rc.d/S50vtund;;
+        disable) rm -f /persistent/etc/rc.d/S50vtund;;
+        *) echo 'Syntax: /etc/init.d/vtund [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
+esac
+
