@@ -60,7 +60,7 @@ ASTERISK_DEP+= spandsp
 endif
 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
-ASTERISK_DEP+= mISDNuser
+ASTERISK_DEP+= mISDNuser dahdi
 ASTERISK_CONFIGURE_OPTS+= --with-misdn
 else
 ASTERISK_DEP+= dahdi
