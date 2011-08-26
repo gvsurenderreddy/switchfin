@@ -14,7 +14,7 @@ SPANDSP_SOURCE=spandsp-0.0.6pre17.tgz
 TIFF_VERSION=3.8.2
 SPANDSP_UNZIP=zcat
 SPANDSP_DIR=$(BUILD_DIR)/spandsp-$(SPANDSP_VERSION)
-SPANDSP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --enable-fixed-point
+SPANDSP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --enable-fixed-point --disable-static --includedir=$(STAGING_INC) --libdir=$(TARGET_DIR)/lib
 TIFF_LDFLAGS=-L$(BUILD_DIR)/tiff-$(TIFF_VERSION)/libtiff/.libs
 TIFF_CFLAGS=-I$(BUILD_DIR)/tiff-$(TIFF_VERSION)/libtiff
 
@@ -34,17 +34,12 @@ $(SPANDSP_DIR)/.configured: $(SPANDSP_DIR)/.unpacked
 	touch $(SPANDSP_DIR)/.configured
 
 spandsp: libtiff $(SPANDSP_DIR)/.configured
-	make  LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) STAGEDIR=$(STAGING_DIR) -C $(SPANDSP_DIR)/
-	#copy header files to staging directory
-	mkdir -p $(STAGING_DIR)/usr/include/spandsp
-	cp -rf $(SPANDSP_DIR)/src/spandsp/* $(STAGING_DIR)/usr/include/spandsp
-	cp -f $(SPANDSP_DIR)/src/spandsp.h  $(STAGING_DIR)/usr/include/ #DPN for fax support
+	make -C $(SPANDSP_DIR)/ all install-strip
 
-	cp -f $(SPANDSP_DIR)/src/.libs/libspandsp* $(STAGING_DIR)/usr/lib/
-	
-	#copy to the target location
-	cp -f $(SPANDSP_DIR)/src/.libs/libspandsp.so $(TARGET_DIR)/lib
-	$(TARGET_STRIP) $(TARGET_DIR)/lib/libspandsp.so
+	# libtool archives are only useful for static libraries.
+	rm -f $(TARGET_DIR)/lib/libspandsp.la
+
+	ln -snf $(TARGET_DIR)/lib/libspandsp.* $(STAGING_LIB)/
 
 spandsp-dirclean:
 	rm -rf $(SPANDSP_DIR)
