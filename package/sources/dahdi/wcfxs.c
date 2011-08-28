@@ -888,6 +888,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 			if (debug>=2)
 				printk("NO BATTERY on %d/%d!\n", wc->span.spanno, card + 1);
 			wc->mod.fxo.battery[card] =  0;
+                        dahdi_alarm_channel(&wc->chans[card], DAHDI_ALARM_RED);
 #ifdef	JAPAN
 			if ((!wc->ohdebounce) && wc->offhook) {
 				dahdi_hooksig(&wc->chans[card], DAHDI_RXSIG_ONHOOK);
@@ -905,6 +906,7 @@ static inline void wcfxs_voicedaa_check_hook(struct wcfxs *wc, int card)
 			wc->mod.fxo.battdebounce[card] = BATT_DEBOUNCE;
 	} else if (abs(b) > BATT_THRESH) {
 		if (!wc->mod.fxo.battery[card] && !wc->mod.fxo.battdebounce[card]) {
+                        dahdi_alarm_channel(&wc->chans[card], DAHDI_ALARM_NONE);
 			if (debug>=2)
 				printk("BATTERY on %d/%d (%s)!\n", wc->span.spanno, card + 1, 
 					(b < 0) ? "-" : "+");			    
