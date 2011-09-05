@@ -135,6 +135,9 @@ endif
 	rm -f S45mdnsd S90asteriskwatch
 endif
 
+ifeq ($(strip $(SF_PACKAGE_PPPOE)),y)
+	-rm -rf $(TARGET_DIR)/etc/ppp/ 
+endif
 
 persistent-dirclean:
 	rm -f $(PERSISTENT_LOC)

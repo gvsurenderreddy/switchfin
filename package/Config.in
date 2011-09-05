@@ -54,5 +54,6 @@ source "package/uw-imap/Config.in"
 source "package/iptables/Config.in"
 source "package/nfs/Config.in"
 source "package/vtun/Config.in"
+source "package/pppoe/Config.in"
 endmenu
 

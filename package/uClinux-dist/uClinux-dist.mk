@@ -155,6 +155,20 @@ ifeq ($(strip $(SF_PACKAGE_NFS)),y)
 else
 	echo "# CONFIG_NFS_FS is not set" >> $(VARIABLE_CONFIG_FILE)
 endif
+ifeq ($(strip $(SF_PACKAGE_PPPOE)),y)
+	echo "CONFIG_PPP=y" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_PPP_SYNC_TTY=y" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_PPP_ASYNC=y" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_PPP_BSDCOMP=y" >> $(VARIABLE_CONFIG_FILE)
+	echo "CONFIG_PPP_DEFLATE=y" >> $(VARIABLE_CONFIG_FILE) 
+	echo "CONFIG_USER_PPPD_PPPD_PPPD=y" >> $(VARIABLE_CONFIG_FILE1)
+	echo "CONFIG_USER_RP_PPPOE_PPPOE=y" >> $(VARIABLE_CONFIG_FILE1)
+	patch -d $(UCLINUX_DIR) -p1 < package/pppoe/pppoe.patch
+else
+	echo "# CONFIG_PPP is not set" >> $(VARIABLE_CONFIG_FILE)
+	echo "# CONFIG_USER_PPPD_PPPD_PPPD is not set" >> $(VARIABLE_CONFIG_FILE1)
+	echo "# CONFIG_USER_RP_PPPOE_PPPOE is not set" >> $(VARIABLE_CONFIG_FILE1)
+endif
 
 #	patch -d $(UCLINUX_DIR) -p1 < package/uClinux-dist/common/dhcpd.patch   #Tempprary removed
 	

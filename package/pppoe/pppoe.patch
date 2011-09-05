@@ -1,0 +1,71 @@
+--- blackfin-linux-dist/user/rp-pppoe/adsl-start.in	2011-09-01 12:32:43.000000000 +0300
++++ blackfin-linux-dist/user/rp-pppoe/adsl-start.in	2011-09-01 12:33:24.000000000 +0300
+@@ -35,7 +35,7 @@
+ ME=`basename $0`
+ # Must be root
+ if [ "`id -u`" != 0 ] ; then
+-    echo "$ME: You must be root to run this script" >& 2
++    echo "$ME: You must be root to run this script" >&2
+     exit 1
+ fi
+ 
+@@ -89,7 +89,7 @@
+ esac
+ 
+ if [ ! -f "$CONFIG" -o ! -r "$CONFIG" ] ; then
+-    echo "$ME: Cannot read configuration file '$CONFIG'" >& 2
++    echo "$ME: Cannot read configuration file '$CONFIG'" >&2
+     exit 1
+ fi
+ 
+@@ -109,7 +109,7 @@
+     # Check if still running
+     kill -0 $PID > /dev/null 2>&1
+     if [ $? = 0 ] ; then
+-	echo "$ME: There already seems to be an ADSL connection up (PID $PID)" >& 2
++	echo "$ME: There already seems to be an ADSL connection up (PID $PID)" >&2
+ 	exit 1
+     fi
+     # Delete bogus PIDFILE
+--- blackfin-linux-dist/user/rp-pppoe/adsl-connect.in	2011-09-01 12:32:27.000000000 +0300
++++ blackfin-linux-dist/user/rp-pppoe/adsl-connect.in	2011-09-01 12:37:44.000000000 +0300
+@@ -27,14 +27,14 @@
+ 
+ # Paths to programs
+ IFCONFIG=/sbin/ifconfig
+-PPPD=@PPPD@
++PPPD=/usr/sbin/pppd
+ SETSID=@SETSID@
+ PPPOE=@sbindir@/pppoe
+ LOGGER="/usr/bin/logger -t `basename $0`"
+ 
+ # Must be root
+ if test "`id -u`" != 0 ; then
+-    echo "$0: You must be root to run this script" >& 2
++    echo "$0: You must be root to run this script" >&2
+     exit 1
+ fi
+ 
+@@ -57,7 +57,7 @@
+ esac
+ 
+ if test ! -f "$CONFIG" -o ! -r "$CONFIG" ; then
+-    echo "$0: Cannot read configuration file '$CONFIG'" >& 2
++    echo "$0: Cannot read configuration file '$CONFIG'" >&2
+     exit 1
+ fi
+ 
+@@ -76,11 +76,11 @@
+ 
+ # Check that config file is sane
+ if test "$USER" = "" ; then
+-    echo "$0: Check '$CONFIG' -- no setting for USER" >& 2
++    echo "$0: Check '$CONFIG' -- no setting for USER" >&2
+     exit 1
+ fi
+ if test "$ETH" = "" ; then
+-    echo "$0: Check '$CONFIG' -- no setting for ETH" >& 2
++    echo "$0: Check '$CONFIG' -- no setting for ETH" >&2
+     exit 1
+ fi
+ 

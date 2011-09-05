@@ -38,6 +38,7 @@ spandsp: libtiff $(SPANDSP_DIR)/.configured
 
 	# libtool archives are only useful for static libraries.
 	rm -f $(TARGET_DIR)/lib/libspandsp.la
+	cd $(TARGET_DIR)/lib/; ln -sf libspandsp.so libspandsp.so.2
 
 	ln -snf $(TARGET_DIR)/lib/libspandsp.* $(STAGING_LIB)/
 
