@@ -69,3 +69,23 @@
      exit 1
  fi
  
+--- blackfin-linux-dist/user/rp-pppoe/adsl-stop.in	2011-09-05 18:17:18.000000000 +0300
++++ blackfin-linux-dist/user/rp-pppoe/adsl-stop.in	2011-09-05 18:18:06.000000000 +0300
+@@ -26,7 +26,7 @@
+ fi
+ 
+ if [ ! -f "$CONFIG" -o ! -r "$CONFIG" ] ; then
+-    echo "$ME: Cannot read configuration file '$CONFIG'" >& 2
++    echo "$ME: Cannot read configuration file '$CONFIG'" >&2
+     exit 1
+ fi
+ 
+@@ -50,7 +50,7 @@
+     # Check if still running
+     kill -0 $PID > /dev/null 2>&1
+     if [ $? != 0 ] ; then
+-	echo "$ME: The adsl-connect script (PID $PID) appears to have died" >& 2
++	echo "$ME: The adsl-connect script (PID $PID) appears to have died" >&2
+ 	exit 1
+     fi
+ 

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# replace default route by PPP one
+if [ "$IPREMOTE" ]; then
+	while [ `/bin/route -n | /bin/grep ^0.0.0.0 -c` ];
+	do
+		/bin/route del default | true
+	done
+	/bin/route add default gw $IPREMOTE
+fi
+
+# this variable is only set if the usepeerdns pppd option is being used
+[ "$USEPEERDNS" ] || exit 0
+
+if [ $DNS1 ]; then
+	echo "nameserver $DNS1" > /etc/resolv.conf
+fi
+
+if [ $DNS2 ]; then
+	echo "nameserver $DNS2" >> /etc/resolv.conf
+fi
+
+exit 0
