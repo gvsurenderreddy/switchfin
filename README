@@ -3,16 +3,6 @@ The SwitchFin(R) Open Source PBX
 Copyright (C) 2010 SwitchFin dpn@switchfin.org
 ================================================================
 
-* Stable releases
-  11 Feb. 2010 the stable releases you can check out are 
-  https://switchfin.svn.sourceforge.net/svnroot/switchfin/switchfin/tags/pr1-ui2.13/  (for PR1 Appliance)
-  https://switchfin.svn.sourceforge.net/svnroot/switchfin/switchfin/tags/br4-ui2.15/  (for BR4Appliance)
-
-  If you need latest stable Asterisk (1.4.28) You may consider testing 
-  the SwitchFin trunk. Note that PRI driver in the the trunk is still 
-  not ported completely so please don't use trunk for PR1 Apliance yet 
-  https://switchfin.svn.sourceforge.net/svnroot/switchfin/switchfin/trunk/	  	
-	
 * WHAT IS SwitchFin ?
   SwitchFin is an Open Source uClinux/Asterisk based distribution
   runing on top of Blackfin CPUs from Analog Devices www.analog.com
@@ -31,7 +21,7 @@ Copyright (C) 2010 SwitchFin dpn@switchfin.org
   not exactly what we see its future. 
   We want to work on a purely telephony oriented project and that's why
   we have created SwitchFin. 
-  Lets wish SwitchFin to become useful peace in the global open source 
+  Let's wish SwitchFin to become useful peace in the global open source 
   society.
 
   For more information on the project itself, please visit the

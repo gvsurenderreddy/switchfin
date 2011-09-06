@@ -1,6 +1,6 @@
-diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
---- asterisk/apps/app_dial.c	2010-11-24 18:48:39.000000000 +0200
-+++ asterisk.patched/apps/app_dial.c	2011-02-04 11:41:59.000000000 +0200
+diff -Naur asterisk-1.4.42_original/apps/app_dial.c asterisk-1.4.42_switchfin/apps/app_dial.c
+--- asterisk-1.4.42_original/apps/app_dial.c	2011-05-18 16:56:08.000000000 -0300
++++ asterisk-1.4.42_switchfin/apps/app_dial.c	2011-09-06 09:51:42.000000000 -0300
 @@ -214,7 +214,11 @@
  "           of features.conf.\n"
  "    W    - Allow the calling party to enable recording of the call by sending\n"
@@ -14,17 +14,16 @@ diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
  
  /* RetryDial App by Anthony Minessale II <anthmct@yahoo.com> Jan/2005 */
  static char *rapp = "RetryDial";
-@@ -261,6 +265,9 @@
+@@ -261,6 +265,8 @@
  	OPT_CALLEE_PARK =	(1 << 25),
  	OPT_CALLER_PARK =	(1 << 26),
  	OPT_IGNORE_FORWARDING = (1 << 27),
 +	OPT_CALLEE_MIXMONITOR = (1 << 28),
 +	OPT_CALLER_MIXMONITOR = (1 << 29),
-+   
  } dial_exec_option_flags;
  
  #define DIAL_STILLGOING			(1 << 30)
-@@ -310,11 +317,14 @@
+@@ -310,11 +316,14 @@
  	AST_APP_OPTION('T', OPT_CALLER_TRANSFER),
  	AST_APP_OPTION('w', OPT_CALLEE_MONITOR),
  	AST_APP_OPTION('W', OPT_CALLER_MONITOR),
@@ -39,7 +38,7 @@ diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
  	OPT_CALLER_PARK | OPT_ANNOUNCE | OPT_CALLEE_MACRO) && \
  	!chan->audiohooks && !peer->audiohooks)
  
-@@ -498,6 +508,7 @@
+@@ -498,6 +507,7 @@
  						       OPT_CALLEE_TRANSFER | OPT_CALLER_TRANSFER |
  						       OPT_CALLEE_HANGUP | OPT_CALLER_HANGUP |
  						       OPT_CALLEE_MONITOR | OPT_CALLER_MONITOR |
@@ -47,7 +46,7 @@ diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
  						       OPT_CALLEE_PARK | OPT_CALLER_PARK |
  						       DIAL_NOFORWARDHTML);
  					ast_copy_string(c->dialcontext, "", sizeof(c->dialcontext));
-@@ -629,6 +640,7 @@
+@@ -629,6 +639,7 @@
  							       OPT_CALLEE_HANGUP | OPT_CALLER_HANGUP |
  							       OPT_CALLEE_MONITOR | OPT_CALLER_MONITOR |
  							       OPT_CALLEE_PARK | OPT_CALLER_PARK |
@@ -55,7 +54,7 @@ diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
  							       DIAL_NOFORWARDHTML);
  						ast_copy_string(c->dialcontext, "", sizeof(c->dialcontext));
  						ast_copy_string(c->exten, "", sizeof(c->exten));
-@@ -1236,6 +1248,7 @@
+@@ -1236,6 +1247,7 @@
  				       OPT_CALLEE_HANGUP | OPT_CALLER_HANGUP |
  				       OPT_CALLEE_MONITOR | OPT_CALLER_MONITOR |
  				       OPT_CALLEE_PARK | OPT_CALLER_PARK |
@@ -63,7 +62,7 @@ diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
  				       OPT_RINGBACK | OPT_MUSICBACK | OPT_FORCECLID);
  			ast_set2_flag(tmp, args.url, DIAL_NOFORWARDHTML);	
  		}
-@@ -1842,6 +1855,10 @@
+@@ -1845,6 +1857,10 @@
  				ast_set_flag(&(config.features_callee), AST_FEATURE_AUTOMON);
  			if (ast_test_flag(peerflags, OPT_CALLER_MONITOR)) 
  				ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMON);
@@ -74,22 +73,30 @@ diff -ur asterisk/apps/app_dial.c asterisk.patched/apps/app_dial.c
  			if (ast_test_flag(peerflags, OPT_CALLEE_PARK))
  				ast_set_flag(&(config.features_callee), AST_FEATURE_PARKCALL);
  			if (ast_test_flag(peerflags, OPT_CALLER_PARK))
-diff -ur asterisk/apps/app_directory.c asterisk.patched/apps/app_directory.c
---- asterisk/apps/app_directory.c	2010-05-18 21:54:58.000000000 +0300
-+++ asterisk.patched/apps/app_directory.c	2011-02-04 11:42:20.000000000 +0200
+@@ -1852,6 +1868,7 @@
+ 			if (ast_test_flag(peerflags, OPT_GO_ON))
+ 				ast_set_flag(&(config.features_caller), AST_FEATURE_NO_H_EXTEN);
+ 
++
+ 			config.timelimit = timelimit;
+ 			config.play_warning = play_warning;
+ 			config.warning_freq = warning_freq;
+diff -Naur asterisk-1.4.42_original/apps/app_directory.c asterisk-1.4.42_switchfin/apps/app_directory.c
+--- asterisk-1.4.42_original/apps/app_directory.c	2010-05-18 15:54:58.000000000 -0300
++++ asterisk-1.4.42_switchfin/apps/app_directory.c	2011-09-05 13:37:51.000000000 -0300
 @@ -179,7 +179,7 @@
  					break;
  				}
  				if (fd > -1)
 -					fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-+					fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE , fd, 0);
++					fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
  			}
  			if (fdm != MAP_FAILED) {
  				memset(fdm, 0, fdlen);
-diff -ur asterisk/apps/app_voicemail.c asterisk.patched/apps/app_voicemail.c
---- asterisk/apps/app_voicemail.c	2010-12-01 02:23:19.000000000 +0200
-+++ asterisk.patched/apps/app_voicemail.c	2011-02-04 11:43:08.000000000 +0200
-@@ -2496,7 +2496,7 @@
+diff -Naur asterisk-1.4.42_original/apps/app_voicemail.c asterisk-1.4.42_switchfin/apps/app_voicemail.c
+--- asterisk-1.4.42_original/apps/app_voicemail.c	2011-05-04 13:08:50.000000000 -0300
++++ asterisk-1.4.42_switchfin/apps/app_voicemail.c	2011-09-05 13:41:36.000000000 -0300
+@@ -2497,7 +2497,7 @@
  					}
  					/* Read out in small chunks */
  					for (offset = 0; offset < colsize2; offset += CHUNKSIZE) {
@@ -98,7 +105,7 @@ diff -ur asterisk/apps/app_voicemail.c asterisk.patched/apps/app_voicemail.c
  							ast_log(LOG_WARNING, "Could not mmap the output file: %s (%d)\n", strerror(errno), errno);
  							SQLFreeHandle(SQL_HANDLE_STMT, stmt);
  							ast_odbc_release_obj(obj);
-@@ -2814,7 +2814,7 @@
+@@ -2863,7 +2863,7 @@
  		fdlen = lseek(fd, 0, SEEK_END);
  		lseek(fd, 0, SEEK_SET);
  		printf("Length is %zd\n", fdlen);
@@ -107,9 +114,9 @@ diff -ur asterisk/apps/app_voicemail.c asterisk.patched/apps/app_voicemail.c
  		if (fdm == MAP_FAILED) {
  			ast_log(LOG_WARNING, "Memory map failed!\n");
  			ast_odbc_release_obj(obj);
-diff -ur asterisk/channels/chan_dahdi.c asterisk.patched/channels/chan_dahdi.c
---- asterisk/channels/chan_dahdi.c	2010-11-25 00:41:07.000000000 +0200
-+++ asterisk.patched/channels/chan_dahdi.c	2011-02-04 11:49:51.000000000 +0200
+diff -Naur asterisk-1.4.42_original/channels/chan_dahdi.c asterisk-1.4.42_switchfin/channels/chan_dahdi.c
+--- asterisk-1.4.42_original/channels/chan_dahdi.c	2011-04-11 12:27:52.000000000 -0300
++++ asterisk-1.4.42_switchfin/channels/chan_dahdi.c	2011-09-05 14:10:22.000000000 -0300
 @@ -116,6 +116,8 @@
  };
  static struct ast_jb_conf global_jbconf;
@@ -119,7 +126,7 @@ diff -ur asterisk/channels/chan_dahdi.c asterisk.patched/channels/chan_dahdi.c
  #ifndef DAHDI_TONEDETECT
  /* Work around older code with no tone detect */
  #define DAHDI_EVENT_DTMFDOWN 0
-@@ -895,6 +897,10 @@
+@@ -931,6 +933,10 @@
  	int polarity;
  	/*! \brief DSP feature flags: DSP_FEATURE_xxx */
  	int dsp_features;
@@ -130,15 +137,15 @@ diff -ur asterisk/channels/chan_dahdi.c asterisk.patched/channels/chan_dahdi.c
  	/*! \brief DTMF digit in progress.  0 when no digit in progress. */
  	char begindigit;
  } *iflist = NULL, *ifend = NULL;
-@@ -5361,6 +5367,7 @@
+@@ -5427,6 +5433,7 @@
  	int index;
  	void *readbuf;
  	struct ast_frame *f;
 +	int before;
  
- 	while (ast_mutex_trylock(&p->lock)) {
- 		DEADLOCK_AVOIDANCE(&ast->lock);
-@@ -5618,7 +5625,16 @@
+ 	/*
+ 	 * For analog channels, we must do deadlock avoidance because
+@@ -5697,7 +5704,17 @@
  	}
  	if (p->dsp && (!p->ignoredtmf || p->callwaitcas || p->busydetect  || p->callprogress) && !index) {
  		/* Perform busy detection. etc on the dahdi line */
@@ -146,26 +153,27 @@ diff -ur asterisk/channels/chan_dahdi.c asterisk.patched/channels/chan_dahdi.c
 +		computationally intensive part of the real time code */
 +		before = cycles();
  		f = ast_dsp_process(ast, p->dsp, &p->subs[index].f);
++
 +		p->dsp_cycles_last = cycles() - before;
 +		if (p->dsp_cycles_last > p->dsp_cycles_worst) {
 +			p->dsp_cycles_worst = p->dsp_cycles_last;
 +		}
 +		p->dsp_cycles_average = (int)(0.1*(float)p->dsp_cycles_last +
-+					      0.9*(float)p->dsp_cycles_average);
++ 				        0.9*(float)p->dsp_cycles_average);
  		if (f) {
  			if ((f->frametype == AST_FRAME_CONTROL) && (f->subclass == AST_CONTROL_BUSY)) {
  				if ((ast->_state == AST_STATE_UP) && !p->outgoing) {
-@@ -9581,6 +9597,9 @@
+@@ -10152,6 +10169,9 @@
  								pri->pvts[x]->owner->_softhangup |= AST_SOFTHANGUP_DEV;
  							ast_mutex_unlock(&pri->pvts[x]->lock);
  						}
 +						pri->pvts[x]->dsp_cycles_last = 0;
 +						pri->pvts[x]->dsp_cycles_worst = 0;
-+						pri->pvts[x]->dsp_cycles_average = 0;				
++						pri->pvts[x]->dsp_cycles_average = 0;	
  				}
  				break;
  			case PRI_EVENT_KEYPAD_DIGIT:
-@@ -10974,6 +10993,7 @@
+@@ -11675,6 +11695,7 @@
  	return RESULT_SUCCESS;
  }
  
@@ -173,33 +181,69 @@ diff -ur asterisk/channels/chan_dahdi.c asterisk.patched/channels/chan_dahdi.c
  static int dahdi_show_channels(int fd, int argc, char **argv)
  {
  #define FORMAT "%7s %-10.10s %-15.15s %-10.10s %-20.20s\n"
-@@ -11114,6 +11134,8 @@
+@@ -11815,6 +11836,9 @@
  			ast_cli(fd, "Fax Handled: %s\n", tmp->faxhandled ? "yes" : "no");
  			ast_cli(fd, "Pulse phone: %s\n", tmp->pulsedial ? "yes" : "no");
  			ast_cli(fd, "Echo Cancellation: %d taps%s, currently %s\n", tmp->echocancel, tmp->echocanbridged ? "" : " unless TDM bridged", tmp->echocanon ? "ON" : "OFF");
 +			ast_cli(fd, "DSP cycles last: %d worst: %d average: %d sample: %d\n",
 +				tmp->dsp_cycles_last, tmp->dsp_cycles_worst, tmp->dsp_cycles_average, dsp_sample);			
++
  			if (tmp->master)
  				ast_cli(fd, "Master Channel: %d\n", tmp->master->channel);
  			for (x = 0; x < MAX_SLAVES; x++) {
-diff -ur asterisk/channels/misdn/isdn_lib.c asterisk.patched/channels/misdn/isdn_lib.c
---- asterisk/channels/misdn/isdn_lib.c	2009-10-02 02:18:28.000000000 +0300
-+++ asterisk.patched/channels/misdn/isdn_lib.c	2011-02-04 11:45:22.000000000 +0200
-@@ -293,7 +293,13 @@
+diff -Naur asterisk-1.4.42_original/channels/chan_sip.c asterisk-1.4.42_switchfin/channels/chan_sip.c
+--- asterisk-1.4.42_original/channels/chan_sip.c	2011-06-28 17:03:19.000000000 -0300
++++ asterisk-1.4.42_switchfin/channels/chan_sip.c	2011-09-05 16:45:05.000000000 -0300
+@@ -1617,6 +1617,7 @@
+ static void build_callid_registry(struct sip_registry *reg, struct in_addr ourip, const char *fromdomain);
+ static void make_our_tag(char *tagbuf, size_t len);
+ static int add_header(struct sip_request *req, const char *var, const char *value);
++static int add_header_contentLength(struct sip_request *req, int len);
+ static int add_content(struct sip_request *req, const char *line);
+ static int finalize_content(struct sip_request *req);
+ static int add_text(struct sip_request *req, const char *text);
+@@ -6428,6 +6429,15 @@
+ 	return 0;	
+ }
+ 
++ /*! \brief Add 'Content-Length' header to SIP message */
++static int add_header_contentLength(struct sip_request *req, int len)
++{
++	char clen[10];
++
++	snprintf(clen, sizeof(clen), "%d", len);
++	return add_header(req, "Content-Length", clen);
++}
++
+ /*! \brief Add 'Content-Length' header to SIP message */
+ static int finalize_content(struct sip_request *req)
+ {
+@@ -7053,6 +7063,7 @@
+ 	struct sip_request resp;
+ 	respprep(&resp, p, msg, req);
+ 	add_header(&resp, "Accept", "application/sdp");
++	add_header_contentLength(&resp, 0);  //Penev: Zero the Content-Length !
+ 	return send_response(p, &resp, reliable, 0);
+ }
+ 
+diff -Naur asterisk-1.4.42_original/channels/misdn/isdn_lib.c asterisk-1.4.42_switchfin/channels/misdn/isdn_lib.c
+--- asterisk-1.4.42_original/channels/misdn/isdn_lib.c	2009-10-01 20:18:28.000000000 -0300
++++ asterisk-1.4.42_switchfin/channels/misdn/isdn_lib.c	2011-09-05 14:21:55.000000000 -0300
+@@ -293,6 +293,13 @@
  	}
  }
  
 +#define ISDN_LIB_DO_NOT_FLIP_BITS
 +#ifdef ISDN_LIB_DO_NOT_FLIP_BITS
- 
++ 
 +#define init_flip_bits(x) 	do { /* NOP */ } while(0)
 +#define flip_buf_bits(a,b) 	do { /* NOP */ } while(0)
 +
 +#else
+ 
  static char flip_table[256];
  
- static void init_flip_bits(void)
-@@ -320,7 +326,7 @@
+@@ -320,7 +327,7 @@
  	
  	return start;
  }
@@ -208,7 +252,7 @@ diff -ur asterisk/channels/misdn/isdn_lib.c asterisk.patched/channels/misdn/isdn
  
  
  
-@@ -1035,7 +1041,7 @@
+@@ -1035,7 +1042,7 @@
  		li.st = bc->b_stid; /*  given idx */
  
  
@@ -217,16 +261,16 @@ diff -ur asterisk/channels/misdn/isdn_lib.c asterisk.patched/channels/misdn/isdn
  #ifndef MISDN_DSP
  		bc->nodsp=1;
  #endif
-@@ -4542,7 +4548,7 @@
- 	int ec_arr[2];
+@@ -4535,7 +4542,7 @@
  
- 	if (bc->ec_enable) {
--		cb_log(3, stack?stack->port:0,"Sending Control ECHOCAN_ON taps:%d\n",bc->ec_deftaps);
-+		cb_log(3, stack?stack->port:0,"Sending Control HW_ECHOCAN_ON taps:%d\n",bc->ec_deftaps);
- 	
- 		switch (bc->ec_deftaps) {
- 		case 4:
-@@ -4564,7 +4570,7 @@
+ #ifdef MISDN_1_2
+ 	if (*bc->pipeline) {
+-		cb_log(3, stack?stack->port:0,"Sending Control PIPELINE_CFG %s\n",bc->pipeline);
++		cb_log(3, stack?stack->port:0,"Sending Control HW_ECHOCAN_ON taps:%d\n",bc->ec_deftaps);		
+ 		manager_ph_control_block(bc, PIPELINE_CFG, bc->pipeline, strlen(bc->pipeline) + 1);
+  	}
+ #else
+@@ -4564,7 +4571,7 @@
  		ec_arr[0]=bc->ec_deftaps;
  		ec_arr[1]=0;
  		
@@ -235,7 +279,7 @@ diff -ur asterisk/channels/misdn/isdn_lib.c asterisk.patched/channels/misdn/isdn
  	}
  #endif
  	}
-@@ -4587,8 +4593,8 @@
+@@ -4587,8 +4594,8 @@
  	manager_ph_control_block(bc, PIPELINE_CFG, "", 0);
  #else
  	if ( ! bc->ec_enable) {
@@ -246,9 +290,9 @@ diff -ur asterisk/channels/misdn/isdn_lib.c asterisk.patched/channels/misdn/isdn
  	}
  #endif
  }
-diff -ur asterisk/codecs/Makefile asterisk.patched/codecs/Makefile
---- asterisk/codecs/Makefile	2009-07-21 16:04:44.000000000 +0300
-+++ asterisk.patched/codecs/Makefile	2011-02-04 11:58:54.000000000 +0200
+diff -Naur asterisk-1.4.42_original/codecs/Makefile asterisk-1.4.42_switchfin/codecs/Makefile
+--- asterisk-1.4.42_original/codecs/Makefile	2009-07-21 10:04:44.000000000 -0300
++++ asterisk-1.4.42_switchfin/codecs/Makefile	2011-09-05 14:26:26.000000000 -0300
 @@ -45,6 +45,7 @@
  	$(MAKE) -C gsm clean
  	$(MAKE) -C lpc10 clean
@@ -271,21 +315,23 @@ diff -ur asterisk/codecs/Makefile asterisk.patched/codecs/Makefile
 +$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
 +	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../blackfin-linux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
 +
-diff -ur asterisk/configure asterisk.patched/configure
---- asterisk/configure	2010-10-07 23:56:04.000000000 +0300
-+++ asterisk.patched/configure	2011-02-04 12:18:26.000000000 +0200
-@@ -10843,7 +10843,7 @@
+diff -Naur asterisk-1.4.42_original/configure asterisk-1.4.42_switchfin/configure
+--- asterisk-1.4.42_original/configure	2011-05-02 15:25:07.000000000 -0300
++++ asterisk-1.4.42_switchfin/configure	2011-09-05 14:33:06.000000000 -0300
+@@ -10941,8 +10941,8 @@
  fi
  if test "x$ac_cv_func_fork_works" = xcross; then
    case $host in
 -    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* )
+-      # Override, as these systems have only a dummy fork() stub
 +    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* | bfin-*-* )
-       # Override, as these systems have only a dummy fork() stub
++     # Override, as these systems have only a dummy fork() stub
        ac_cv_func_fork_works=no
        ;;
-diff -ur asterisk/include/asterisk/audiohook.h asterisk.patched/include/asterisk/audiohook.h
---- asterisk/include/asterisk/audiohook.h	2010-07-27 23:33:40.000000000 +0300
-+++ asterisk.patched/include/asterisk/audiohook.h	2011-02-04 12:01:44.000000000 +0200
+     *)
+diff -Naur asterisk-1.4.42_original/include/asterisk/audiohook.h asterisk-1.4.42_switchfin/include/asterisk/audiohook.h
+--- asterisk-1.4.42_original/include/asterisk/audiohook.h	2010-07-27 17:33:40.000000000 -0300
++++ asterisk-1.4.42_switchfin/include/asterisk/audiohook.h	2011-09-05 14:36:51.000000000 -0300
 @@ -212,6 +212,28 @@
   */
  void ast_audiohook_trigger_wait(struct ast_audiohook *audiohook);
@@ -311,13 +357,13 @@ diff -ur asterisk/include/asterisk/audiohook.h asterisk.patched/include/asterisk
 +  Note: Function performs no locking.
 +*/
 +int ast_channel_audiohook_count_by_source_running(struct ast_channel *chan, const char *source, enum ast_audiohook_type type);
-+     
++    
  /*! \brief Lock an audiohook
   * \param ah Audiohook structure
   */
-diff -ur asterisk/include/asterisk/channel.h asterisk.patched/include/asterisk/channel.h
---- asterisk/include/asterisk/channel.h	2010-11-22 20:46:26.000000000 +0200
-+++ asterisk.patched/include/asterisk/channel.h	2011-02-04 12:01:57.000000000 +0200
+diff -Naur asterisk-1.4.42_original/include/asterisk/channel.h asterisk-1.4.42_switchfin/include/asterisk/channel.h
+--- asterisk-1.4.42_original/include/asterisk/channel.h	2011-01-24 18:32:21.000000000 -0200
++++ asterisk-1.4.42_switchfin/include/asterisk/channel.h	2011-09-05 14:38:44.000000000 -0300
 @@ -551,6 +551,7 @@
  	AST_FEATURE_PARKCALL =     (1 << 5),
  	AST_FEATURE_NO_H_EXTEN =   (1 << 6),
@@ -326,13 +372,14 @@ diff -ur asterisk/include/asterisk/channel.h asterisk.patched/include/asterisk/c
  };
  
  struct ast_bridge_config {
-diff -ur asterisk/main/audiohook.c asterisk.patched/main/audiohook.c
---- asterisk/main/audiohook.c	2010-07-27 23:33:40.000000000 +0300
-+++ asterisk.patched/main/audiohook.c	2011-02-04 12:02:52.000000000 +0200
-@@ -770,3 +770,83 @@
+diff -Naur asterisk-1.4.42_original/main/audiohook.c asterisk-1.4.42_switchfin/main/audiohook.c
+--- asterisk-1.4.42_original/main/audiohook.c	2010-07-27 17:33:40.000000000 -0300
++++ asterisk-1.4.42_switchfin/main/audiohook.c	2011-09-05 14:42:37.000000000 -0300
+@@ -770,3 +770,84 @@
  	
  	return;
  }
++
 +
 +/* Count number of channel audiohooks by type, regardless of type */
 +int ast_channel_audiohook_count_by_source(struct ast_channel *chan, const char *source, enum ast_audiohook_type type)
@@ -413,9 +460,9 @@ diff -ur asterisk/main/audiohook.c asterisk.patched/main/audiohook.c
 +	return count;
 +}
 +
-diff -ur asterisk/main/callerid.c asterisk.patched/main/callerid.c
---- asterisk/main/callerid.c	2010-05-21 02:23:21.000000000 +0300
-+++ asterisk.patched/main/callerid.c	2011-02-04 12:04:55.000000000 +0200
+diff -Naur asterisk-1.4.42_original/main/callerid.c asterisk-1.4.42_switchfin/main/callerid.c
+--- asterisk-1.4.42_original/main/callerid.c	2011-03-14 13:38:24.000000000 -0300
++++ asterisk-1.4.42_switchfin/main/callerid.c	2011-09-05 15:25:21.000000000 -0300
 @@ -45,7 +45,17 @@
  #include "asterisk/options.h"
  #include "asterisk/utils.h"
@@ -472,7 +519,7 @@ diff -ur asterisk/main/callerid.c asterisk.patched/main/callerid.c
  static inline void gen_tones(unsigned char *buf, int len, int codec, float ddr1, float ddi1, float ddr2, float ddi2, float *cr1, float *ci1, float *cr2, float *ci2)
  {
  	int x;
-@@ -134,6 +168,12 @@
+@@ -134,6 +168,13 @@
  	struct callerid_state *cid;
  
  	if ((cid = ast_calloc(1, sizeof(*cid)))) {
@@ -482,10 +529,11 @@ diff -ur asterisk/main/callerid.c asterisk.patched/main/callerid.c
 +				cid_put_msg_func_t,
 +				cid);
 +#endif
++
  		cid->fskd.spb = 7.0;          	/* 1200 baud */
  		/* cid->fskd.hdlc = 0; */     	/* Async */
  		cid->fskd.nbit = 8;           	/* 8 bits */
-@@ -559,7 +599,11 @@
+@@ -559,7 +600,11 @@
  		buf[x+cid->oldlen/2] = AST_XLAW(ubuf[x]);
  	while(mylen >= 160) {
  		olen = mylen;
@@ -497,7 +545,7 @@ diff -ur asterisk/main/callerid.c asterisk.patched/main/callerid.c
  		if (mylen < 0) {
  			ast_log(LOG_ERROR, "No start bit found in fsk data.\n");
  			free(obuf);
-@@ -572,6 +616,13 @@
+@@ -572,6 +617,14 @@
  			return -1;
  		}
  		if (res == 1) {
@@ -508,27 +556,28 @@ diff -ur asterisk/main/callerid.c asterisk.patched/main/callerid.c
 +			{
 +				b = cid->adsi_output[index] & 0x00ff;
 +#endif
- 			/* Ignore invalid bytes */
- 			if (b > 0xff)
- 				continue;
-@@ -606,6 +657,7 @@
++			/* Ignore invalid bytes */
+ 			if (b > 0xff) {
+ 				if (cid->sawflag != 5) {
+ 					/* Ignore invalid bytes */
+@@ -619,6 +672,7 @@
  				if (!cid->len) {
  					cid->rawdata[cid->pos] = '\0';
  					cid->sawflag = 5;
-+#ifndef USE_SPANDSP_CALLERID				
++#ifndef USE_SPANDSP_CALLERID
  				}
  				break;
  			case 5: /* Check checksum */
-@@ -615,7 +667,7 @@
+@@ -628,7 +682,7 @@
  					cid->sawflag = 0;
  					break;
  				}
 -		
-+#endif
++#endif		
  				cid->number[0] = '\0';
  				cid->name[0] = '\0';
  				/* If we get this far we're fine.  */
-@@ -692,10 +744,16 @@
+@@ -705,10 +759,16 @@
  				}
  				free(obuf);
  				return 1;
@@ -545,9 +594,9 @@ diff -ur asterisk/main/callerid.c asterisk.patched/main/callerid.c
  		}
  	}
  	if (mylen) {
-diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
---- asterisk/main/dsp.c	2010-05-19 09:32:27.000000000 +0300
-+++ asterisk.patched/main/dsp.c	2011-02-04 12:09:56.000000000 +0200
+diff -Naur asterisk-1.4.42_original/main/dsp.c asterisk-1.4.42_switchfin/main/dsp.c
+--- asterisk-1.4.42_original/main/dsp.c	2010-05-19 03:32:27.000000000 -0300
++++ asterisk-1.4.42_switchfin/main/dsp.c	2011-09-05 16:00:46.000000000 -0300
 @@ -60,6 +60,27 @@
  #include "asterisk/alaw.h"
  #include "asterisk/utils.h"
@@ -670,7 +719,7 @@ diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
  
  	hit = 0;
  	for (sample = 0;  sample < samples;  sample = limit) {
-@@ -456,12 +500,25 @@
+@@ -456,6 +500,20 @@
  #if defined(USE_3DNOW)
  		_dtmf_goertzel_update (s->row_out, amp + sample, limit - sample);
  		_dtmf_goertzel_update (s->col_out, amp + sample, limit - sample);
@@ -691,13 +740,7 @@ diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
  #ifdef OLD_DSP_ROUTINES
  		_dtmf_goertzel_update (s->row_out2nd, amp + sample, limit2 - sample);
  		_dtmf_goertzel_update (s->col_out2nd, amp + sample, limit2 - sample);
- #endif		
- 		/* XXX Need to fax detect for 3dnow too XXX */
--		#warning "Fax Support Broken"
- #else
- 		/* The following unrolled loop takes only 35% (rough estimate) of the 
- 		   time of a rolled loop on the machine on which it was developed */
-@@ -1032,7 +1089,7 @@
+@@ -1032,7 +1090,7 @@
  	/* Amplify ignored stuff */
  	i2 *= TONE_THRESH;
  	i1 *= TONE_THRESH;
@@ -706,7 +749,7 @@ diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
  	/* Check first tone */
  	if ((p1 < i1) || (p1 < i2) || (p1 < e))
  		return 0;
-@@ -1082,10 +1139,17 @@
+@@ -1082,10 +1140,17 @@
  			pass = dsp->gsamp_size - dsp->gsamps;
  		}
  		for (x = 0; x < pass; x++) {
@@ -720,11 +763,11 @@ diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
 +#else
  			}
  			dsp->genergy += s[x] * s[x];
-+#endif		
++#endif
  		}
  		s += pass;
  		dsp->gsamps += pass;
-@@ -1496,6 +1560,8 @@
+@@ -1496,6 +1561,8 @@
  		dsp->display_inband_dtmf_warning = 0;
  		return af;
  	}
@@ -733,7 +776,7 @@ diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
  	silence = __ast_dsp_silence(dsp, shortdata, len, NULL);
  	if ((dsp->features & DSP_FEATURE_SILENCE_SUPPRESS) && silence) {
  		memset(&dsp->f, 0, sizeof(dsp->f));
-@@ -1628,6 +1694,7 @@
+@@ -1628,6 +1695,7 @@
  			}
  		}
  	}
@@ -741,9 +784,9 @@ diff -ur asterisk/main/dsp.c asterisk.patched/main/dsp.c
  	FIX_INF(af);
  	return af;
  }
-diff -ur asterisk/main/frame.c asterisk.patched/main/frame.c
---- asterisk/main/frame.c	2010-06-11 21:23:05.000000000 +0300
-+++ asterisk.patched/main/frame.c	2011-02-04 12:11:03.000000000 +0200
+diff -Naur asterisk-1.4.42_original/main/frame.c asterisk-1.4.42_switchfin/main/frame.c
+--- asterisk-1.4.42_original/main/frame.c	2010-06-11 15:23:05.000000000 -0300
++++ asterisk-1.4.42_switchfin/main/frame.c	2011-09-05 16:04:00.000000000 -0300
 @@ -110,7 +110,7 @@
  	{ 1, AST_FORMAT_SLINEAR, "slin", "16 bit Signed Linear PCM", 160, 10, 70, 10, 20, AST_SMOOTHER_FLAG_BE },	/*!< 7 */
  	{ 1, AST_FORMAT_LPC10, "lpc10", "LPC10", 7, 20, 20, 20, 20 },		/*!<  8: codec_lpc10.c */ 
@@ -759,14 +802,14 @@ diff -ur asterisk/main/frame.c asterisk.patched/main/frame.c
  	case AST_FORMAT_SPEEX:
 -		samples = speex_samples(f->data, f->datalen);
 +		/* DR: hard coded for quality=8 mode.
-+			300 bits (38 bytes) converted to 160 samples */
++		300 bits (38 bytes) converted to 160 samples */
 +		samples = 160 * (f->datalen / 38);
  		break;
  	case AST_FORMAT_G723_1:
                  samples = g723_samples(f->data, f->datalen);
-diff -ur asterisk/main/loader.c asterisk.patched/main/loader.c
---- asterisk/main/loader.c	2010-07-09 21:23:23.000000000 +0300
-+++ asterisk.patched/main/loader.c	2011-02-04 12:12:24.000000000 +0200
+diff -Naur asterisk-1.4.42_original/main/loader.c asterisk-1.4.42_switchfin/main/loader.c
+--- asterisk-1.4.42_original/main/loader.c	2010-07-09 15:23:23.000000000 -0300
++++ asterisk-1.4.42_switchfin/main/loader.c	2011-09-05 16:05:51.000000000 -0300
 @@ -660,6 +660,13 @@
  		ast_verbose("The previous reload command didn't finish yet\n");
  		return -1;	/* reload already in progress */
@@ -781,19 +824,19 @@ diff -ur asterisk/main/loader.c asterisk.patched/main/loader.c
  	ast_lastreloadtime = time(NULL);
  
  	/* Call "predefined" reload here first */
-diff -ur asterisk/main/manager.c asterisk.patched/main/manager.c
---- asterisk/main/manager.c	2010-10-02 11:50:05.000000000 +0300
-+++ asterisk.patched/main/manager.c	2011-02-04 12:13:02.000000000 +0200
-@@ -1186,7 +1186,7 @@
+diff -Naur asterisk-1.4.42_original/main/manager.c asterisk-1.4.42_switchfin/main/manager.c
+--- asterisk-1.4.42_original/main/manager.c	2011-06-15 12:15:30.000000000 -0300
++++ asterisk-1.4.42_switchfin/main/manager.c	2011-09-05 16:39:10.000000000 -0300
+@@ -1191,7 +1191,7 @@
  		astman_send_error(s, m, "Filename not specified");
  		return 0;
  	}
 -	if (!(cfg = ast_config_load_with_comments(fn))) {
-+	if (!(cfg = ast_config_load(fn))) {
++	if (!(cfg = ast_config_load(fn))) {	
  		astman_send_error(s, m, "Config file not found");
  		return 0;
  	}
-@@ -1296,7 +1296,7 @@
+@@ -1301,7 +1301,7 @@
  		astman_send_error(s, m, "Filename not specified");
  		return 0;
  	}
@@ -802,19 +845,29 @@ diff -ur asterisk/main/manager.c asterisk.patched/main/manager.c
  		astman_send_error(s, m, "Config file not found");
  		return 0;
  	}
-diff -ur asterisk/pbx/Makefile asterisk.patched/pbx/Makefile
---- asterisk/pbx/Makefile	2010-05-11 22:55:42.000000000 +0300
-+++ asterisk.patched/pbx/Makefile	2011-02-04 12:13:36.000000000 +0200
-@@ -73,3 +73,6 @@
+@@ -3002,7 +3002,7 @@
+ 			}
+ 
+ 			if (res == 1 && (l = lseek(ss.fd, 0, SEEK_END)) > 0) {
+-				if (MAP_FAILED == (buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_SHARED, ss.fd, 0))) {
++				if (MAP_FAILED == (buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_PRIVATE, ss.fd, 0))) {
+ 					ast_log(LOG_WARNING, "mmap failed.  Manager request output was not processed\n");
+ 				} else {
+ 					char *tmpbuf;
+diff -Naur asterisk-1.4.42_original/pbx/Makefile asterisk-1.4.42_switchfin/pbx/Makefile
+--- asterisk-1.4.42_original/pbx/Makefile	2010-05-11 16:55:42.000000000 -0300
++++ asterisk-1.4.42_switchfin/pbx/Makefile	2011-09-05 16:10:16.000000000 -0300
+@@ -73,3 +73,7 @@
  $(if $(filter pbx_dundi,$(EMBEDDED_MODS)),modules.link,pbx_dundi.so): dundi-parser.o
  
  pbx_gtkconsole.o: _ASTCFLAGS+=-Wno-strict-prototypes
 +
 +pbx_lua.so:
 +	$(CC) -o pbx_lua.so -shared  $(ASTLDFLAGS) pbx_lua.o $(wildcard $(ASTTOPDIR)/../uClinux-dist/user/lua/lua-5.1.4/src/*[!lua].o)
-diff -ur asterisk/res/res_agi.c asterisk.patched/res/res_agi.c
---- asterisk/res/res_agi.c	2010-11-19 21:32:04.000000000 +0200
-+++ asterisk.patched/res/res_agi.c	2011-02-04 12:13:56.000000000 +0200
++
+diff -Naur asterisk-1.4.42_original/res/res_agi.c asterisk-1.4.42_switchfin/res/res_agi.c
+--- asterisk-1.4.42_original/res/res_agi.c	2011-04-22 11:34:23.000000000 -0300
++++ asterisk-1.4.42_switchfin/res/res_agi.c	2011-09-05 16:11:41.000000000 -0300
 @@ -308,7 +308,7 @@
  	/* Block SIGHUP during the fork - prevents a race */
  	sigfillset(&signal_set);
@@ -824,9 +877,9 @@ diff -ur asterisk/res/res_agi.c asterisk.patched/res/res_agi.c
  	if (pid < 0) {
  		ast_log(LOG_WARNING, "Failed to fork(): %s\n", strerror(errno));
  		pthread_sigmask(SIG_SETMASK, &old_set, NULL);
-diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
---- asterisk/res/res_features.c	2010-11-04 23:28:12.000000000 +0200
-+++ asterisk.patched/res/res_features.c	2011-02-04 12:15:23.000000000 +0200
+diff -Naur asterisk-1.4.42_original/res/res_features.c asterisk-1.4.42_switchfin/res/res_features.c
+--- asterisk-1.4.42_original/res/res_features.c	2011-06-23 15:16:52.000000000 -0300
++++ asterisk-1.4.42_switchfin/res/res_features.c	2011-09-06 09:52:11.000000000 -0300
 @@ -64,6 +64,7 @@
  #include "asterisk/adsi.h"
  #include "asterisk/devicestate.h"
@@ -834,8 +887,8 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
 +#include "asterisk/audiohook.h"
  #include "asterisk/global_datastores.h"
  
- #define DEFAULT_PARK_TIME 45000
-@@ -107,6 +108,7 @@
+ /*
+@@ -161,6 +162,7 @@
  static int parkedcallreparking;                            /*!< Who can PARKCALL after picking up a parked call */
  static int parkedcallhangup;                               /*!< Who can DISCONNECT after picking up a parked call */
  static int parkedcallrecording;                            /*!< Who can AUTOMON after picking up a parked call */
@@ -843,7 +896,7 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  
  static char courtesytone[256];                             /*!< Courtesy tone */
  static int parkedplay = 0;                                 /*!< Who to play the courtesy tone to */
-@@ -152,6 +154,12 @@
+@@ -206,6 +208,12 @@
  static struct ast_app *monitor_app = NULL;
  static int monitor_ok = 1;
  
@@ -856,7 +909,7 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  struct parkeduser {
  	struct ast_channel *chan;                   /*!< Parking channel */
  	struct timeval start;                       /*!< Time the parking started */
-@@ -757,6 +765,122 @@
+@@ -927,6 +935,122 @@
  	return -1;
  }
  
@@ -979,7 +1032,7 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  static int builtin_disconnect(struct ast_channel *chan, struct ast_channel *peer, struct ast_bridge_config *config, char *code, int sense, void *data)
  {
  	if (option_verbose > 3)
-@@ -1133,6 +1257,7 @@
+@@ -1366,6 +1490,7 @@
  	{ AST_FEATURE_AUTOMON, "One Touch Monitor", "automon", "", "", builtin_automonitor, AST_FEATURE_FLAG_NEEDSDTMF, "" },
  	{ AST_FEATURE_DISCONNECT, "Disconnect Call", "disconnect", "*", "*", builtin_disconnect, AST_FEATURE_FLAG_NEEDSDTMF, "" },
  	{ AST_FEATURE_PARKCALL, "Park Call", "parkcall", "", "", builtin_parkcall, AST_FEATURE_FLAG_NEEDSDTMF, "" },
@@ -987,7 +1040,7 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  };
  
  
-@@ -2716,6 +2841,12 @@
+@@ -3176,6 +3301,12 @@
  		if ((parkedcallrecording == AST_FEATURE_FLAG_BYCALLER) || (parkedcallrecording == AST_FEATURE_FLAG_BYBOTH)) {
  			ast_set_flag(&(config.features_caller), AST_FEATURE_AUTOMON);
  		}
@@ -1000,7 +1053,7 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  		res = ast_bridge_call(chan, peer, &config);
  
  		pbx_builtin_setvar_helper(chan, "PARKEDCHANNEL", peer->name);
-@@ -3010,6 +3141,7 @@
+@@ -3493,6 +3624,7 @@
  	parkedcallreparking = 0;
  	parkedcallhangup = 0;
  	parkedcallrecording = 0;
@@ -1008,7 +1061,7 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  
  	transferdigittimeout = DEFAULT_TRANSFER_DIGIT_TIMEOUT;
  	featuredigittimeout = DEFAULT_FEATURE_DIGIT_TIMEOUT;
-@@ -3078,6 +3210,15 @@
+@@ -3561,6 +3693,15 @@
  				parkedcallrecording = AST_FEATURE_FLAG_BYCALLEE;
  			else if (!strcasecmp(var->value, "both"))
  				parkedcallrecording = AST_FEATURE_FLAG_BYBOTH;
@@ -1024,9 +1077,9 @@ diff -ur asterisk/res/res_features.c asterisk.patched/res/res_features.c
  		} else if (!strcasecmp(var->name, "adsipark")) {
  			adsipark = ast_true(var->value);
  		} else if (!strcasecmp(var->name, "transferdigittimeout")) {
-diff -ur asterisk/utils/Makefile asterisk.patched/utils/Makefile
---- asterisk/utils/Makefile	2010-03-25 22:41:15.000000000 +0200
-+++ asterisk.patched/utils/Makefile	2011-02-04 12:16:17.000000000 +0200
+diff -Naur asterisk-1.4.42_original/utils/Makefile asterisk-1.4.42_switchfin/utils/Makefile
+--- asterisk-1.4.42_original/utils/Makefile	2010-03-25 17:41:15.000000000 -0300
++++ asterisk-1.4.42_switchfin/utils/Makefile	2011-09-05 16:33:52.000000000 -0300
 @@ -26,7 +26,7 @@
  #     changes are made to ast_expr2.y or ast_expr2.fl (or the corresponding .c files),
  #     as a regression test. Others (mere mortals?) need not bother, but they are
@@ -1036,48 +1089,3 @@ diff -ur asterisk/utils/Makefile asterisk.patched/utils/Makefile
  UTILS:=$(ALL_UTILS)
  
  include $(ASTTOPDIR)/Makefile.rules
---- asterisk/main/manager.c	2011-02-15 12:46:59.000000000 +0200
-+++ asterisk.patched/main/manager.c	2011-02-15 12:47:27.000000000 +0200
-@@ -2934,7 +2934,7 @@
- 			size_t l;
- 
- 			if ((l = lseek(ss.fd, 0, SEEK_END)) > 0) {
--				if (MAP_FAILED == (buf = mmap(NULL, l + 1, PROT_READ | PROT_WRITE, MAP_SHARED, ss.fd, 0))) {
-+				if (MAP_FAILED == (buf = mmap(NULL, l + 1, PROT_READ | PROT_WRITE, MAP_PRIVATE, ss.fd, 0))) {
- 					ast_log(LOG_WARNING, "mmap failed.  Manager request output was not processed\n");
- 				} else {
- 					char *tmpbuf;
---- asterisk/channels/chan_sip.c	2010-12-10 00:00:30.000000000 +0200
-+++ asterisk.patched/channels/chan_sip.c	2011-02-22 19:46:52.000000000 +0200
-@@ -1604,6 +1604,7 @@
- static void build_callid_registry(struct sip_registry *reg, struct in_addr ourip, const char *fromdomain);
- static void make_our_tag(char *tagbuf, size_t len);
- static int add_header(struct sip_request *req, const char *var, const char *value);
-+static int add_header_contentLength(struct sip_request *req, int len);
- static int add_content(struct sip_request *req, const char *line);
- static int finalize_content(struct sip_request *req);
- static int add_text(struct sip_request *req, const char *text);
-@@ -6229,6 +6230,15 @@
- }
- 
- /*! \brief Add 'Content-Length' header to SIP message */
-+static int add_header_contentLength(struct sip_request *req, int len)
-+{
-+	char clen[10];
-+
-+	snprintf(clen, sizeof(clen), "%d", len);
-+	return add_header(req, "Content-Length", clen);
-+}
-+
-+/*! \brief Add 'Content-Length' header to SIP message */
- static int finalize_content(struct sip_request *req)
- {
- 	char clen[10];
-@@ -6840,6 +6850,7 @@
- 	struct sip_request resp;
- 	respprep(&resp, p, msg, req);
- 	add_header(&resp, "Accept", "application/sdp");
-+	add_header_contentLength(&resp, 0);  //Penev: Zero the Content-Length !
- 	return send_response(p, &resp, reliable, 0);
- }
- 
