@@ -376,11 +376,11 @@ static int pr1_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long da
 
 
 static void pr1_framer_start(struct t1 *wc, struct dahdi_span *span);
-static int pr1_startup(struct dahdi_span *span);
+static int pr1_startup(struct file *file, struct dahdi_span *span);
 static int pr1_shutdown(struct dahdi_span *span);
 
-static int pr1_chanconfig(struct dahdi_chan *chan, int sigtype);
-static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc);
+static int pr1_chanconfig(struct file *file, struct dahdi_chan *chan, int sigtype);
+static int pr1_spanconfig(struct file *file, struct dahdi_span *span, struct dahdi_lineconfig *lc);
 
 static inline void __t1_handle_leds(struct t1 *wc);
 

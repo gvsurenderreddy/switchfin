@@ -733,7 +733,7 @@ static void __t1_set_clear(struct t1 *wc)
 	unsigned short val=0;
 	for (i=0;i<24;i++) {
 		j = (i/8);
-		if (wc->chans[i].flags & DAHDI_FLAG_CLEAR) 
+		if (wc->span.chans[i]->flags & DAHDI_FLAG_CLEAR) 
 			val |= 1 << (7 - (i % 8));
 		if ((i % 8)==7) {
 			if (debug)
@@ -786,9 +786,6 @@ static int __t1_maint(struct dahdi_span *span, int cmd)
 		case DAHDI_MAINT_LOOPDOWN:
 			printk("wpr1: E1 - Send loopdown code E1 XXX\n");
 			break;
-		case DAHDI_MAINT_LOOPSTOP:
-			printk("wpr1: E1 - Stop sending loop codes E1 XXX\n");
-			break;
 		default:
 			printk("wpr1: Unknown E1 maint command: %d\n", cmd);
 			break;
@@ -797,6 +794,7 @@ static int __t1_maint(struct dahdi_span *span, int cmd)
 		switch(cmd) {
 	    case DAHDI_MAINT_NONE:
 			printk("wpr1: T1 -  Turn off local and remote loops T1 XXX\n");
+			t1_framer_out8(wc, FALC56_XSP_FMR5, 0x40);      /* FMR5: Nothing but RBS mode */
 			break;
 	    case DAHDI_MAINT_LOCALLOOP:
 			printk("wpr1: T1 - Turn on local loop and no remote loop XXX\n");
@@ -809,9 +807,6 @@ static int __t1_maint(struct dahdi_span *span, int cmd)
 			break;
 	    case DAHDI_MAINT_LOOPDOWN:
 			t1_framer_out8(wc, FALC56_XSP_FMR5, 0x60);	/* FMR5: Nothing but RBS mode */
-			break;
-	    case DAHDI_MAINT_LOOPSTOP:
-			t1_framer_out8(wc, FALC56_XSP_FMR5, 0x40);	/* FMR5: Nothing but RBS mode */
 			break;
 	    default:
 			printk("wpr1: Unknown T1 maint command: %d\n", cmd);
@@ -1271,7 +1266,7 @@ static void pr1_framer_start(struct t1 *wc, struct dahdi_span *span)
 }
 
 
-static int pr1_startup(struct dahdi_span *span)
+static int pr1_startup(struct file *file, struct dahdi_span *span)
 {
 	struct t1 *wc = t1_from_span(span);
 	int i,alreadyrunning = span->flags & DAHDI_FLAG_RUNNING;
@@ -1317,7 +1312,7 @@ static int pr1_shutdown(struct dahdi_span *span)
 }
 
 
-static int pr1_chanconfig(struct dahdi_chan *chan, int sigtype)
+static int pr1_chanconfig(struct file *file, struct dahdi_chan *chan, int sigtype)
 {
 	struct t1 *wc = chan->pvt;
 	unsigned long flags;
@@ -1335,7 +1330,7 @@ static int pr1_chanconfig(struct dahdi_chan *chan, int sigtype)
 	return 0;
 }
 
-static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc)
+static int pr1_spanconfig(struct file *file, struct dahdi_span *span, struct dahdi_lineconfig *lc)
 {
 	struct t1 *wc = t1_from_span(span);
 
@@ -1349,7 +1344,7 @@ static int pr1_spanconfig(struct dahdi_span *span, struct dahdi_lineconfig *lc)
 	wc->sync = lc->sync;
 	/* If already running, apply changes immediately */
 	if (span->flags & DAHDI_FLAG_RUNNING)
-		return pr1_startup(span);
+		return pr1_startup(file, span);
 	return 0;
 }
 
@@ -1379,7 +1374,7 @@ static int pr1_software_init(struct t1 *wc)
 	sprintf(wc->span.desc, "%s Card %d", wc->variety, wc->num);
 	
 	wc->span.manufacturer 	= "Switchvoice";
-	dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype) - 1);
+	strlcpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
 	if (wc->spantype == E1) {
 		wc->span.channels = 31;
 		wc->span.linecompat = DAHDI_CONFIG_HDB3 | DAHDI_CONFIG_CCS | DAHDI_CONFIG_CRC4;
@@ -1392,8 +1387,6 @@ static int pr1_software_init(struct t1 *wc)
 		wc->span.spantype = "T1";
 	}
 	wc->span.flags = DAHDI_FLAG_RBS;
-
-	init_waitqueue_head(&wc->span.maintq);
 
 	for (x=0;x<wc->span.channels;x++) {
 		sprintf(wc->chans[x].name, "PR1/%d/%d", wc->num, x + 1);
@@ -1580,8 +1573,8 @@ static void __t1_check_alarms(struct t1 *wc)
 
 	if (wc->span.lineconfig & DAHDI_CONFIG_NOTOPEN) {
 		for (x=0,j=0;x < wc->span.channels;x++)
-			if ((wc->chans[x].flags & DAHDI_FLAG_OPEN) ||
-			    (wc->chans[x].flags & DAHDI_FLAG_NETDEV))
+			if ((wc->span.chans[x]->flags & DAHDI_FLAG_OPEN) ||
+			    dahdi_have_netdev(wc->span.chans[x]))
 				j++;
 		if (!j)
 			alarms |= DAHDI_ALARM_NOTOPEN;

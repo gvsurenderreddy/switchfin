@@ -39,14 +39,16 @@ static int echo_can_create(struct dahdi_chan *chan, struct dahdi_echocanparams *
 			   struct dahdi_echocanparam *p, struct dahdi_echocan_state **ec);
 static void echo_can_free(struct dahdi_chan *chan, struct dahdi_echocan_state *ec);
 
+static const char *name = "ZARLINK";
+static const char *ec_name(const struct dahdi_chan *chan){ return name; }
+
 static const struct dahdi_echocan_factory my_factory = {
-	.name = "ZARLINK",
+	.get_name = ec_name,
 	.owner = THIS_MODULE,
 	.echocan_create = echo_can_create,
 };
 
 static const struct dahdi_echocan_ops my_ops = {
-	.name = "ZARLINK",
 	.echocan_free = echo_can_free,
 };
 
@@ -106,7 +108,7 @@ static int __init mod_init(void)
 		return -EPERM;
 	}
 
-	module_printk(KERN_INFO, "Registered echo canceler '%s'\n", my_factory.name);
+	module_printk(KERN_INFO, "Registered echo canceler '%s'\n", my_factory.get_name(NULL));
 
 	return 0;
 }

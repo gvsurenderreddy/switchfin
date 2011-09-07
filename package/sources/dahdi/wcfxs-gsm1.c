@@ -2111,11 +2111,10 @@ static int wcfxs_initialize(struct wcfxs *wc)
 		wc->_chans[x]=&(wc->chans[x]);
 	}
         wc->span.manufacturer   = "Rowetel";
-        dahdi_copy_string(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
+        strlcpy(wc->span.devicetype, wc->variety, sizeof(wc->span.devicetype));
         wc->span.chans = wc->_chans;
         wc->span.channels = wc->cards;
         wc->span.flags = DAHDI_FLAG_RBS;
-        init_waitqueue_head(&wc->span.maintq);
 
         wc->span.ops = &wcfxs_span_ops;
 	if (dahdi_register(&wc->span, 0)) {
