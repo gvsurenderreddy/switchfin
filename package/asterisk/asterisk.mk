@@ -77,6 +77,11 @@ $(DL_DIR)/$(ASTERISK_SOURCE):
 $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 	$(ASTERISK_UNZIP) $(DL_DIR)/$(ASTERISK_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	ln -sf $(ASTERISK_DIR) $(ASTERISK_DIR_LINK)
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+ifeq ($(strip $(SF_PACKAGE_OPENR2)),y)
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/OpenR2/ openr2-asterisk-1.4.42-p1.patch
+endif
+endif
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(ASTERISK_PATCH)
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
