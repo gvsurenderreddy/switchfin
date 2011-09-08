@@ -8,7 +8,7 @@ case $1 in
 	         	modprobe wpr1 t1e1mode=2 # E1
 	         fi
 	         dahdi_cfg;
-		 usleep 150000;; # Dahdi needs some time to settle. Asterisk will fail to load if executed too soon. 
+		 usleep 250000;; # Dahdi needs some time to settle. Asterisk will fail to load if executed too soon. 
 	stop)    modprobe -r wpr1;;
 	restart) $0 stop; $0 start;;
 	enable)  ln -snf /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
