@@ -200,6 +200,8 @@ static inline unsigned int cycles(void) {
    return ret;
 }
 
+unsigned int cycles_tp_max=0;
+unsigned int cycles_rp_max=0;
 int wpr1_proc_read(char *buf, char **start, off_t offset,
                     int count, int *eof, void *data)
 {
@@ -244,7 +246,9 @@ int wpr1_proc_read(char *buf, char **start, off_t offset,
                       "isr_cycles_worst....: %d\n"
                       "isr_cycles_average..: %d\n"
 		      "readchunk_x : %d \n"
-		      "frame \n%s \n",
+		      "frame \n%s \n"
+                      "tp_cycles_max.....: %d\n"
+                      "rp_cycles_max....: %d\n",
                       readchunk_first,
                       readchunk_second,
                       readchunk_didntswap,
@@ -259,7 +263,9 @@ int wpr1_proc_read(char *buf, char **start, off_t offset,
                       isr_cycles_worst,
                       isr_cycles_average>>1,
 		      readchunk_x,
-		      sBuf
+		      sBuf,
+		      cycles_tp_max,
+		      cycles_rp_max
                       );
 
         *eof=1;
@@ -493,8 +499,13 @@ static void pr1_dma_sport_stop(void)
 	if (debug) printk("wpr1 : Stop DMA\n");
 	bfin_write_SPORT0_MCMC2(bfin_read_SPORT0_MCMC2() & ~MCMEN);
 
-#if (defined(CONFIG_BF532) || defined(CONFIG_BF533))
+        if (debug) printk("wpr1 : disable SPORT Rx Tx\n");
+        bfin_write_SPORT0_TCR1(bfin_read_SPORT0_TCR1() & ~TSPEN);
+        bfin_write_SPORT0_RCR1(bfin_read_SPORT0_RCR1() & ~RSPEN);
 
+	__builtin_bfin_ssync();
+
+#if (defined(CONFIG_BF532) || defined(CONFIG_BF533))
 	/*bfin_write_SPORT0_MCMC2(bfin_read_SPORT0_MCMC2() & ~MCMEN);*/
 
 	bfin_write_DMA2_CONFIG(bfin_read_DMA2_CONFIG() & ~DMAEN);
@@ -503,18 +514,16 @@ static void pr1_dma_sport_stop(void)
 #endif
 
 #if (defined(CONFIG_BF536) || defined(CONFIG_BF537))
-
         /* disable DMA3 and DMA4 */
-        bfin_write_DMA4_CONFIG(bfin_read_DMA4_CONFIG() & (~DMAEN));
+	if (debug) printk("wpr1 : Stop DMA4\n");
+	bfin_write_DMA4_CONFIG(bfin_read_DMA4_CONFIG() & (~DMAEN));
+
+	if (debug) printk("wpr1 : Stop DMA3\n");
         bfin_write_DMA3_CONFIG(bfin_read_DMA3_CONFIG() & (~DMAEN));
 
 	__builtin_bfin_ssync();
 #endif
-	if (debug) printk("wpr1 : disable SPORT Rx Tx\n");
-	bfin_write_SPORT0_TCR1(bfin_read_SPORT0_TCR1() & ~TSPEN);
-	bfin_write_SPORT0_RCR1(bfin_read_SPORT0_RCR1() & ~RSPEN);
 
-	__builtin_bfin_ssync();
 }
 
 static int pr1_enable_interrupts(struct t1 *wc)
@@ -538,7 +547,7 @@ static void pr1_disable_interrupts()
 {
 	if (debug) printk("wpr1 : Disable RxInterrupt\n");
 
-	bfin_write_SIC_IMASK(bfin_read_SIC_IMASK() | ~SCI_IMASK_SPORT0_RX);
+	bfin_write_SIC_IMASK(bfin_read_SIC_IMASK() & ~SCI_IMASK_SPORT0_RX);
 	__builtin_bfin_ssync();
 }
 
@@ -1305,7 +1314,8 @@ static int pr1_shutdown(struct dahdi_span *span)
 
 	spin_lock_irqsave(&wc->lock, flags);
 	__t1_framer_out8(wc, FALC56_GCR, 0x41);	/* GCR: Interrupt on Activation/Deactivation of AIX, LOS */
-	pr1_dma_sport_stop();
+	pr1_sport_stop();
+        pr1_dma_close();
 	span->flags &= ~DAHDI_FLAG_RUNNING;
 	spin_unlock_irqrestore(&wc->lock, flags);
 	return 0;
@@ -1461,15 +1471,18 @@ static inline void __t1_handle_leds(struct t1 *wc)
 			pr1_set_led(wc);
 	}
 }
-
 static void pr1_transmitprep(struct t1 *wc, u8 *pTransmit)
 {
 	volatile unsigned char *txbuf;
 	int x,y;
+	unsigned int  start_cycles_tp, cycles_tp; //penev
 
 	txbuf = pTransmit;
 
+	start_cycles_tp = cycles(); //penev
 	dahdi_transmit(&wc->span);
+	cycles_tp=cycles() - start_cycles_tp ;
+	cycles_tp_max=(cycles_tp_max<cycles_tp)?cycles_tp:cycles_tp_max;
 
 	for (y=0;y<DAHDI_CHUNKSIZE;y++) 
 	{
@@ -1487,6 +1500,8 @@ static void pr1_receiveprep(struct t1 *wc, u8 *pReceive)
 	volatile unsigned char *rxbuf;
 	int x;
 	int y;
+	unsigned int  start_cycles_rp, cycles_rp; //penev
+	
 
 	rxbuf=pReceive;
 
@@ -1507,8 +1522,13 @@ static void pr1_receiveprep(struct t1 *wc, u8 *pReceive)
 		memcpy(wc->ec_chunk2[x],wc->ec_chunk1[x],DAHDI_CHUNKSIZE);
 		memcpy(wc->ec_chunk1[x],wc->chans[x].writechunk,DAHDI_CHUNKSIZE);
 	}
+
+	start_cycles_rp=cycles();
 	dahdi_receive(&wc->span);
+        cycles_rp=cycles() - start_cycles_rp ;
+        cycles_rp_max=(cycles_rp_max<cycles_rp)?cycles_rp:cycles_rp_max;
 }
+
 
 static void __t1_check_alarms(struct t1 *wc)
 {
@@ -1988,6 +2008,7 @@ static int pr1_hardware_init(struct t1 *wc)
 	return 0;
 }
 
+struct t1 *wc_;
 static int __init pr1_init()
 {
 	int res;
@@ -2025,7 +2046,7 @@ static int __init pr1_init()
 
 		/* Misc. software stuff */
 		pr1_software_init(wc);
-
+		wc_=wc;
 		printk("Found a Wildcard: %s\n", wc->variety);
 		res = 0;
 	} else
@@ -2043,10 +2064,15 @@ static int __init pr1_init()
 
 static void __exit pr1_cleanup(void)
 {
-		pr1_sport_stop();
-		pr1_dma_close();
-		pCard->ledtestreg = 0;
 
+	//pr1_sport_stop();           //Those are ionvoced from the pr1_shutdown() on dahdi_unregister() 
+	//pr1_dma_close();
+
+	remove_proc_entry(PROCFS_NAME, NULL);
+	
+	dahdi_unregister(&(wc_->span));
+
+	pCard->ledtestreg = 0;
 	if(!fakemode)
 	{
 		pr1_set_led(pCard);
