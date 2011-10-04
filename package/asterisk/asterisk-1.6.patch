@@ -132,3 +132,13 @@ diff -Naur asterisk-1.6.2.6.orig/main/asterisk.c asterisk-1.6.2.6/main/asterisk.
  		if (canary_pid == 0) {
  			char canary_binary[128], *lastslash, ppid[12];
  
+diff -Naur asterisk-1.6.2.6.orig/codecs/Makefile asterisk-1.6.2.6/codecs/Makefile
+--- asterisk-1.6.2.6.orig/codecs/Makefile	2009-07-21 14:56:35.000000000 +0100
++++ asterisk-1.6.2.6/codecs/Makefile	2011-10-04 21:54:32.638729501 +0100
+@@ -50,3 +50,6 @@
+ $(if $(filter codec_ilbc,$(EMBEDDED_MODS)),modules.link,codec_ilbc.so): $(LIBILBC)
+ 
+ $(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): g722/g722_encode.o g722/g722_decode.o
++
++$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
++	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../blackfin-linux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
