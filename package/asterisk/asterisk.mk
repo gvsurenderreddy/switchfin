@@ -23,16 +23,11 @@
 
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ASTERISK_VERSION=1.4.42
-	ASTERISK_PATCH=asterisk-1.4.patch
-	ASTERISK_MAKEOPTS=asterisk-1.4
-	ATTRAFAX_NAME=attrafax-0.9
-	ATTRAFAX_DIR=$(BUILD_DIR)/$(ATTRAFAX_NAME)
-	GSM1_PATCH=asterisk-1.4-gsm1.patch
+	ASTERISK_SERIES=1.4
+	ATTRAFAX_DIR=$(BUILD_DIR)/attrafax-0.9
 else
 	ASTERISK_VERSION=1.6.2.6
-	ASTERISK_PATCH=asterisk-1.6.patch
-	CID_PATCH=cid-1.6.patch
-	ASTERISK_MAKEOPTS=asterisk-1.6
+	ASTERISK_SERIES=1.6
 	ATTRAFAX_DIR=$(BUILD_DIR)/asterisk-$(ASTERISK_VERSION)
 endif
 
@@ -82,16 +77,14 @@ ifeq ($(strip $(SF_PACKAGE_OPENR2)),y)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/OpenR2/ openr2-asterisk-1.4.42-p1.patch
 endif
 endif
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(ASTERISK_PATCH)
-
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk asterisk-$(ASTERISK_SERIES).patch
+ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
+	ln -sf $(SOURCES_DIR)/asterisk/codec_g729$(if $(filter $(SF_ASTERISK_1_6),y),_ast1_6).c $(ASTERISK_DIR)/codecs/codec_g729.c
+	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
-
 ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
-	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk $(GSM1_PATCH)
+	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk asterisk-1.4-gsm1.patch
 endif
-
-	ln -sf $(SOURCES_DIR)/asterisk/codec_g729.c $(ASTERISK_DIR)/codecs
-	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs
 ifeq ($(strip $(SF_PACKAGE_LUA)),y)
 	ln -sf $(SOURCES_DIR)/lua/pbx_lua.c $(ASTERISK_DIR)/pbx
 	ln -sf $(SOURCES_DIR)/lua/hashtab.h $(ASTERISK_DIR)/include/asterisk/
@@ -99,16 +92,13 @@ endif
 ifeq ($(strip $(SF_PACKAGE_DEVSTATE)),y)
 	ln -sf $(SOURCES_DIR)/asterisk/func_devstate.c $(ASTERISK_DIR)/funcs		
 endif
-	touch $(ASTERISK_DIR)/.asterisk.1.4
-else
-	ln -sf $(SOURCES_DIR)/asterisk/codec_g729_ast1_6.c $(ASTERISK_DIR)/codecs/codec_g729.c
-	touch $(ASTERISK_DIR)/.asterisk.1.6
+	ln -sf $(SOURCES_DIR)/asterisk/codec_speex.c $(ASTERISK_DIR)/codecs
 endif
-	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
+	touch $(ASTERISK_DIR)/.asterisk.$(ASTERISK_SERIES)
 	touch $(ASTERISK_DIR)/.unpacked
 
 $(ASTERISK_DIR_LINK)/.configured: $(ASTERISK_DEP) $(ASTERISK_DIR)/.unpacked $(if $(filter $(SF_PACKAGE_ATTRAFAX),y), $(ATTRAFAX_DIR)/.unpacked)
-	cp -v package/asterisk/$(ASTERISK_MAKEOPTS).makeopts $(ASTERISK_DIR)/menuselect.makeopts
+	cp -v package/asterisk/asterisk-$(ASTERISK_SERIES).makeopts $(ASTERISK_DIR)/menuselect.makeopts
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
 	sed -i 's/\b\S*misdn\S*\b//g' $(ASTERISK_DIR)/menuselect.makeopts
 else

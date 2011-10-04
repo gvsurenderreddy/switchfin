@@ -68,7 +68,7 @@ config SF_PACKAGE_ASTERISK-H323
 config SF_PACKAGE_ASTERISK_G729
         bool "g.729 codec EVALUATION ONLY, READ HELP!!!!"
         default n
-        depends SF_ASTERISK_1_4
+        depends SF_PACKAGE_ASTERISK
         help    
                 g.729 codec for testing/evaluation purposes only.
                 You need to pay royalties to patent holders if
