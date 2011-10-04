@@ -81,6 +81,7 @@ endif
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_G729)),y)
 	ln -sf $(SOURCES_DIR)/asterisk/codec_g729$(if $(filter $(SF_ASTERISK_1_6),y),_ast1_6).c $(ASTERISK_DIR)/codecs/codec_g729.c
 	ln -sf $(SOURCES_DIR)/asterisk/g729ab_codec.h $(ASTERISK_DIR)/codecs
+endif
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 ifeq ($(strip $(SF_PACKAGE_DAHDI_GSM1)),y)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk asterisk-1.4-gsm1.patch
