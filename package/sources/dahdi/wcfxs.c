@@ -49,6 +49,16 @@
  * for use in Switchfin, based on the previous work done by Atcom
  * 14 May 2011 Dimitar Penev, DAHDI 2.4.1.2+2.4.1 update
  * 	
+ * 12 Oct 2011 wangxinyong suggested better OHT on IDLE implementation.
+ *	       before confirming the change let's enable his additions 
+ *	       using the lowpower module parameter.
+ * lowpower=
+ *	0	On-Hook Transmission(OHT) when IDLE (old implementation 
+ *		probably incomplete)
+ *	1	OHT when IDLE (changes suggested by wangxinyong) 
+ *	2	On-Hook Line Voltage reduced to 24V, audio path disabled when IDLE 
+ *
+ *
  * Copyright @ 2010 Switchfin <dpn@switchfin.org>
  */
 
@@ -964,6 +974,30 @@ static inline void wcfxs_proslic_check_hook(struct wcfxs *wc, int card)
 {
 	char res;
 	int hook;
+	
+	//run in low power added by wangxy 
+	if (lowpower == 1) { 
+		if (wc->mod.fxs.lasttxhook[card] == 0x4)  {
+	    	/* RINGing, prepare for OHT */
+	    		wc->mod.fxs.ohttimer[card] = OHT_TIMER << 3;							
+	   		 wc->mod.fxs.idletxhookstate[card] = 0x2; /* OHT mode when idle */
+		} else if (wc->mod.fxs.ohttimer[card])  {
+			if (!wc->mod.fxs.oldrxhook[card])  {		  
+		  		wc->mod.fxs.ohttimer[card] -= NUM_CARDS*DAHDI_CHUNKSIZE;
+		  		if (!wc->mod.fxs.ohttimer[card]) {					
+		  			wc->mod.fxs.idletxhookstate[card] = 0x1;/* Switch to active */
+		    			if ((wc->mod.fxs.lasttxhook[card] == 0x2) || (wc->mod.fxs.lasttxhook[card] == 0x6)) {
+		       				wc->mod.fxs.lasttxhook[card] = 0x1;		       
+		      				wcfxs_setreg(wc, card, 64, wc->mod.fxs.lasttxhook[card]);
+		    			}
+		  		}
+	  		}  else {
+				wc->mod.fxs.ohttimer[card] = 0;
+				/* Switch to Active, Rev or Fwd */
+				wc->mod.fxs.idletxhookstate[card] = 0x1;
+		 	}
+		}
+	}
 
 	/* For some reason we have to debounce the
 	   hook detector.  */
@@ -1654,7 +1688,7 @@ static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast, int manual, 
 		if (fxo_modes[_opermode].ring_x)
 			wcfxs_proslic_setreg_indirect(wc, card, 21, fxo_modes[_opermode].ring_x);
 	}
-    if (lowpower)
+    if (lowpower==2)
     	wcfxs_setreg(wc, card, 72, 0x10);
 
 #if 0
@@ -1676,7 +1710,7 @@ static int wcfxs_init_proslic(struct wcfxs *wc, int card, int fast, int manual, 
 		if (wcfxs_proslic_setreg_indirect(wc, card, 21, 0x1d1)) 
 			return -1;
 		printk("Boosting ringinger on slot %d (89V peak)\n", card + 1);
-	} else if (lowpower) {
+	} else if (lowpower==2) {
 		if (wcfxs_proslic_setreg_indirect(wc, card, 21, 0x108)) 
 			return -1;
 		printk("Reducing ring power on slot %d (50V peak)\n", card + 1);
@@ -1703,7 +1737,7 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 			return -EFAULT;
 		wc->mod.fxs.ohttimer[chan->chanpos - 1] = x << 3;
 
-		if (lowpower < 2) {
+		if (lowpower == 0) {
 		    /* DR: Set lowpower=2 to disable this code and run
 		       FXS ports at minimum power.  Unfortunately, this
 		       also disables FXS port Called ID transmit.  I don't
@@ -1721,7 +1755,14 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
 		    }
 		}
-
+		else (lowpower == 1) {
+			wc->mod.fxs.idletxhookstate[chan->chanpos - 1] = 0x1;	/* OHT mode when idle */
+			if (wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x1 || wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x5) {
+				/* Apply the change if appropriate */				
+				wc->mod.fxs.lasttxhook[chan->chanpos - 1] = 0x2;
+				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
+			}
+		}
 		break;
 	case WCFXS_GET_STATS:
 		if (wc->modtype[chan->chanpos - 1] == MOD_TYPE_FXS) {
