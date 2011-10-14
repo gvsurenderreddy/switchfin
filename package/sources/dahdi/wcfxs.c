@@ -1755,9 +1755,9 @@ static int wcfxs_ioctl(struct dahdi_chan *chan, unsigned int cmd, unsigned long 
 				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
 		    }
 		}
-		else (lowpower == 1) {
+		else if (lowpower == 1) {
 			wc->mod.fxs.idletxhookstate[chan->chanpos - 1] = 0x1;	/* OHT mode when idle */
-			if (wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x1 || wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x5) {
+			if ((wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x1) || (wc->mod.fxs.lasttxhook[chan->chanpos - 1] == 0x5)) {
 				/* Apply the change if appropriate */				
 				wc->mod.fxs.lasttxhook[chan->chanpos - 1] = 0x2;
 				wcfxs_setreg(wc, chan->chanpos - 1, 64, wc->mod.fxs.lasttxhook[chan->chanpos - 1]);
