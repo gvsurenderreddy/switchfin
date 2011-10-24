@@ -26,6 +26,7 @@
  */
 //#include <linux/delay.h>
 
+#include <asm/bfin_sport.h>
 #include "GSM_module_SPI.h"
 
 extern int sport_configure(int baud);

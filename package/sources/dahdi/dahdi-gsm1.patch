@@ -20,25 +20,6 @@ diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/bfsi.c dahdi-lin
  
  }
  #endif
-diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/dahdi-base.c dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/dahdi-base.c
---- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/dahdi-base.c	2010-04-19 22:42:53.000000000 +0300
-+++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/dahdi-base.c	2010-09-06 11:20:14.000000000 +0300
-@@ -3330,6 +3330,7 @@
- 		case 'T':
- 			chan->digitmode = DIGIT_MODE_DTMF;
- 			chan->tonep = 0;
-+			chan->span->hooksig(chan, DAHDI_TXSIG_START);
- 			break;
- 		case 'M':
- 			chan->digitmode = DIGIT_MODE_MFR1;
-@@ -3346,6 +3347,7 @@
- 		case 'P':
- 			chan->digitmode = DIGIT_MODE_PULSE;
- 			chan->tonep = 0;
-+			chan->span->hooksig(chan, DAHDI_TXSIG_START);
- 			break;
- 		default:
- 			if ((c != 'W') && (chan->digitmode == DIGIT_MODE_PULSE)) {
 diff -uP dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/GSM_module_SPI.h dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/GSM_module_SPI.h
 --- dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi/GSM_module_SPI.h	1970-01-01 02:00:00.000000000 +0200
 +++ dahdi-linux-complete-2.3.0.1+2.3.0/linux/drivers/dahdi-gsm1/GSM_module_SPI.h	2010-09-06 11:20:14.000000000 +0300
