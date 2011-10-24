@@ -1,6 +1,203 @@
---- asterisk/include/asterisk/compat.h	2010-04-18 00:42:23.000000000 +0300
-+++ asterisk/include/asterisk/compat.h	2010-04-18 00:42:53.000000000 +0300
-@@ -187,7 +187,7 @@
+diff -Naur asterisk-1.6.2.20_Original/apps/app_voicemail.c asterisk-1.6.2.20/apps/app_voicemail.c
+--- asterisk-1.6.2.20_Original/apps/app_voicemail.c	2011-05-04 13:10:59.000000000 -0300
++++ asterisk-1.6.2.20/apps/app_voicemail.c	2011-10-21 10:05:48.000000000 -0200
+@@ -3206,7 +3206,7 @@
+ 					}
+ 					/* Read out in small chunks */
+ 					for (offset = 0; offset < colsize2; offset += CHUNKSIZE) {
+-						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset)) == MAP_FAILED) {
++						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, offset)) == MAP_FAILED) {
+ 							ast_log(AST_LOG_WARNING, "Could not mmap the output file: %s (%d)\n", strerror(errno), errno);
+ 							SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+ 							ast_odbc_release_obj(obj);
+@@ -3639,7 +3639,7 @@
+ 		fdlen = lseek(fd, 0, SEEK_END);
+ 		lseek(fd, 0, SEEK_SET);
+ 		printf("Length is %zd\n", fdlen);
+-		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_SHARED,fd, 0);
++		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE,fd, 0);
+ 		if (fdm == MAP_FAILED) {
+ 			ast_log(AST_LOG_WARNING, "Memory map failed!\n");
+ 			res = -1;
+diff -Naur asterisk-1.6.2.20_Original/channels/chan_dahdi.c asterisk-1.6.2.20/channels/chan_dahdi.c
+--- asterisk-1.6.2.20_Original/channels/chan_dahdi.c	2011-04-12 15:44:44.000000000 -0300
++++ asterisk-1.6.2.20/channels/chan_dahdi.c	2011-10-21 10:41:40.000000000 -0200
+@@ -326,6 +326,7 @@
+ static int numbufs = 4;
+ 
+ static int mwilevel = 512;
++static int dtmfcid_level = 256;
+ 
+ #ifdef HAVE_PRI
+ static struct ast_channel inuse;
+@@ -1084,7 +1085,9 @@
+ 	int span;					/*!< Span number */
+ 	time_t guardtime;				/*!< Must wait this much time before using for new call */
+ 	int cid_signalling;				/*!< CID signalling type bell202 or v23 */
+-	int cid_start;					/*!< CID start indicator, polarity or ring */
++	int cid_start;					/*!< CID start indicator, polarity or ring or DTMF without warning event */
++	int dtmfcid_holdoff_state;		/*!< State indicator that allows for line to settle before checking for dtmf energy */
++	struct timeval	dtmfcid_delay;  /*!< Time value used for allow line to settle */
+ 	int callingpres;				/*!< The value of calling presentation that we're going to use when placing a PRI call */
+ 	int callwaitingrepeat;				/*!< How many samples to wait before repeating call waiting */
+ 	int cidcwexpire;				/*!< When to stop waiting for CID/CW CAS response (In samples) */
+@@ -8830,7 +8833,8 @@
+ 		/* If we want caller id, we're in a prering state due to a polarity reversal
+ 		 * and we're set to use a polarity reversal to trigger the start of caller id,
+ 		 * grab the caller id and wait for ringing to start... */
+-		} else if (p->use_callerid && (chan->_state == AST_STATE_PRERING && (p->cid_start == CID_START_POLARITY || p->cid_start == CID_START_POLARITY_IN))) {
++		} else if (p->use_callerid && (chan->_state == AST_STATE_PRERING &&
++				 (p->cid_start == CID_START_POLARITY || p->cid_start == CID_START_POLARITY_IN || p->cid_start == CID_START_DTMF_NOALERT))) {
+ 			/* If set to use DTMF CID signalling, listen for DTMF */
+ 			if (p->cid_signalling == CID_SIG_DTMF) {
+ 				int k = 0;
+@@ -10037,8 +10041,10 @@
+ 					pfds[count].revents = 0;
+ 					/* If we are monitoring for VMWI or sending CID, we need to
+ 					   read from the channel as well */
+-					if (i->cidspill || i->mwisendactive || i->mwimonitor_fsk)
++					if (i->cidspill || i->mwisendactive || i->mwimonitor_fsk ||
++					  (i->cid_start == CID_START_DTMF_NOALERT && (i->sig == SIG_FXSLS || i->sig == SIG_FXSGS || i->sig == SIG_FXSKS))) {
+ 						pfds[count].events |= POLLIN;
++					}	
+ 					count++;
+ 				}
+ 			}
+@@ -10136,7 +10142,7 @@
+ 							ast_log(LOG_WARNING, "Whoa....  I'm owned but found (%d) in read...\n", i->subs[SUB_REAL].dfd);
+ 						continue;
+ 					}
+-					if (!i->mwimonitor_fsk && !i->mwisendactive) {
++					if (!i->mwimonitor_fsk && !i->mwisendactive && i->cid_start != CID_START_DTMF_NOALERT) {
+ 						ast_log(LOG_WARNING, "Whoa....  I'm not looking for MWI or sending MWI but am reading (%d)...\n", i->subs[SUB_REAL].dfd);
+ 						continue;
+ 					}
+@@ -10163,6 +10169,41 @@
+ 									i->mwimonitoractive = 1;
+ 								}
+ 							}
++						/* If configured to check for a DTMF CID spill that comes without alert (e.g no polarity reversal) */
++						 } else if (i->cid_start == CID_START_DTMF_NOALERT) {
++						    int energy;
++						    struct timeval now;
++						    /* State machine dtmfcid_holdoff_state allows for the line to settle
++					             * before checking agin for dtmf energy.  Presently waits for 500 mS before checking again
++						     */
++						     if (1 == i->dtmfcid_holdoff_state) {
++							gettimeofday(&i->dtmfcid_delay, NULL);
++							i->dtmfcid_holdoff_state = 2;
++						     } else if (2 == i->dtmfcid_holdoff_state) {
++							gettimeofday(&now, NULL);
++						        if ((int)(now.tv_sec - i->dtmfcid_delay.tv_sec) * 1000000 + (int)now.tv_usec - (int)i->dtmfcid_delay.tv_usec > 500000) {
++								i->dtmfcid_holdoff_state = 0;
++						        }
++						     } else {
++							   energy = calc_energy((unsigned char *) buf, res, AST_LAW(i));
++							   if (!i->mwisendactive && energy > dtmfcid_level) {
++								pthread_t threadid;
++								struct ast_channel *chan;
++								ast_mutex_unlock(&iflock);
++								chan = dahdi_new(i, AST_STATE_PRERING, 0, SUB_REAL, 0, 0);
++								if (!chan) {
++									ast_log(LOG_WARNING, "Cannot allocate new structure on channel %d\n", i->channel);
++								} else {
++									res = ast_pthread_create_detached(&threadid, NULL, ss_thread, chan);
++									if (res) {
++										ast_log(LOG_WARNING, "Unable to start simple switch thread on channel %d\n",i->channel);
++									} else {
++										i->dtmfcid_holdoff_state = 1;
++										}
++								 }
++								    ast_mutex_lock(&iflock);
++								}
++							}
+ 						}
+ 						if (i->mwisendactive) {
+ 							mwi_send_process_buffer(i, res);
+@@ -17274,6 +17315,8 @@
+ 				confp->chan.cid_start = CID_START_POLARITY_IN;
+ 			else if (!strcasecmp(v->value, "polarity"))
+ 				confp->chan.cid_start = CID_START_POLARITY;
++			else if (!strcasecmp(v->value, "dtmf"))
++				confp->chan.cid_start = CID_START_DTMF_NOALERT;
+ 			else if (ast_true(v->value))
+ 				confp->chan.cid_start = CID_START_RING;
+ 		} else if (!strcasecmp(v->name, "threewaycalling")) {
+@@ -18114,6 +18157,8 @@
+ 				ast_copy_string(defaultozz, v->value, sizeof(defaultozz));
+ 			} else if (!strcasecmp(v->name, "mwilevel")) {
+ 				mwilevel = atoi(v->value);
++			} else if (!strcasecmp(v->name, "dtmfcidlevel")) {
++				dtmfcid_level = atoi(v->value);
+ 			}
+ 		} else if (!(options & PROC_DAHDI_OPT_NOWARN) )
+ 			ast_log(LOG_WARNING, "Ignoring any changes to '%s' (on reload) at line %d.\n", v->name, v->lineno);
+diff -Naur asterisk-1.6.2.20_Original/codecs/Makefile asterisk-1.6.2.20/codecs/Makefile
+--- asterisk-1.6.2.20_Original/codecs/Makefile	2009-07-21 10:56:35.000000000 -0300
++++ asterisk-1.6.2.20/codecs/Makefile	2011-10-21 10:05:48.000000000 -0200
+@@ -50,3 +50,6 @@
+ $(if $(filter codec_ilbc,$(EMBEDDED_MODS)),modules.link,codec_ilbc.so): $(LIBILBC)
+ 
+ $(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): g722/g722_encode.o g722/g722_decode.o
++
++$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
++	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../blackfin-linux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
+diff -Naur asterisk-1.6.2.20_Original/configs/chan_dahdi.conf.sample asterisk-1.6.2.20/configs/chan_dahdi.conf.sample
+--- asterisk-1.6.2.20_Original/configs/chan_dahdi.conf.sample	2010-11-22 18:02:37.000000000 -0200
++++ asterisk-1.6.2.20/configs/chan_dahdi.conf.sample	2011-10-21 10:45:52.000000000 -0200
+@@ -355,9 +355,19 @@
+ ;     polarity_IN = polarity reversal signals the start, for India, 
+ ;                   for dtmf dialtone detection; using DTMF.
+ ;                   (see doc/India-CID.txt)
++;     dtmf	  = causes monitor loop to look for dtmf energy on the
++;		    incoming channel to initate cid acquisition
+ ;
+ ;cidstart=polarity
+ ;
++; When cidstart=dtmf, the energy level used to trigger dtmf cid acquisition. This number is
++; compared to the average over a packet of audio of the absolute values of 16
++; bit signed linear samples. The default is set to 256. The choice of 256 is
++; arbitrary. The value you should select should be high enough to prevent false
++; detections while low enough to insure that no dtmf spills are missed.
++;
++;dtmfcidlevel=256
++;
+ ; Whether or not to hide outgoing caller ID (Override with *67 or *82)
+ ; (If your dialplan doesn't catch it)
+ ;
+diff -Naur asterisk-1.6.2.20_Original/configure asterisk-1.6.2.20/configure
+--- asterisk-1.6.2.20_Original/configure	2011-04-11 16:33:03.000000000 -0300
++++ asterisk-1.6.2.20/configure	2011-10-21 10:10:04.000000000 -0200
+@@ -14893,7 +14893,7 @@
+ fi
+ if test "x$ac_cv_func_fork_works" = xcross; then
+   case $host in
+-    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* )
++    *-*-amigaos* | *-*-msdosdjgpp* | *-*-uclinux* | *-*-linux-uclibc* | bfin-*-* )
+       # Override, as these systems have only a dummy fork() stub
+       ac_cv_func_fork_works=no
+       ;;
+diff -Naur asterisk-1.6.2.20_Original/include/asterisk/callerid.h asterisk-1.6.2.20/include/asterisk/callerid.h
+--- asterisk-1.6.2.20_Original/include/asterisk/callerid.h	2009-03-09 17:58:17.000000000 -0300
++++ asterisk-1.6.2.20/include/asterisk/callerid.h	2011-10-21 10:47:50.000000000 -0200
+@@ -60,9 +60,10 @@
+ #define CID_SIG_V23_JP	4
+ #define CID_SIG_SMDI	5
+ 
+-#define CID_START_RING	1
+-#define CID_START_POLARITY 2
+-#define CID_START_POLARITY_IN 3
++#define CID_START_RING		1
++#define CID_START_POLARITY 	2
++#define CID_START_POLARITY_IN 	3
++#define CID_START_DTMF_NOALERT	4
+ 
+ /* defines dealing with message waiting indication generation */
+ /*! MWI SDMF format */
+diff -Naur asterisk-1.6.2.20_Original/include/asterisk/compat.h asterisk-1.6.2.20/include/asterisk/compat.h
+--- asterisk-1.6.2.20_Original/include/asterisk/compat.h	2010-09-24 00:36:01.000000000 -0300
++++ asterisk-1.6.2.20/include/asterisk/compat.h	2011-10-21 10:05:48.000000000 -0200
+@@ -191,7 +191,7 @@
  #define GLOB_ABORTED GLOB_ABEND
  #endif
  #include <glob.h>
@@ -9,30 +206,33 @@
  #define MY_GLOB_FLAGS   GLOB_NOCHECK
  #else
  #define MY_GLOB_FLAGS   (GLOB_NOMAGIC|GLOB_BRACE)
---- asterisk/res/ael/ael.flex	2010-04-18 00:56:38.000000000 +0300
-+++ asterisk/res/ael/ael.flex	2010-04-18 00:57:08.000000000 +0300
-@@ -595,7 +595,7 @@
- 		   snprintf(fnamebuf2,sizeof(fnamebuf2), "%s/%s", (char *)ast_config_AST_CONFIG_DIR, fnamebuf);
- 		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
- 		}
--#ifdef SOLARIS
-+#if defined(SOLARIS) || defined (__BLACKFIN__)
- 			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
- #else
- 			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
---- asterisk/res/ael/ael_lex.c	2010-04-18 00:59:56.000000000 +0300
-+++ asterisk/res/ael/ael_lex.c	2010-04-18 01:03:14.000000000 +0300
-@@ -1962,7 +1962,7 @@
- 		   snprintf(fnamebuf2,sizeof(fnamebuf2), "%s/%s", (char *)ast_config_AST_CONFIG_DIR, fnamebuf);
- 		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
- 		}
--#ifdef SOLARIS
-+#if defined(SOLARIS) || defined(__BLACKFIN__)
- 			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
- #else
- 			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
---- asterisk/main/frame.c	2010-04-18 02:02:03.000000000 +0300
-+++ asterisk/main/frame.c	2010-04-18 02:03:50.000000000 +0300
+diff -Naur asterisk-1.6.2.20_Original/main/app.c asterisk-1.6.2.20/main/app.c
+--- asterisk-1.6.2.20_Original/main/app.c	2011-01-19 18:13:24.000000000 -0200
++++ asterisk-1.6.2.20/main/app.c	2011-10-21 10:05:48.000000000 -0200
+@@ -2085,7 +2085,7 @@
+ 	sigfillset(&signal_set);
+ 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
+ 
+-	pid = fork();
++	pid = vfork();
+ 
+ 	if (pid != 0) {
+ 		/* Fork failed or parent */
+diff -Naur asterisk-1.6.2.20_Original/main/asterisk.c asterisk-1.6.2.20/main/asterisk.c
+--- asterisk-1.6.2.20_Original/main/asterisk.c	2011-04-01 07:51:24.000000000 -0300
++++ asterisk-1.6.2.20/main/asterisk.c	2011-10-21 10:05:48.000000000 -0200
+@@ -3595,7 +3595,7 @@
+ 		/* Don't let the canary child kill Asterisk, if it dies immediately */
+ 		sigaction(SIGPIPE, &ignore_sig_handler, NULL);
+ 
+-		canary_pid = fork();
++		canary_pid = vfork();
+ 		if (canary_pid == 0) {
+ 			char canary_binary[128], *lastslash, ppid[12];
+ 
+diff -Naur asterisk-1.6.2.20_Original/main/frame.c asterisk-1.6.2.20/main/frame.c
+--- asterisk-1.6.2.20_Original/main/frame.c	2010-06-11 15:32:13.000000000 -0300
++++ asterisk-1.6.2.20/main/frame.c	2011-10-21 10:05:48.000000000 -0200
 @@ -103,7 +103,7 @@
  	{ AST_FORMAT_SLINEAR, "slin", 8000, "16 bit Signed Linear PCM", 160, 10, 70, 10, 20, AST_SMOOTHER_FLAG_BE }, /*!< Signed linear */
  	{ AST_FORMAT_LPC10, "lpc10", 8000, "LPC10", 7, 20, 20, 20, 20 },                                       /*!< codec_lpc10.c */ 
@@ -42,7 +242,7 @@
  	{ AST_FORMAT_ILBC, "ilbc", 8000, "iLBC", 50, 30, 30, 30, 30 },                                         /*!< codec_ilbc.c */ /* inc=30ms - workaround */
  	{ AST_FORMAT_G726_AAL2, "g726aal2", 8000, "G.726 AAL2", 40, 10, 300, 10, 20 },                         /*!< codec_g726.c */
  	{ AST_FORMAT_G722, "g722", 16000, "G722", 80, 10, 150, 10, 20 },                                       /*!< codec_g722.c */
-@@ -1434,7 +1434,9 @@
+@@ -1436,7 +1436,9 @@
  
  	switch(f->subclass) {
  	case AST_FORMAT_SPEEX:
@@ -53,40 +253,10 @@
  		break;
  	case AST_FORMAT_G723_1:
  		samples = g723_samples(f->data.ptr, f->datalen);
---- asterisk/apps/app_voicemail.c	2010-04-30 22:41:57.000000000 +0300
-+++ asterisk/apps/app_voicemail.c	2010-04-30 22:42:59.000000000 +0300
-@@ -3128,7 +3128,7 @@
- 					}
- 					/* Read out in small chunks */
- 					for (offset = 0; offset < colsize2; offset += CHUNKSIZE) {
--						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset)) == MAP_FAILED) {
-+						if ((fdm = mmap(NULL, CHUNKSIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, offset)) == MAP_FAILED) {
- 							ast_log(AST_LOG_WARNING, "Could not mmap the output file: %s (%d)\n", strerror(errno), errno);
- 							SQLFreeHandle(SQL_HANDLE_STMT, stmt);
- 							ast_odbc_release_obj(obj);
-@@ -3513,7 +3513,7 @@
- 		fdlen = lseek(fd, 0, SEEK_END);
- 		lseek(fd, 0, SEEK_SET);
- 		printf("Length is %zd\n", fdlen);
--		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_SHARED,fd, 0);
-+		fdm = mmap(NULL, fdlen, PROT_READ | PROT_WRITE, MAP_PRIVATE,fd, 0);
- 		if (fdm == MAP_FAILED) {
- 			ast_log(AST_LOG_WARNING, "Memory map failed!\n");
- 			res = -1;
---- asterisk/main/manager.c	2010-04-30 22:45:08.000000000 +0300
-+++ asterisk/main/manager.c	2010-04-30 22:45:35.000000000 +0300
-@@ -3936,7 +3936,7 @@
- 		fprintf(s.f, "%c", 0);
- 
- 		if ((l = ftell(s.f))) {
--			if ((buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_SHARED, s.fd, 0))) {
-+			if ((buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_PRIVATE, s.fd, 0))) {
- 				if (format == FORMAT_XML || format == FORMAT_HTML)
- 					xml_translate(&out, buf, params, format);
- 				else
---- asterisk/main/http.c	2010-04-30 22:59:50.000000000 +0300
-+++ asterisk/main/http.c	2010-04-30 23:01:13.000000000 +0300
-@@ -208,7 +208,9 @@
+diff -Naur asterisk-1.6.2.20_Original/main/http.c asterisk-1.6.2.20/main/http.c
+--- asterisk-1.6.2.20_Original/main/http.c	2011-04-21 15:22:19.000000000 -0300
++++ asterisk-1.6.2.20/main/http.c	2011-10-21 10:05:48.000000000 -0200
+@@ -221,7 +221,9 @@
  		goto out403;
  	}
  
@@ -97,7 +267,7 @@
  	fprintf(ser->f, "HTTP/1.1 200 OK\r\n"
  		"Server: Asterisk/%s\r\n"
  		"Date: %s\r\n"
-@@ -741,7 +743,9 @@
+@@ -758,7 +760,9 @@
  		char timebuf[256];
  		struct ast_tm tm;
  
@@ -108,37 +278,50 @@
  		fprintf(ser->f,
  			"HTTP/1.1 %d %s\r\n"
  			"Server: Asterisk/%s\r\n"
-diff -Naur asterisk-1.6.2.6.orig/main/app.c asterisk-1.6.2.6/main/app.c
---- asterisk-1.6.2.6.orig/main/app.c	2009-11-30 21:36:06.000000000 +0000
-+++ asterisk-1.6.2.6/main/app.c	2011-07-06 12:20:20.544179397 +0100
-@@ -2014,7 +2014,7 @@
- 	sigfillset(&signal_set);
- 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
+diff -Naur asterisk-1.6.2.20_Original/pbx/Makefile asterisk-1.6.2.20/pbx/Makefile
+--- asterisk-1.6.2.20_Original/pbx/Makefile	2010-01-24 04:42:23.000000000 -0200
++++ asterisk-1.6.2.20/pbx/Makefile	2011-10-21 10:15:19.000000000 -0200
+@@ -32,3 +32,7 @@
+ pbx_gtkconsole.o: _ASTCFLAGS+=-Wno-strict-prototypes
  
--	pid = fork();
-+	pid = vfork();
- 
- 	if (pid != 0) {
- 		/* Fork failed or parent */
-diff -Naur asterisk-1.6.2.6.orig/main/asterisk.c asterisk-1.6.2.6/main/asterisk.c
---- asterisk-1.6.2.6.orig/main/asterisk.c	2010-02-25 21:25:05.000000000 +0000
-+++ asterisk-1.6.2.6/main/asterisk.c	2011-07-06 12:20:30.249049290 +0100
-@@ -3500,7 +3500,7 @@
- 		/* Don't let the canary child kill Asterisk, if it dies immediately */
- 		signal(SIGPIPE, SIG_IGN);
- 
--		canary_pid = fork();
-+		canary_pid = vfork();
- 		if (canary_pid == 0) {
- 			char canary_binary[128], *lastslash, ppid[12];
- 
-diff -Naur asterisk-1.6.2.6.orig/codecs/Makefile asterisk-1.6.2.6/codecs/Makefile
---- asterisk-1.6.2.6.orig/codecs/Makefile	2009-07-21 14:56:35.000000000 +0100
-+++ asterisk-1.6.2.6/codecs/Makefile	2011-10-04 21:54:32.638729501 +0100
-@@ -50,3 +50,6 @@
- $(if $(filter codec_ilbc,$(EMBEDDED_MODS)),modules.link,codec_ilbc.so): $(LIBILBC)
- 
- $(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): g722/g722_encode.o g722/g722_decode.o
+ $(if $(filter pbx_dundi,$(EMBEDDED_MODS)),modules.link,pbx_dundi.so): dundi-parser.o
 +
-+$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
-+	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../blackfin-linux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
++pbx_lua.so:
++	$(CC) -o pbx_lua.so -shared  $(ASTLDFLAGS) pbx_lua.o $(wildcard $(ASTTOPDIR)/../uClinux-dist/user/lua/lua-5.1.4/src/*[!lua].o)
++
+diff -Naur asterisk-1.6.2.20_Original/res/ael/ael.flex asterisk-1.6.2.20/res/ael/ael.flex
+--- asterisk-1.6.2.20_Original/res/ael/ael.flex	2010-06-23 18:09:20.000000000 -0300
++++ asterisk-1.6.2.20/res/ael/ael.flex	2011-10-21 10:05:48.000000000 -0200
+@@ -595,7 +595,7 @@
+ 		   snprintf(fnamebuf2,sizeof(fnamebuf2), "%s/%s", (char *)ast_config_AST_CONFIG_DIR, fnamebuf);
+ 		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
+ 		}
+-#ifdef SOLARIS
++#if defined(SOLARIS) || defined (__BLACKFIN__)
+ 			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
+ #else
+ 			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
+diff -Naur asterisk-1.6.2.20_Original/res/ael/ael_lex.c asterisk-1.6.2.20/res/ael/ael_lex.c
+--- asterisk-1.6.2.20_Original/res/ael/ael_lex.c	2010-10-28 17:52:52.000000000 -0200
++++ asterisk-1.6.2.20/res/ael/ael_lex.c	2011-10-21 10:05:48.000000000 -0200
+@@ -1976,7 +1976,7 @@
+ 		   snprintf(fnamebuf2,sizeof(fnamebuf2), "%s/%s", (char *)ast_config_AST_CONFIG_DIR, fnamebuf);
+ 		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
+ 		}
+-#ifdef SOLARIS
++#if defined(SOLARIS) || defined(__BLACKFIN__)
+ 			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
+ #else
+ 			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
+diff -Naur asterisk-1.6.2.20_Original/utils/Makefile asterisk-1.6.2.20/utils/Makefile
+--- asterisk-1.6.2.20_Original/utils/Makefile	2010-03-25 17:43:34.000000000 -0300
++++ asterisk-1.6.2.20/utils/Makefile	2011-10-21 10:17:12.000000000 -0200
+@@ -27,7 +27,7 @@
+ #     changes are made to ast_expr2.y or ast_expr2.fl (or the corresponding .c files),
+ #     as a regression test. Others (mere mortals?) need not bother, but they are
+ #     more than welcome to play! The regression test itself is in expr2.testinput.
+-ALL_UTILS:=astman smsq stereorize streamplayer muted hashtest2 hashtest astcanary refcounter aelparse conf2ael
++ALL_UTILS:=astman smsq stereorize streamplayer hashtest2 hashtest astcanary refcounter aelparse conf2ael
+ UTILS:=$(ALL_UTILS)
+ 
+ LIBS += $(BKTR_LIB) # astobj2 with devmode uses backtrace
