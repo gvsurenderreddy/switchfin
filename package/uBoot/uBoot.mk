@@ -22,7 +22,7 @@ ifeq ($(strip $(SF_IP04)),y)
 UBOOT_DIRNAME=u-boot-1.1.5-bf1
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
 UBOOT_SOURCE=u-boot-1.1.5-bf1-061210.tar.bz2
-UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/330/2208/
+UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/330/2208
 UBOOT_UNZIP=bzcat
 PATCHNAME=uBoot-ip04
 UCONFIG=ip04
@@ -32,19 +32,19 @@ ifeq ($(strip $(SF_IP01)),y)
 UBOOT_DIRNAME=u-boot-1.1.5-bf1
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
 UBOOT_SOURCE=u-boot-1.1.5-bf1-061210.tar.bz2
-UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/330/2208/
+UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/330/2208
 UBOOT_UNZIP=bzcat
 PATCHNAME=uBoot-ip04
 UCONFIG=ip04
 endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-UBOOT_DIRNAME=u-boot-1.1.6
+UBOOT_DIRNAME=u-boot-2010.06-2010R1-RC2
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
-UBOOT_SOURCE=u-boot-1.1.6.tar.bz2
-UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/40/3028
+UBOOT_SOURCE=u-boot-2010.06-2010R1-RC2.tar.bz2
+UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/499/8434
 UBOOT_UNZIP=bzcat
-PATCHNAME=uBoot
+PATCHNAME=uBoot-pr1
 UCONFIG=pr1
 endif
 
@@ -90,7 +90,9 @@ $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(UBOOT_UNZIP) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch
+ifneq ($(strip $(SF_PR1_APPLIANCE)),y)
 	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/nand.patch
+endif
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch.br4
 	mkdir -p $(UBOOT_DIR)/board/SwitchVoice/br4
@@ -113,24 +115,25 @@ ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragnet.patch
 	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragtftp.patch
 endif
-ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-	mkdir -p $(UBOOT_DIR)/board/SwitchVoice/pr1
-	ln -sf $(UBOOT_SOURCES_DIR)/pr1.h $(UBOOT_DIR)/include/configs/
-	ln -sf $(UBOOT_SOURCES_DIR)/pr1.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/cmd_bf537led.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/config.mk.uboot $(UBOOT_DIR)/board/SwitchVoice/pr1/config.mk
-	ln -sf $(UBOOT_SOURCES_DIR)/Makefile.uboot.pr1 $(UBOOT_DIR)/board/SwitchVoice/pr1/Makefile
-	ln -sf $(UBOOT_SOURCES_DIR)/ether_bf537.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/ether_bf537.h $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/flash-defines.h $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/nand.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/post-memory.c.pr1 $(UBOOT_DIR)/board/SwitchVoice/pr1/post-memory.c
-	ln -sf $(UBOOT_SOURCES_DIR)/stm_m25p40.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
-	ln -sf $(UBOOT_SOURCES_DIR)/u-boot.lds.S.pr1 $(UBOOT_DIR)/board/SwitchVoice/pr1/u-boot.lds.S
-	ln -sf $(UBOOT_SOURCES_DIR)/tftp.c $(UBOOT_DIR)/net/
-	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragnet.patch
-	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragtftp.patch
-endif
+
+#ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
+#	mkdir -p $(UBOOT_DIR)/board/SwitchVoice/pr1
+#	ln -sf $(UBOOT_SOURCES_DIR)/pr1.h $(UBOOT_DIR)/include/configs/
+#	ln -sf $(UBOOT_SOURCES_DIR)/pr1.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/cmd_bf537led.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/config.mk.uboot $(UBOOT_DIR)/board/SwitchVoice/pr1/config.mk
+#	ln -sf $(UBOOT_SOURCES_DIR)/Makefile.uboot.pr1 $(UBOOT_DIR)/board/SwitchVoice/pr1/Makefile
+#	ln -sf $(UBOOT_SOURCES_DIR)/ether_bf537.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/ether_bf537.h $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/flash-defines.h $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/nand.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/post-memory.c.pr1 $(UBOOT_DIR)/board/SwitchVoice/pr1/post-memory.c
+#	ln -sf $(UBOOT_SOURCES_DIR)/stm_m25p40.c $(UBOOT_DIR)/board/SwitchVoice/pr1/
+#	ln -sf $(UBOOT_SOURCES_DIR)/u-boot.lds.S.pr1 $(UBOOT_DIR)/board/SwitchVoice/pr1/u-boot.lds.S
+#	ln -sf $(UBOOT_SOURCES_DIR)/tftp.c $(UBOOT_DIR)/net/
+#	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragnet.patch
+#	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragtftp.patch
+#endif
 
 	touch $(UBOOT_DIR)/.unpacked
 
@@ -142,7 +145,9 @@ $(UBOOT_DIR)/.configured: $(UBOOT_DIR)/.unpacked
 uBoot: $(UBOOT_DIR)/.configured
 	mkdir -p $(IMAGE_DIR)
 	$(MAKE) -C $(UBOOT_DIR)
+ifneq ($(strip $(SF_PR1_APPLIANCE)),y)
 	cd $(UBOOT_DIR)/tools/bin2ldr; ./runme.sh
+endif
 	cp -v $(UBOOT_DIR)/u-boot.ldr $(IMAGE_DIR)
 
 uBoot-configure: $(UBOOT_DIR)/.configured

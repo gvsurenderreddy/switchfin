@@ -319,7 +319,7 @@ diff -Naur u-boot-1.1.6.orig/Makefile u-boot-1.1.6/Makefile
 +echo "#define CONFIG_MEM_SIZE                 64" >> config.h
 +echo "#define CONFIG_MEM_ADD_WDTH             10" >> config.h
 +echo "#define CONFIG_MEM_MT48LC32M8A2_75      1" >> config.h
-+echo "#elif SDRAM_128M" >> config.h
++echo "#elif SDRAM_128MB" >> config.h
 +echo "#define CONFIG_MEM_SIZE                 128" >> config.h
 +echo "#define CONFIG_MEM_ADD_WDTH             11" >> config.h
 +echo "#define CONFIG_MEM_MT48LC64M8A2P_75     1" >> config.h
