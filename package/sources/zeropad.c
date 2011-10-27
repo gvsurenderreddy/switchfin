@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+//This way we will make our uImage block size (of the nand flash) multiple
+//In addition we will be able to extend the file so we can calculate the md5 check sum
+
 int main(int argc, char *argv[]) {
     FILE *fin, *fout;
     char *buf;
@@ -37,12 +40,18 @@ int main(int argc, char *argv[]) {
 	printf("Error in blocksize\n");
 	exit(1);
     }
-    memset(buf, 0, blocksize);
+  
 
-    while((n = fread(buf, sizeof(char), blocksize, fin))) {
+
+    //Copy the full blocks
+    while((n = fread(buf, sizeof(char), blocksize, fin))==blocksize) {
 	fwrite(buf, sizeof(char), blocksize, fout);
     }
-
+	
+    //Copy the zero padded last block  	
+    memset(buf+n, 0xff, blocksize-n); //nand flash is 0xff if cleared
+    fwrite(buf, sizeof(char), blocksize, fout);	 	
+    
     free(buf);
     fclose(fin);
     fclose(fout);
