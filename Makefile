@@ -148,8 +148,8 @@ image: $(TARGETS_IMAGE)
 	@sleep 5;
 	-$(MAKE) -C $(UCLINUX_DIR) modules_install image ROMFSDIR=$(TARGET_DIR) IMAGEDIR=$(IMAGE_DIR)
 	gcc $(SOURCES_DIR)/zeropad.c -o $(IMAGE_DIR)/zeropad -Wall
-	$(IMAGE_DIR)/zeropad $(IMAGE_DIR)/uImage $(IMAGE_DIR)/fix_image.astfin 0x20000
-	mv -f $(IMAGE_DIR)/fix_image.astfin $(IMAGE_DIR)/uImage
+	$(IMAGE_DIR)/zeropad $(IMAGE_DIR)/uImage $(IMAGE_DIR)/fix_image.switchfin 0x20000
+	mv -f $(IMAGE_DIR)/fix_image.switchfin $(IMAGE_DIR)/uImage
 	config/package-image.sh $(IMAGE_DIR)/uImage $(IMAGE_DIR)/uImage-md5
 	@if [ -f $(UBOOT_DIR)/u-boot.ldr ] ; then \
 		cp -v $(UBOOT_DIR)/u-boot.ldr $(IMAGE_DIR); \
