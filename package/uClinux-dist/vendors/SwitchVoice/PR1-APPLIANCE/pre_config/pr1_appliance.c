@@ -105,13 +105,9 @@ static struct platform_device bfin_mac_device = {
 static struct mtd_partition bfin_spi_flash_partitions[] = {
         {
                 .name = "boot loader(spi)",
-                .size = 0x30000,
+                .size = 0x40000,
                 .offset = 0,
                 .mask_flags = MTD_CAP_ROM
-        },{
-                .name = "boot loader env.(spi)",
-                .size = 0x10000,
-                .offset = 0x30000
         },{
                 .name = "extra(spi)",
                 .size = 0x40000,
