@@ -92,6 +92,7 @@ $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	$(UBOOT_UNZIP) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
+	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-pr1-post.patch
 ifeq ($(strip $(SF_SDRAM_64)),y)
 	sed -i  -e's/^#define CONFIG_MEM_ADD_WDTH.*/#define CONFIG_MEM_ADD_WDTH     10/' $(UBOOT_DIR)/include/configs/pr1.h
 	sed -i  -e's/^#define CONFIG_MEM_SIZE.*/#define CONFIG_MEM_SIZE         64/' $(UBOOT_DIR)/include/configs/pr1.h
