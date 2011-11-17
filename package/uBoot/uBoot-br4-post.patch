@@ -1,0 +1,84 @@
+--- u-boot-c02b119-br4/include/configs/br4.h	2011-11-16 17:49:33.000000000 +0200
++++ u-boot-c02b119-br4-post/include/configs/br4.h	2011-11-16 17:37:45.000000000 +0200
+@@ -57,6 +57,10 @@
+ #define CONFIG_BFIN_CPU             bf537-0.3
+ #define CONFIG_BFIN_BOOT_MODE       BFIN_BOOT_SPI_MASTER
+ 
++/*
++ * Enable memory and LED POST test
++ */
++#define CONFIG_POST (CONFIG_SYS_POST_MEMORY | CONFIG_SYS_POST_BSPEC1)
+ 
+ /*
+  * Clock Settings
+@@ -183,6 +187,10 @@
+ #define CONFIG_RTC_BFIN
+ #define CONFIG_UART_CONSOLE	0
+ 
++
++/* Define if want to do post memory test */
++#define CONFIG_POST_BSPEC1_GPIO_LEDS GPIO_PF14, GPIO_PF15
++
+ /*
+  * Pull in common ADI header for remaining command/environment setup
+  */
+--- u-boot-c02b119-br4/post/drivers/memory.c	2011-11-16 17:49:33.000000000 +0200
++++ u-boot-c02b119-br4-post/post/drivers/memory.c	2011-11-16 17:37:49.000000000 +0200
+@@ -489,6 +489,7 @@
+ 	return;
+ }
+ 
++#define POST_SLOWTEST 0
+ int memory_post_test(int flags)
+ {
+ 	int ret = 0;
+--- u-boot-c02b119-br4/board/br4/Makefile	2011-11-16 17:49:33.000000000 +0200
++++ u-boot-c02b119-br4-post/board/br4/Makefile	2011-11-16 17:37:34.000000000 +0200
+@@ -30,7 +30,7 @@
+ LIB	= $(obj)lib$(BOARD).o
+ 
+ COBJS-y	:= $(BOARD).o
+-COBJS-$(CONFIG_HAS_POST)   += post-memory.o
++#COBJS-$(CONFIG_HAS_POST)   += post-memory.o
+ 
+ SRCS	:= $(SOBJS-y:.o=.S) $(COBJS-y:.o=.c)
+ OBJS	:= $(addprefix $(obj),$(COBJS-y))
+--- u-boot-c02b119-br4/board/br4/br4.c	2011-11-16 17:49:33.000000000 +0200
++++ u-boot-c02b119-br4-post/board/br4/br4.c	2011-11-16 17:37:34.000000000 +0200
+@@ -33,6 +33,7 @@
+ #include <net.h>
+ #include <asm/mach-common/bits/bootrom.h>
+ #include <netdev.h>
++#include <asm/gpio.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+@@ -80,3 +81,28 @@
+ 
+ 	return 0;
+ }
++
++
++int post_hotkeys_pressed(void)
++{
++
++        int ret;
++        unsigned gpio = PF2;
++
++	printf("In hotkeys\n");
++
++	return 0;
++	
++        ret = gpio_request(gpio, "hotkeys");
++        if (ret) {
++                printf("POST: gpio hotkey request failed\n");
++                return 0;
++        }
++
++        gpio_direction_input(gpio);
++        ret = gpio_get_value(gpio);
++        gpio_free(gpio);
++
++        return !ret;
++}
++

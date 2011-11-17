@@ -49,12 +49,12 @@ UCONFIG=pr1
 endif
 
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
-UBOOT_DIRNAME=u-boot-1.1.6
+UBOOT_DIRNAME=u-boot-c02b119
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
-UBOOT_SOURCE=u-boot-1.1.6.tar.bz2
-UBOOT_SITE=http://blackfin.uclinux.org/gf/download/frsrelease/40/3028
-UBOOT_UNZIP=bzcat
-PATCHNAME=uBoot
+UBOOT_SOURCE=u-boot-c02b119.tar.gz
+UBOOT_SITE='http://blackfin.uclinux.org/git/?p=u-boot;a=snapshot;h=c02b119d1c6bad4361f1d8e1872e77f89a7553db;sf=tgz'
+UBOOT_UNZIP=zcat
+PATCHNAME=uBoot-br4
 UCONFIG=br4
 endif
 
@@ -81,16 +81,22 @@ CPU_FLAGS=CPU_600
 endif
 
 $(DL_DIR)/$(UBOOT_SOURCE):
-ifneq ($(strip $(SF_PR1_APPLIANCE)),y)
-	$(WGET) -P $(DL_DIR)  $(UBOOT_SITE)/$(UBOOT_SOURCE)
-else
+
+ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
+ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	$(WGET) -O $(DL_DIR)/$(UBOOT_SOURCE) $(UBOOT_SITE)
+else
+	$(WGET) -P $(DL_DIR)  $(UBOOT_SITE)/$(UBOOT_SOURCE)
+endif
+else
+	$(WGET) -P $(DL_DIR)  $(UBOOT_SITE)/$(UBOOT_SOURCE)
 endif
 
 $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	mkdir -p $(BUILD_DIR)
 	$(UBOOT_UNZIP) $(DL_DIR)/$(UBOOT_SOURCE) | tar -C $(BUILD_DIR) $(TAR_OPTIONS) -
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch
+
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-pr1-post.patch
 ifeq ($(strip $(SF_SDRAM_64)),y)
@@ -105,32 +111,33 @@ ifeq ($(strip $(SF_CPU_REV_2)),y)
 else
 	sed -i  -e's/^#define CONFIG_BFIN_CPU.*/#define CONFIG_BFIN_CPU             bf537-0.3/' $(UBOOT_DIR)/include/configs/pr1.h
 endif
+
 endif
+
+
+ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
+	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-br4-post.patch
+ifeq ($(strip $(SF_SDRAM_64)),y)
+	sed -i  -e's/^#define CONFIG_MEM_ADD_WDTH.*/#define CONFIG_MEM_ADD_WDTH     10/' $(UBOOT_DIR)/include/configs/br4.h
+	sed -i  -e's/^#define CONFIG_MEM_SIZE.*/#define CONFIG_MEM_SIZE         64/' $(UBOOT_DIR)/include/configs/br4.h
+else
+	sed -i  -e's/^#define CONFIG_MEM_ADD_WDTH.*/#define CONFIG_MEM_ADD_WDTH     11/' $(UBOOT_DIR)/include/configs/br4.h
+	sed -i  -e's/^#define CONFIG_MEM_SIZE.*/#define CONFIG_MEM_SIZE         128/' $(UBOOT_DIR)/include/configs/br4.h
+endif
+ifeq ($(strip $(SF_CPU_REV_2)),y)
+	sed -i  -e's/^#define CONFIG_BFIN_CPU.*/#define CONFIG_BFIN_CPU             bf537-0.2/' $(UBOOT_DIR)/include/configs/br4.h
+else
+	sed -i  -e's/^#define CONFIG_BFIN_CPU.*/#define CONFIG_BFIN_CPU             bf537-0.3/' $(UBOOT_DIR)/include/configs/br4.h
+endif
+
+endif
+
 ifneq ($(strip $(SF_PR1_APPLIANCE)),y)
+ifneq ($(strip $(SF_BR4_APPLIANCE)),y)
 	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/nand.patch
 endif
-ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
-	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch.br4
-	mkdir -p $(UBOOT_DIR)/board/SwitchVoice/br4
-	touch $(UBOOT_DIR)/board/SwitchVoice/br4/memory.c
-	ln -sf $(UBOOT_SOURCES_DIR)/br4.h $(UBOOT_DIR)/include/configs/
-	ln -sf $(UBOOT_SOURCES_DIR)/boot_progress.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/br4.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/cmd_bf537led.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/config.mk.uboot $(UBOOT_DIR)/board/SwitchVoice/br4/config.mk
-	ln -sf $(UBOOT_SOURCES_DIR)/Makefile.uboot.br4 $(UBOOT_DIR)/board/SwitchVoice/br4/Makefile
-	ln -sf $(UBOOT_SOURCES_DIR)/ether_bf537.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/ether_bf537.h $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/flash-defines.h $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/i2c.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/nand.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/post-memory.c.br4 $(UBOOT_DIR)/board/SwitchVoice/br4/post-memory.c
-	ln -sf $(UBOOT_SOURCES_DIR)/stm_m25p40.c $(UBOOT_DIR)/board/SwitchVoice/br4/
-	ln -sf $(UBOOT_SOURCES_DIR)/u-boot.lds.S.br4 $(UBOOT_DIR)/board/SwitchVoice/br4/u-boot.lds.S
-	ln -sf $(UBOOT_SOURCES_DIR)/tftp.c $(UBOOT_DIR)/net/
-	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragnet.patch
-	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/defragtftp.patch
 endif
+
 	touch $(UBOOT_DIR)/.unpacked
 
 $(UBOOT_DIR)/.configured: $(UBOOT_DIR)/.unpacked
@@ -141,7 +148,9 @@ uBoot: $(UBOOT_DIR)/.configured
 	mkdir -p $(IMAGE_DIR)
 	$(MAKE)  -C $(UBOOT_DIR)
 ifneq ($(strip $(SF_PR1_APPLIANCE)),y)
+ifneq ($(strip $(SF_BR4_APPLIANCE)),y)
 	cd $(UBOOT_DIR)/tools/bin2ldr; ./runme.sh
+endif
 endif
 	cp -v $(UBOOT_DIR)/u-boot.ldr $(IMAGE_DIR)
 
