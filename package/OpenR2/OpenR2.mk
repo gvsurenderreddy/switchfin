@@ -40,7 +40,7 @@ ifeq ($(strip $(SF_PACKAGE_OPENR2)),y)
 openr2_: openr2
 else
 openr2_:
-	rm -f $(TARGET_DIR)/usr/sbin/{edge,supernode} 
+#	rm -f $(TARGET_DIR)/foo
 endif
 
 ################################################
