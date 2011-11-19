@@ -39,10 +39,10 @@ UCONFIG=ip04
 endif
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-UBOOT_DIRNAME=u-boot-c02b119
+UBOOT_DIRNAME=u-boot-dc1aeeb
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
-UBOOT_SOURCE=u-boot-c02b119.tar.gz
-UBOOT_SITE='http://blackfin.uclinux.org/git/?p=u-boot;a=snapshot;h=c02b119d1c6bad4361f1d8e1872e77f89a7553db;sf=tgz'
+UBOOT_SOURCE=u-boot-dc1aeeb.tar.gz
+UBOOT_SITE='http://blackfin.uclinux.org/git/?p=u-boot;a=snapshot;h=dc1aeebd486bc0408902b96402cd6455cc93eb1a;sf=tgz'
 UBOOT_UNZIP=zcat
 PATCHNAME=uBoot-pr1
 UCONFIG=pr1
@@ -86,7 +86,7 @@ ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
 	$(WGET) -O $(DL_DIR)/$(UBOOT_SOURCE) $(UBOOT_SITE)
 else
-	$(WGET) -P $(DL_DIR)  $(UBOOT_SITE)/$(UBOOT_SOURCE)
+	$(WGET) -O $(DL_DIR)/$(UBOOT_SOURCE) $(UBOOT_SITE)
 endif
 else
 	$(WGET) -P $(DL_DIR)  $(UBOOT_SITE)/$(UBOOT_SOURCE)
@@ -98,7 +98,7 @@ $(UBOOT_DIR)/.unpacked: $(DL_DIR)/$(UBOOT_SOURCE)
 	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot $(PATCHNAME).patch
 
 ifeq ($(strip $(SF_PR1_APPLIANCE)),y)
-	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-pr1-post.patch
+#	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-pr1-post.patch
 ifeq ($(strip $(SF_SDRAM_64)),y)
 	sed -i  -e's/^#define CONFIG_MEM_ADD_WDTH.*/#define CONFIG_MEM_ADD_WDTH     10/' $(UBOOT_DIR)/include/configs/pr1.h
 	sed -i  -e's/^#define CONFIG_MEM_SIZE.*/#define CONFIG_MEM_SIZE         64/' $(UBOOT_DIR)/include/configs/pr1.h
@@ -137,7 +137,6 @@ ifneq ($(strip $(SF_BR4_APPLIANCE)),y)
 	patch -N -p1 -d $(UBOOT_DIR) < package/uBoot/nand.patch
 endif
 endif
-
 	touch $(UBOOT_DIR)/.unpacked
 
 $(UBOOT_DIR)/.configured: $(UBOOT_DIR)/.unpacked

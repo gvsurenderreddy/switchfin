@@ -32,17 +32,6 @@
  int memory_post_test(int flags)
  {
  	int ret = 0;
---- u-boot-c02b119-pr1/board/pr1/Makefile	2011-11-16 17:49:33.000000000 +0200
-+++ u-boot-c02b119-pr1-post/board/pr1/Makefile	2011-11-16 17:37:34.000000000 +0200
-@@ -30,7 +30,7 @@
- LIB	= $(obj)lib$(BOARD).o
- 
- COBJS-y	:= $(BOARD).o
--COBJS-$(CONFIG_HAS_POST)   += post-memory.o
-+#COBJS-$(CONFIG_HAS_POST)   += post-memory.o
- 
- SRCS	:= $(SOBJS-y:.o=.S) $(COBJS-y:.o=.c)
- OBJS	:= $(addprefix $(obj),$(COBJS-y))
 --- u-boot-c02b119-pr1/board/pr1/pr1.c	2011-11-16 17:49:33.000000000 +0200
 +++ u-boot-c02b119-pr1-post/board/pr1/pr1.c	2011-11-16 17:37:34.000000000 +0200
 @@ -33,6 +33,7 @@
