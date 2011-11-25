@@ -49,10 +49,10 @@ UCONFIG=pr1
 endif
 
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
-UBOOT_DIRNAME=u-boot-c02b119
+UBOOT_DIRNAME=u-boot-dc1aeeb
 UBOOT_DIR=$(BUILD_DIR)/$(UBOOT_DIRNAME)
-UBOOT_SOURCE=u-boot-c02b119.tar.gz
-UBOOT_SITE='http://blackfin.uclinux.org/git/?p=u-boot;a=snapshot;h=c02b119d1c6bad4361f1d8e1872e77f89a7553db;sf=tgz'
+UBOOT_SOURCE=u-boot-dc1aeeb.tar.gz
+UBOOT_SITE='http://blackfin.uclinux.org/git/?p=u-boot;a=snapshot;h=dc1aeebd486bc0408902b96402cd6455cc93eb1a;sf=tgz'
 UBOOT_UNZIP=zcat
 PATCHNAME=uBoot-br4
 UCONFIG=br4
@@ -116,7 +116,7 @@ endif
 
 
 ifeq ($(strip $(SF_BR4_APPLIANCE)),y)
-	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-br4-post.patch
+#	$(PATCH_KERNEL) $(UBOOT_DIR) package/uBoot uBoot-br4-post.patch
 ifeq ($(strip $(SF_SDRAM_64)),y)
 	sed -i  -e's/^#define CONFIG_MEM_ADD_WDTH.*/#define CONFIG_MEM_ADD_WDTH     10/' $(UBOOT_DIR)/include/configs/br4.h
 	sed -i  -e's/^#define CONFIG_MEM_SIZE.*/#define CONFIG_MEM_SIZE         64/' $(UBOOT_DIR)/include/configs/br4.h
