@@ -34,6 +34,12 @@ config SF_ASTERISK_1_6
         help
           Asterisk 1.6 bringing up new features. Experimental, still not recommend for production boxes.
 
+config SF_ASTERISK_1_8
+        bool "Asterisk 1.8 (Experimental)"
+        depends on SF_PACKAGE_ASTERISK
+        help
+          Asterisk 1.8 bringing up new features. Experimental, still not recommend for production boxes.
+
 endchoice
 
 config SF_PACKAGE_ASTERISK_VERBOSE

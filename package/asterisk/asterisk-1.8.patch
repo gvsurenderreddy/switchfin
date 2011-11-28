@@ -1,5 +1,5 @@
---- asterisk/res/ael/ael.flex	2010-04-18 00:56:38.000000000 +0300
-+++ asterisk/res/ael/ael.flex	2010-04-18 00:57:08.000000000 +0300
+--- asterisk/res/ael/ael.flex	2010-06-23 14:06:40.000000000 -0700
++++ asterisk/res/ael/ael.flex	2011-11-06 10:24:34.906467328 -0800
 @@ -595,7 +595,7 @@
  		   snprintf(fnamebuf2,sizeof(fnamebuf2), "%s/%s", (char *)ast_config_AST_CONFIG_DIR, fnamebuf);
  		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
@@ -9,9 +9,9 @@
  			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
  #else
  			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
---- asterisk/res/ael/ael_lex.c	2010-04-18 00:59:56.000000000 +0300
-+++ asterisk/res/ael/ael_lex.c	2010-04-18 01:03:14.000000000 +0300
-@@ -1962,7 +1962,7 @@
+--- asterisk/res/ael/ael_lex.c	2010-10-28 13:00:06.000000000 -0700
++++ asterisk/res/ael/ael_lex.c	2011-11-06 10:24:34.906467328 -0800
+@@ -1976,7 +1976,7 @@
  		   snprintf(fnamebuf2,sizeof(fnamebuf2), "%s/%s", (char *)ast_config_AST_CONFIG_DIR, fnamebuf);
  		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
  		}
@@ -20,8 +20,8 @@
  			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
  #else
  			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
---- asterisk/main/frame.c	2010-04-18 02:02:03.000000000 +0300
-+++ asterisk/main/frame.c	2010-04-18 02:03:50.000000000 +0300
+--- asterisk/main/frame.c	2010-06-17 10:23:43.000000000 -0700
++++ asterisk/main/frame.c	2011-11-06 10:24:34.910467328 -0800
 @@ -103,8 +103,8 @@
  	{ AST_FORMAT_SLINEAR, "slin", 8000, "16 bit Signed Linear PCM", 160, 10, 70, 10, 20, AST_SMOOTHER_FLAG_BE }, /*!< Signed linear */
  	{ AST_FORMAT_LPC10, "lpc10", 8000, "LPC10", 7, 20, 20, 20, 20 },                                       /*!< codec_lpc10.c */ 
@@ -33,19 +33,19 @@
  	{ AST_FORMAT_ILBC, "ilbc", 8000, "iLBC", 50, 30, 30, 30, 30 },                                         /*!< codec_ilbc.c */ /* inc=30ms - workaround */
  	{ AST_FORMAT_G726_AAL2, "g726aal2", 8000, "G.726 AAL2", 40, 10, 300, 10, 20 },                         /*!< codec_g726.c */
  	{ AST_FORMAT_G722, "g722", 16000, "G722", 80, 10, 150, 10, 20 },                                       /*!< codec_g722.c */
-@@ -1434,7 +1434,9 @@
+@@ -1449,7 +1449,9 @@
  
- 	switch(f->subclass) {
+ 	switch (f->subclass.codec) {
  	case AST_FORMAT_SPEEX:
 -		samples = speex_samples(f->data.ptr, f->datalen);
 +		/* DR: hard coded for quality=8 mode.
 +		300 bits (38 bytes) converted to 160 samples */
 +		samples = 160 * (f->datalen / 38);		
  		break;
- 	case AST_FORMAT_G723_1:
- 		samples = g723_samples(f->data.ptr, f->datalen);
---- asterisk/apps/app_voicemail.c	2011-02-09 03:41:42.000000000 +0800
-+++ asterisk/apps/app_voicemail.c	2011-07-11 06:54:30.844212368 +0800
+ 	case AST_FORMAT_SPEEX16:
+ 		samples = 2 * speex_samples(f->data.ptr, f->datalen);
+--- asterisk/apps/app_voicemail.c	2011-02-08 11:41:42.000000000 -0800
++++ asterisk/apps/app_voicemail.c	2011-11-06 10:24:34.910467328 -0800
 @@ -3366,7 +3366,7 @@
  					}
  					/* Read out in small chunks */
@@ -64,19 +64,8 @@
  		if (fdm == MAP_FAILED) {
  			ast_log(AST_LOG_WARNING, "Memory map failed!\n");
  			res = -1;
---- asterisk/main/manager.c	2011-04-25 23:11:30.000000000 +0800
-+++ asterisk/main/manager.c	2011-07-11 06:56:48.316894048 +0800
-@@ -5914,7 +5914,7 @@
- 		size_t l = ftell(s.f);
- 
- 		if (l) {
--			if ((buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_SHARED, s.fd, 0))) {
-+			if ((buf = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_PRIVATE, s.fd, 0))) {
- 				if (format == FORMAT_XML || format == FORMAT_HTML) {
- 					xml_translate(&out, buf, params, format);
- 				} else {
---- asterisk/codecs/Makefile	2011-07-13 17:49:18.131493352 +0800
-+++ asterisk/codecs/Makefile	2011-07-13 14:55:01.993772852 +0800
+--- asterisk/codecs/Makefile	2010-03-23 07:22:27.000000000 -0700
++++ asterisk/codecs/Makefile	2011-11-06 10:24:34.914467328 -0800
 @@ -51,3 +51,6 @@
  
  $(if $(filter codec_g722,$(EMBEDDED_MODS)),modules.link,codec_g722.so): g722/g722_encode.o g722/g722_decode.o
@@ -84,8 +73,8 @@
 +
 +$(if $(filter codec_g729,$(EMBEDDED_MODS)),modules.link,codec_g729.so):
 +	$(CC) -o codec_g729.so -shared $(ASTLDFLAGS)  codec_g729.o $(ASTTOPDIR)/../uClinux-dist/lib/libbfgdots/g729/src.fdpic/partial_local.o
---- asterisk/include/asterisk/stringfields.h	2011-07-15 12:45:02.034513771 +0800
-+++ asterisk/include/asterisk/stringfields.h	2011-07-15 11:11:29.093304811 +0800
+--- asterisk/include/asterisk/stringfields.h	2009-12-21 10:51:17.000000000 -0800
++++ asterisk/include/asterisk/stringfields.h	2011-11-06 10:24:34.914467328 -0800
 @@ -295,7 +295,7 @@
  
  /* the type of storage used to track how many bytes were allocated for a field */
@@ -95,8 +84,8 @@
  
  /*!
    \brief Macro to provide access to the allocation field that lives immediately in front of a string field
---- asterisk/makeopts.in	2011-07-15 14:13:44.317672636 +0800
-+++ asterisk/makeopts.in	2011-07-15 14:14:00.705753898 +0800
+--- asterisk/makeopts.in	2010-12-17 15:52:04.000000000 -0800
++++ asterisk/makeopts.in	2011-11-06 10:24:34.914467328 -0800
 @@ -85,7 +85,7 @@
  astvarlibdir = @astvarlibdir@
  ASTVARLIBDIR = @astvarlibdir@
@@ -106,8 +95,8 @@
  ASTKEYDIR = @astkeydir@
  ASTSPOOLDIR = @astspooldir@
  ASTLOGDIR = @astlogdir@
---- asterisk/configure	2011-07-17 09:30:54.085912359 +0800
-+++ asterisk/configure	2011-07-17 09:32:00.174240070 +0800
+--- asterisk/configure	2011-01-27 09:03:01.000000000 -0800
++++ asterisk/configure	2011-11-06 10:24:34.922467328 -0800
 @@ -13104,7 +13104,7 @@
  fi
  if test "x$ac_cv_func_fork_works" = xcross; then
@@ -117,8 +106,8 @@
        # Override, as these systems have only a dummy fork() stub
        ac_cv_func_fork_works=no
        ;;
---- asterisk/channels/sig_analog.c.orig	2011-08-03 14:06:43.986937669 +0800
-+++ asterisk/channels/sig_analog.c	2011-08-03 14:07:51.807273984 +0800
+--- asterisk/channels/sig_analog.c	2010-11-24 14:49:48.000000000 -0800
++++ asterisk/channels/sig_analog.c	2011-11-06 10:24:34.922467328 -0800
 @@ -47,7 +47,7 @@
   * before dialing on it.  Certain FXO interfaces always think they're out of
   * service with this method however.
@@ -136,3 +125,30 @@
  			return 0;
  #endif
  		/* TDM FXS card, "offhook" means someone took the hook off so it's unavailable! */
+--- asterisk/main/asterisk.c	2011-02-10 14:39:30.000000000 -0800
++++ asterisk/main/asterisk.c	2011-11-08 12:30:24.703012625 -0800
+@@ -3622,8 +3622,11 @@
+ 
+ 		/* Don't let the canary child kill Asterisk, if it dies immediately */
+ 		sigaction(SIGPIPE, &ignore_sig_handler, NULL);
+-
+-		canary_pid = fork();
++	#ifdef HAVE_WORKING_FORK
++        	canary_pid = fork();
++	#else
++        	canary_pid = vfork();
++	#endif
+ 		if (canary_pid == 0) {
+ 			char canary_binary[128], *lastslash, ppid[12];
+ 
+--- asterisk/main/app.c	2011-01-19 12:24:57.000000000 -0800
++++ asterisk/main/app.c	2011-11-08 12:27:51.839012668 -0800
+@@ -2095,7 +2095,7 @@
+ 	sigfillset(&signal_set);
+ 	pthread_sigmask(SIG_BLOCK, &signal_set, &old_set);
+ 
+-	pid = fork();
++	pid = vfork();
+ 
+ 	if (pid != 0) {
+ 		/* Fork failed or parent */

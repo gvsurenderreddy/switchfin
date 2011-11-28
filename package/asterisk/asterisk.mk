@@ -26,9 +26,15 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 	ASTERISK_SERIES=1.4
 	ATTRAFAX_DIR=$(BUILD_DIR)/attrafax-0.9
 else
-	ASTERISK_VERSION=1.6.2.20
-	ASTERISK_SERIES=1.6
-	ATTRAFAX_DIR=$(BUILD_DIR)/asterisk-$(ASTERISK_VERSION)
+	ifeq ($(strip $(SF_ASTERISK_1_6)),y)
+		ASTERISK_VERSION=1.6.2.20
+		ASTERISK_SERIES=1.6
+		ATTRAFAX_DIR=$(BUILD_DIR)/asterisk-$(ASTERISK_VERSION)
+	else
+		ASTERISK_VERSION=1.8.7.1
+		ASTERISK_SERIES=1.8
+		ATTRAFAX_DIR=$(BUILD_DIR)/asterisk-$(ASTERISK_VERSION)
+	endif
 endif
 
 ASTERISK_NAME=asterisk-$(ASTERISK_VERSION)
@@ -46,7 +52,11 @@ ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
 ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
 ASTERISK_DEP=sqlite3 $(if $(filter $(SF_PR1_APPLIANCE),y), libpri) $(if $(filter $(SF_PACKAGE_LUA),y), _lua)
 ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl
-ASTERISK_CONFIGURE_OPTS+= --without-curl --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux
+ASTERISK_CONFIGURE_OPTS+= --without-libcurl --with-ssl --with-crypto --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux 
+
+ifeq ($(strip $(SF_PACKAGE_IKSEMEL)),y)
+ASTERISK_CONFIGURE_OPTS+= --with-iksemel=$(TARGET_DIR)/usr
+endif
 
 ifeq ($(filter $(SF_SPANDSP_FAX) $(SF_SPANDSP_CALLERID),y),y)
 ASTERISK_CFLAGS+= $(if $(filter $(SF_SPANDSP_CALLERID),y), -DUSE_SPANDSP_CALLERID)
@@ -108,6 +118,9 @@ endif
 ifeq ($(strip $(SF_PACKAGE_UW-IMAP)),y)
 	sed -i 's/^MENUSELECT_OPTS_app_voicemail=/\0IMAP_STORAGE/' $(ASTERISK_DIR)/menuselect.makeopts
 endif
+ifeq ($(strip $(SF_PACKAGE_IKSEMEL)),y)
+	make iksemel
+endif
 	cd $(ASTERISK_DIR); CFLAGS="$(ASTERISK_CFLAGS)" LDFLAGS="$(ASTERISK_LDFLAGS)" GNU_LD=0 ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
@@ -142,6 +155,12 @@ ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
 		rm -rf $(TARGET_DIR)/bin/asterisk; \
 	fi
+	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.8; then \
+		rm -rf $(BUILD_DIR)/asterisk-1.8*; \
+		rm -rf $(ASTERISK_DIR_LINK); \
+		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
+		rm -rf $(TARGET_DIR)/bin/asterisk; \
+	fi
 endif
 ifeq ($(strip $(SF_ASTERISK_1_6)),y)
 	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.4; then \
@@ -150,7 +169,29 @@ ifeq ($(strip $(SF_ASTERISK_1_6)),y)
 		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
 		rm -rf $(TARGET_DIR)/bin/asterisk; \
 	fi
+	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.8; then \
+		rm -rf $(BUILD_DIR)/asterisk-1.8*; \
+		rm -rf $(ASTERISK_DIR_LINK); \
+		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
+		rm -rf $(TARGET_DIR)/bin/asterisk; \
+	fi
+
 endif
+ifeq ($(strip $(SF_ASTERISK_1_8)),y)
+	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.4; then \
+		rm -rf $(BUILD_DIR)/asterisk-1.4*; \
+		rm -rf $(ASTERISK_DIR_LINK); \
+		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
+		rm -rf $(TARGET_DIR)/bin/asterisk; \
+	fi
+	if test -f $(ASTERISK_DIR_LINK)/.asterisk.1.6; then \
+		rm -rf $(BUILD_DIR)/asterisk-1.6*; \
+		rm -rf $(ASTERISK_DIR_LINK); \
+		rm -rf $(TARGET_DIR)/usr/lib/asterisk/modules/; \
+		rm -rf $(TARGET_DIR)/bin/asterisk; \
+	fi
+endif
+
 
 asterisk: check_prev_ver $(ASTERISK_DIR_LINK)/.configured
 
