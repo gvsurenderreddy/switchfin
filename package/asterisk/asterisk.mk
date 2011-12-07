@@ -76,6 +76,11 @@ ASTERISK_DEP+= uw-imap
 ASTERISK_CONFIGURE_OPTS+= --with-imap=$(BUILD_DIR)/imap-2007e
 endif
 
+ifeq ($(strip $(SF_PACKAGE_OPENR2)),y)
+ASTERISK_DEP+= openr2
+ASTERISK_CONFIGURE_OPTS+= --with-openr2=$(TARGET_DIR)/lib
+endif
+
 $(DL_DIR)/$(ASTERISK_SOURCE):
 	$(WGET) -P $(DL_DIR) $(ASTERISK_SITE)/$(ASTERISK_SOURCE)
 
@@ -85,6 +90,7 @@ $(ASTERISK_DIR)/.unpacked: $(DL_DIR)/$(ASTERISK_SOURCE)
 ifeq ($(strip $(SF_ASTERISK_1_4)),y)
 ifeq ($(strip $(SF_PACKAGE_OPENR2)),y)
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/OpenR2/ openr2-asterisk-1.4.42-p1.patch
+	cd $(ASTERISK_DIR)/; ./bootstrap.sh
 endif
 endif
 	$(PATCH_KERNEL) $(ASTERISK_DIR_LINK) package/asterisk asterisk-$(ASTERISK_SERIES).patch

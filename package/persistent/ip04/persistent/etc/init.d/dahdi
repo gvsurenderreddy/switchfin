@@ -1,20 +1,21 @@
 #!/bin/hush
 # Start up file for DAHDI
-
+	
 case $1 in
-	start)   modprobe wcfxs opermode=`sed -n 's/^opermode *= *//p' /etc/asterisk/guipreferences.conf`;
-	         if dahdi_scan | grep -q "Blackfin IP0x Board"; then; else; modprobe dahdi_dummy; fi;
-	         dahdi_cfg;;
-	stop)    modprobe -r wcfxs dahdi_dummy;;
-	restart) $0 stop; $0 start;;
-	enable)  ln -snf /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
-	disable) rm -f /persistent/etc/rc.d/S40dahdi;;
-	*) echo 'Syntax: /etc/init.d/dahdi [command]'
-	   echo ''
-	   echo '       Available commands:'
-	   echo '               start   Start the service'
-	   echo '               stop    Stop the service'
-	   echo '               restart Restart the service'
-	   echo '               enable  Enable service autostart'
-	   echo '               disable Disable service autostart'
+        start)   modprobe wcfxs opermode=`sed -n 's/^opermode *= *//p' /etc/asterisk/guipreferences.conf`;
+                 if dahdi_scan | grep -q "Blackfin IP0x Board"; then; else; modprobe dahdi_dummy; fi;
+                 dahdi_cfg;;
+        stop)    modprobe -r wcfxs dahdi_dummy;;
+        restart) $0 stop; $0 start;;
+        enable)  ln -snf /persistent/etc/init.d/dahdi /persistent/etc/rc.d/S40dahdi;;
+        disable) rm -f /persistent/etc/rc.d/S40dahdi;;
+        *) echo 'Syntax: /etc/init.d/dahdi [command]'
+           echo ''
+           echo '       Available commands:'
+           echo '               start   Start the service'
+           echo '               stop    Stop the service'
+           echo '               restart Restart the service'
+           echo '               enable  Enable service autostart'
+           echo '               disable Disable service autostart'
 esac
+
