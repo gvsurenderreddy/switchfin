@@ -4,8 +4,8 @@
 #
 # Copyright @ 2010 SwitchFin <dpn@switchfin.org>
 #########################################################
-INADYN_SITE=ftp://ftp.vmlinux.org/pub/People/jocke/inadyn/
-INADYN_VERSION=1.97.4
+INADYN_SITE=http://cloud.github.com/downloads/troglobit/inadyn
+INADYN_VERSION=1.98.1
 INADYN_SOURCE=inadyn-$(INADYN_VERSION).tar.bz2
 INADYN_CROSS_COMPILE_PATCH=inadyn.patch
 INADYN_DIR_BASENAME=inadyn
@@ -13,7 +13,7 @@ INADYN_DIR=$(BUILD_DIR)/$(INADYN_DIR_BASENAME)-$(INADYN_VERSION)
 
 
 $(DL_DIR)/$(INADYN_SOURCE):
-	$(WGET) -P $(DL_DIR) $(INADYN_SITE)/$(INADYN_SOURCE)
+	$(WGET)  -P $(DL_DIR) $(INADYN_SITE)/$(INADYN_SOURCE)
 
 $(INADYN_DIR)/.unpacked: $(DL_DIR)/$(INADYN_SOURCE)
 	tar -xf $(DL_DIR)/$(INADYN_SOURCE) -C $(BUILD_DIR)
