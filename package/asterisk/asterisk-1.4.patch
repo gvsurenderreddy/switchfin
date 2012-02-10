@@ -603,7 +603,7 @@ diff -Naur asterisk-1.4.42_original/main/dsp.c asterisk-1.4.42_switchfin/main/ds
  
 +unsigned int cycles(void);
 +
-+#ifdef __BLACKFIN__
++#ifdef __BFIN__
 +unsigned int cycles() {
 +  int ret;
 +

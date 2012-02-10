@@ -22,24 +22,14 @@
  PROC?=$(shell uname -m)
  
  # SONAME version; should be changed on every ABI change
-@@ -90,7 +98,7 @@
- 	rose_qsig_mwi.lo \
+@@ -91,6 +98,7 @@
  	rose_qsig_name.lo \
  	version.lo
--CFLAGS=-Wall -Werror -Wstrict-prototypes -Wmissing-prototypes -g -fPIC $(ALERTING) $(LIBPRI_OPT) $(COVERAGE_CFLAGS)
-+CFLAGS= -mfdpic -fomit-frame-pointer -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes -g $(ALERTING) $(COVERAGE_CFLAGS) $(LIBPRI_OPT)
+ CFLAGS=-Wall -Werror -Wstrict-prototypes -Wmissing-prototypes -g -fPIC $(ALERTING) $(LIBPRI_OPT) $(COVERAGE_CFLAGS)
++CFLAGS+= -fomit-frame-pointer
  INSTALL_PREFIX=$(DESTDIR)
  INSTALL_BASE=/usr
  libdir?=$(INSTALL_BASE)/lib
-@@ -101,7 +109,7 @@
-   endif
-   LDCONFIG=/usr/bin/true
- else
--  SOFLAGS=-shared -Wl,-h$(DYNAMIC_LIBRARY) $(COVERAGE_LDFLAGS)
-+  SOFLAGS=-mfdpic -shared -Wl,-h$(DYNAMIC_LIBRARY) $(COVERAGE_LDFLAGS)
-   LDCONFIG = /sbin/ldconfig
- endif
- ifneq (,$(findstring X$(OSARCH)X, XLinuxX XGNU/kFreeBSDX XGNUX))
 @@ -145,7 +153,7 @@
  SOFLAGS += -m32
  endif

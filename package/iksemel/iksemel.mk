@@ -11,9 +11,9 @@ IKSEMEL_CROSS_COMPILE_PATCH=iksemel.patch
 IKSEMEL_DIR_BASENAME=iksemel
 IKSEMEL_DIR=$(BUILD_DIR)/$(IKSEMEL_DIR_BASENAME)-$(IKSEMEL_VERSION)
 
-#IKSEMEL_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__ -I$(STAGING_INC) -fno-jump-tables
+#IKSEMEL_CFLAGS=-g -mfast-fp -ffast-math -D__FIXED_PT__ -I$(STAGING_INC) -fno-jump-tables
 #IKSEMEL_CFLAGS+= $(if $(filter $(SF_SPANDSP_CALLERID),y), -DUSE_SPANDSP_CALLERID)
-#IKSEMEL_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp -lspandsp -ltiff
+#IKSEMEL_LDFLAGS=-L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp -lspandsp -ltiff
 IKSEMEL_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --prefix=$(TARGET_DIR)/usr
 
 $(DL_DIR)/$(IKSEMEL_SOURCE):

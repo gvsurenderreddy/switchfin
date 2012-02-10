@@ -22,7 +22,7 @@ VTUN_SOURCE=$(VTUN_NAME).tar.gz
 VTUN_SITE=http://prdownloads.sourceforge.net/vtun
 VTUN_UNZIP=zcat
 
-VTUN_CFLAGS=-D__FIXED_PT__ -D__BLACKFIN__
+VTUN_CFLAGS=-D__FIXED_PT__
 VTUN_CFLAGS+= -I$(STAGING_INC)
 VTUN_LDFLAGS=-L$(STAGING_LIB) -lz -lcrypto
 

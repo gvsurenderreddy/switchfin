@@ -20,7 +20,7 @@ mISDNuser_CONFIG=$(UCLINUX_KERNEL_SRC)/.config
 
 
 mISDNuserCFLAGS += -g -Wall -I $(mISDNuser_DIR)/include -I $(mISDN_DIR)/include -ffast-math -D__FIXED_PT__  -I$(STAGING_INC)
-mISDNuserCFLAGS += -D CLOSE_REPORT=1 -mfdpic -D__BLACKFIN__
+mISDNuserCFLAGS += -D CLOSE_REPORT=1
 
 
 $(DL_DIR)/$(mISDNuser_NAME)-$(mISDNuser_REV):
@@ -40,7 +40,7 @@ mISDNuser: mISDN $(mISDNuser_DIR)/.configured
 		CC="gcc" LIBDIR="usr/lib"\
 		CROSS="$(TARGET_CROSS)" \
 		CFLAGS="$(mISDNuserCFLAGS)" \
-		LDFLAGS="-L$(STAGING_LIB) -mfdpic -lncurses -lpthread -ldl" \
+		LDFLAGS="-L$(STAGING_LIB) -lncurses -lpthread -ldl" \
 		MISDNDIR="$(mISDN_DIR)" \
 		INSTALL_PREFIX=$(STAGING_DIR)
 

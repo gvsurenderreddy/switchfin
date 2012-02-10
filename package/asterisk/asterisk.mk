@@ -47,12 +47,11 @@ ASTERISK_UNZIP=zcat
 APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
 APP_FAX_REV=69
 
-ASTERISK_CFLAGS=-g -mfdpic -mfast-fp -ffast-math -D__FIXED_PT__ -D__BLACKFIN__
-ASTERISK_CFLAGS+= -I$(STAGING_INC) -fno-jump-tables
-ASTERISK_LDFLAGS=-mfdpic -L$(STAGING_LIB) -lpthread -ldl -ltonezone -lsqlite3 -lspeexdsp
+ASTERISK_CPPFLAGS=-I$(STAGING_INC)
+ASTERISK_CFLAGS=-g -mfast-fp -ffast-math -fno-jump-tables -D__FIXED_PT__
+ASTERISK_LDFLAGS=-L$(STAGING_LIB)
 ASTERISK_DEP=sqlite3 $(if $(filter $(SF_PR1_APPLIANCE),y), libpri) $(if $(filter $(SF_PACKAGE_LUA),y), _lua)
-ASTERISK_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl
-ASTERISK_CONFIGURE_OPTS+= --without-libcurl --with-ssl --with-crypto --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux 
+ASTERISK_CONFIGURE_OPTS=--host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl --without-curl --with-ssl --with-crypto --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux --with-tonezone --with-sqlite3 --with-speex --with-speexdsp --with-gsm --with-ncurses
 
 ifeq ($(strip $(SF_PACKAGE_IKSEMEL)),y)
 ASTERISK_CONFIGURE_OPTS+= --with-iksemel=$(TARGET_DIR)/usr
@@ -60,8 +59,10 @@ endif
 
 ifeq ($(filter $(SF_SPANDSP_FAX) $(SF_SPANDSP_CALLERID),y),y)
 ASTERISK_CFLAGS+= $(if $(filter $(SF_SPANDSP_CALLERID),y), -DUSE_SPANDSP_CALLERID)
-ASTERISK_LDFLAGS+= -lspandsp -ltiff
 ASTERISK_DEP+= spandsp
+ASTERISK_CONFIGURE_OPTS+= --with-spandsp
+else
+ASTERISK_CONFIGURE_OPTS+= --without-spandsp
 endif
 
 ifeq ($(strip $(SF_PACKAGE_MISDNUSER)),y)
@@ -69,16 +70,21 @@ ASTERISK_DEP+= mISDNuser dahdi
 ASTERISK_CONFIGURE_OPTS+= --with-misdn
 else
 ASTERISK_DEP+= dahdi
+ASTERISK_CONFIGURE_OPTS+= --without-misdn
 endif
 
 ifeq ($(strip $(SF_PACKAGE_UW-IMAP)),y)
 ASTERISK_DEP+= uw-imap
 ASTERISK_CONFIGURE_OPTS+= --with-imap=$(BUILD_DIR)/imap-2007e
+else
+ASTERISK_CONFIGURE_OPTS+= --without-imap
 endif
 
 ifeq ($(strip $(SF_PACKAGE_OPENR2)),y)
 ASTERISK_DEP+= openr2
 ASTERISK_CONFIGURE_OPTS+= --with-openr2=$(TARGET_DIR)/lib
+else
+ASTERISK_CONFIGURE_OPTS+= --without-openr2
 endif
 
 $(DL_DIR)/$(ASTERISK_SOURCE):
@@ -127,7 +133,7 @@ endif
 ifeq ($(strip $(SF_PACKAGE_IKSEMEL)),y)
 	make iksemel
 endif
-	cd $(ASTERISK_DIR); CFLAGS="$(ASTERISK_CFLAGS)" LDFLAGS="$(ASTERISK_LDFLAGS)" GNU_LD=0 ./configure $(ASTERISK_CONFIGURE_OPTS)
+	cd $(ASTERISK_DIR); CPPFLAGS="$(ASTERISK_CPPFLAGS)" CFLAGS="$(ASTERISK_CFLAGS)" LDFLAGS="$(ASTERISK_LDFLAGS)" GNU_LD=0 ./configure $(ASTERISK_CONFIGURE_OPTS)
 	#The config doesn't detect the fork properly. We know fork is properly emulated under uClinux
 	sed -i 's/WORKING_FORK=/WORKING_FORK=1/' $(ASTERISK_DIR)/build_tools/menuselect-deps
 	echo LUA=1 >> $(ASTERISK_DIR)/build_tools/menuselect-deps
@@ -204,10 +210,10 @@ asterisk: check_prev_ver $(ASTERISK_DIR_LINK)/.configured
 ifeq ($(strip $(SF_PACKAGE_ASTERISK_VERBOSE)),y)
 #	-$(MAKE1) -C $(ASTERISK_DIR) menuselect
 endif
-#	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
+#	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CPPFLAGS)" \
 #	$(MAKE1) -C $(ASTERISK_DIR) codecs NOISY_BUILD=1 GNU_LD=0
 
-	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CFLAGS)" ASTLDFLAGS="$(ASTERISK_LDFLAGS)" \
+	OPTIMIZE="-O4" ASTCFLAGS="$(ASTERISK_CPPFLAGS)" \
 	$(MAKE1) -C $(ASTERISK_DIR) NOISY_BUILD=1 GNU_LD=0
 
 	mkdir -p $(TARGET_DIR)/bin/

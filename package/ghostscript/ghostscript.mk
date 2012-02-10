@@ -41,7 +41,7 @@ ghostscript: $(GHOSTSCRIPT_DIR)/.configured
 	cp $(SOURCES_DIR)/ghostscript/echogs $(GHOSTSCRIPT_DIR)/obj/
 	cp $(SOURCES_DIR)/ghostscript/genarch $(GHOSTSCRIPT_DIR)/obj/
 	cp $(SOURCES_DIR)/ghostscript/genconf $(GHOSTSCRIPT_DIR)/obj/
-	$(MAKE) -C $(GHOSTSCRIPT_DIR) CAPOPT= GENOPT=-mfdpic AR=bfin-linux-uclibc-ar CC=bfin-linux-uclibc-gcc CCLD=bfin-linux-uclibc-gcc
+	$(MAKE) -C $(GHOSTSCRIPT_DIR) CAPOPT= GENOPT= AR=bfin-linux-uclibc-ar CC=bfin-linux-uclibc-gcc CCLD=bfin-linux-uclibc-gcc
 	mkdir -p $(TARGET_DIR)/usr/share/ghostscript/$(GHOSTSCRIPT_VERSION)/Resource
 	cp -r $(GHOSTSCRIPT_DIR)/Resource $(TARGET_DIR)/usr/share/ghostscript/$(GHOSTSCRIPT_VERSION)/
 	cp -r $(GHOSTSCRIPT_DIR)/bin/gs $(TARGET_DIR)/bin/

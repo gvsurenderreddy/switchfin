@@ -28,7 +28,7 @@ SQLITE3_CONFIGURE_OPTS = --host=bfin-linux-uclibc \
                 --disable-tcl \
 		--libdir=$(STAGING_LIB)
 
-SQLITE3_CFLAGS=-mfdpic -Os -I$(STAGING_INC)
+SQLITE3_CFLAGS=-Os -I$(STAGING_INC)
 SQLITE3_LDFLAGS=-L$(STAGING_LIB)
 
 $(DL_DIR)/$(SQLITE3_SOURCE):

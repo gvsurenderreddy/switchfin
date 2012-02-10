@@ -23,7 +23,7 @@ CGIC_CONFIGURE_OPTS = --host=bfin-linux-uclibc \
 		--prefix=$(STAGING_DIR)/usr \
 		--libdir=$(STAGING_LIB)
 
-CGIC_CFLAGS=-mfdpic -Os -I$(STAGING_INC)
+CGIC_CFLAGS=-Os -I$(STAGING_INC)
 CGIC_LDFLAGS=-L$(STAGING_LIB)
 
 $(DL_DIR)/$(CGIC_SOURCE):

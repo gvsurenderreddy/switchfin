@@ -5,7 +5,7 @@
  		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
  		}
 -#ifdef SOLARIS
-+#if defined(SOLARIS) || defined (__BLACKFIN__)
++#if defined(SOLARIS) || defined (__BFIN__)
  			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
  #else
  			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
@@ -16,7 +16,7 @@
  		   ast_copy_string(fnamebuf,fnamebuf2,sizeof(fnamebuf));
  		}
 -#ifdef SOLARIS
-+#if defined(SOLARIS) || defined(__BLACKFIN__)
++#if defined(SOLARIS) || defined(__BFIN__)
  			glob_ret = glob(fnamebuf, GLOB_NOCHECK, NULL, &globbuf);
  #else
  			glob_ret = glob(fnamebuf, GLOB_NOMAGIC|GLOB_BRACE, NULL, &globbuf);
