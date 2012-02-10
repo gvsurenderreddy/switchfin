@@ -10,7 +10,7 @@
 
 SPANDSP_SITE=http://www.soft-switch.org/downloads/spandsp/
 SPANDSP_VERSION=0.0.6
-SPANDSP_SOURCE=spandsp-0.0.6pre17.tgz
+SPANDSP_SOURCE=spandsp-0.0.6pre20.tgz
 TIFF_VERSION=3.8.2
 SPANDSP_UNZIP=zcat
 SPANDSP_DIR=$(BUILD_DIR)/spandsp-$(SPANDSP_VERSION)
@@ -30,7 +30,6 @@ $(SPANDSP_DIR)/.unpacked: $(DL_DIR)/$(SPANDSP_SOURCE)
 
 $(SPANDSP_DIR)/.configured: $(SPANDSP_DIR)/.unpacked
 	cd $(SPANDSP_DIR); LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) ./configure $(SPANDSP_CONFIGURE_OPTS)
-	cd $(SPANDSP_DIR); patch -p0 < $(BASE_DIR)/package/spandsp/spandsp.patch
 	touch $(SPANDSP_DIR)/.configured
 
 spandsp: libtiff $(SPANDSP_DIR)/.configured
