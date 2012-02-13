@@ -1089,3 +1089,359 @@ diff -Naur asterisk-1.4.42_original/utils/Makefile asterisk-1.4.42_switchfin/uti
  UTILS:=$(ALL_UTILS)
  
  include $(ASTTOPDIR)/Makefile.rules
+Index: asterisk/menuselect/menuselect_newt.c
+===================================================================
+--- asterisk/menuselect/menuselect_newt.c	(revision 904)
++++ asterisk/menuselect/menuselect_newt.c	(revision 906)
+@@ -90,9 +90,9 @@
+ {
+ 	char buffer[128] = { 0 };
+ 
+-	struct depend *dep;
+-	struct conflict *con;
+-	struct use *uses;
++	struct reference *dep;
++	struct reference *con;
++	struct reference *uses;
+ 
+ 	reset_display();
+ 
+@@ -119,6 +119,7 @@
+ 		strcpy(buffer, "");
+ 		AST_LIST_TRAVERSE(&mem->uses, uses, list) {
+ 			strncat(buffer, uses->displayname, sizeof(buffer) - strlen(buffer) - 1);
++			strncat(buffer, uses->member ? "(M)" : "(E)", sizeof(buffer) - strlen(buffer) - 1);
+ 			if (AST_LIST_NEXT(uses, list))
+ 				strncat(buffer, ", ", sizeof(buffer) - strlen(buffer) - 1);
+ 		}
+Index: asterisk/menuselect/menuselect.c
+===================================================================
+--- asterisk/menuselect/menuselect.c	(revision 904)
++++ asterisk/menuselect/menuselect.c	(revision 906)
+@@ -191,9 +191,9 @@
+ /*! \brief Free a member structure and all of its members */
+ static void free_member(struct member *mem)
+ {
+-	struct depend *dep;
+-	struct conflict *cnf;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *cnf;
++	struct reference *use;
+ 
+ 	while ((dep = AST_LIST_REMOVE_HEAD(&mem->deps, list)))
+ 		free(dep);
+@@ -210,9 +210,9 @@
+ 	FILE *f;
+ 	struct tree *tree;
+ 	struct member *mem;
+-	struct depend *dep;
+-	struct conflict *cnf;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *cnf;
++	struct reference *use;
+ 	mxml_node_t *cur;
+ 	mxml_node_t *cur2;
+ 	mxml_node_t *cur3;
+@@ -345,27 +345,6 @@
+ 			     cur3 && cur3->child;
+ 			     cur3 = mxmlFindElement(cur3, cur2, "use", NULL, NULL, MXML_NO_DESCEND))
+ 			{
+-#if !defined(HAVE_ATTRIBUTE_weak_import) && !defined(HAVE_ATTRIBUTE_weakref)
+-				/* If the compiler won't support the functionality required for "use", then "use" -> "depend" */
+-				if (!(dep = calloc(1, sizeof(*dep)))) {
+-					free_member(mem);
+-					return -1;
+-				}
+-				if ((tmp = mxmlElementGetAttr(cur3, "name"))) {
+-					if (!strlen_zero(tmp)) {
+-						dep->name = tmp;
+-					}
+-				}
+-				if (!strlen_zero(cur3->child->value.opaque)) {
+-					dep->displayname = cur3->child->value.opaque;
+-					if (!dep->name) {
+-						dep->name = dep->displayname;
+-					}
+-					AST_LIST_INSERT_TAIL(&mem->deps, dep, list);
+-				} else {
+-					free(dep);
+-				}
+-#else
+ 				if (!(use = calloc(1, sizeof(*use)))) {
+ 					free_member(mem);
+ 					return -1;
+@@ -381,9 +360,9 @@
+ 						use->name = use->displayname;
+ 					}
+ 					AST_LIST_INSERT_TAIL(&mem->uses, use, list);
+-				} else
++				} else {
+ 					free(use);
+-#endif
++				}
+ 			}
+ 
+ 			if (add_member(mem, cat))
+@@ -404,7 +383,7 @@
+ 	unsigned int result = 0;
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct depend *dep;
++	struct reference *dep;
+ 	struct dep_file *dep_file;
+ 	unsigned int changed, old_failure;
+ 
+@@ -491,7 +470,7 @@
+ 	unsigned int result = 0;
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct conflict *cnf;
++	struct reference *cnf;
+ 	struct dep_file *dep_file;
+ 	unsigned int changed, old_failure;
+ 
+@@ -661,10 +640,11 @@
+ {
+ 	struct category *cat, *cat2;
+ 	struct member *mem, *mem2;
+-	struct depend *dep;
+-	struct conflict *cnf;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *cnf;
++	struct reference *use;
+ 
++	/* Traverse through each module's dependency list and determine whether each is another module */
+ 	AST_LIST_TRAVERSE(&categories, cat, list) {
+ 		AST_LIST_TRAVERSE(&cat->members, mem, list) {
+ 			AST_LIST_TRAVERSE(&mem->deps, dep, list) {
+@@ -693,6 +673,7 @@
+ 		}
+ 	}
+ 
++	/* Traverse through each module's use list and determine whether each is another module */
+ 	AST_LIST_TRAVERSE(&categories, cat, list) {
+ 		AST_LIST_TRAVERSE(&cat->members, mem, list) {
+ 			AST_LIST_TRAVERSE(&mem->uses, use, list) {
+@@ -721,7 +702,23 @@
+ 		}
+ 	}
+ 
++	/* If weak linking is not supported, move module uses which are other modules to the dependency list */
++#if !defined(HAVE_ATTRIBUTE_weak_import) && !defined(HAVE_ATTRIBUTE_weakref)
+ 	AST_LIST_TRAVERSE(&categories, cat, list) {
++		AST_LIST_TRAVERSE(&cat->members, mem, list) {
++			AST_LIST_TRAVERSE_SAFE_BEGIN(&mem->uses, use, list) {
++				if (use->member) {
++					AST_LIST_REMOVE_CURRENT(&mem->uses, list);
++					AST_LIST_INSERT_TAIL(&mem->deps, use, list);
++				}
++			}
++			AST_LIST_TRAVERSE_SAFE_END;
++		}
++	}
++#endif
++
++	/* Traverse through each category marked as exclusive and mark every member as conflicting with every other member */
++	AST_LIST_TRAVERSE(&categories, cat, list) {
+ 		if (!cat->exclusive)
+ 			continue;
+ 
+@@ -740,6 +737,7 @@
+ 		}
+ 	}
+ 
++	/* Traverse through each category and determine whether named conflicts for each module are other modules */
+ 	AST_LIST_TRAVERSE(&categories, cat, list) {
+ 		AST_LIST_TRAVERSE(&cat->members, mem, list) {
+ 			AST_LIST_TRAVERSE(&mem->conflicts, cnf, list) {
+@@ -825,7 +823,7 @@
+ 
+ unsigned int enable_member(struct member *mem)
+ {
+-	struct depend *dep;
++	struct reference *dep;
+ 	unsigned int can_enable = 1;
+ 
+ 	AST_LIST_TRAVERSE(&mem->deps, dep, list) {
+@@ -1062,8 +1060,8 @@
+ 	FILE *f;
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct depend *dep;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *use;
+ 	struct dep_file *dep_file;
+ 
+ 	if (!(f = fopen(output_makedeps, "w"))) {
+@@ -1148,8 +1146,8 @@
+ 	FILE *f;
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct depend *dep;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *use;
+ 
+ 	if (!(f = fopen(output_makeopts, "w"))) {
+ 		fprintf(stderr, "Unable to open build configuration file (%s) for writing!\n", output_makeopts);
+@@ -1284,8 +1282,8 @@
+ #ifdef MENUSELECT_DEBUG
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct depend *dep;
+-	struct conflict *cnf;
++	struct reference *dep;
++	struct reference *cnf;
+ 
+ 	AST_LIST_TRAVERSE(&categories, cat, list) {
+ 		fprintf(stderr, "Category: '%s'\n", cat->name);
+@@ -1312,9 +1310,9 @@
+ {
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct depend *dep;
+-	struct conflict *cnf;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *cnf;
++	struct reference *use;
+ 
+ 	while ((cat = AST_LIST_REMOVE_HEAD(&categories, list))) {
+ 		while ((mem = AST_LIST_REMOVE_HEAD(&cat->members, list))) {
+@@ -1404,8 +1402,8 @@
+ 	unsigned int insane = 0;
+ 	struct category *cat;
+ 	struct member *mem;
+-	struct depend *dep;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *use;
+ 	struct dep_file *dep_file;
+ 	unsigned int dep_header_printed;
+ 	unsigned int group_header_printed;
+Index: asterisk/menuselect/menuselect_gtk.c
+===================================================================
+--- asterisk/menuselect/menuselect_gtk.c	(revision 904)
++++ asterisk/menuselect/menuselect_gtk.c	(revision 906)
+@@ -268,9 +268,9 @@
+ 			char dep_buf[64] = "";
+ 			char use_buf[64] = "";
+ 			char cnf_buf[64] = "";
+-			struct depend *dep;
+-			struct use *use;
+-			struct conflict *cnf;
++			struct reference *dep;
++			struct reference *use;
++			struct reference *cnf;
+ 
+ 			AST_LIST_TRAVERSE(&mem->deps, dep, list) {
+ 				strncat(dep_buf, dep->displayname, sizeof(dep_buf) - strlen(dep_buf) - 1);
+Index: asterisk/menuselect/menuselect.h
+===================================================================
+--- asterisk/menuselect/menuselect.h	(revision 904)
++++ asterisk/menuselect/menuselect.h	(revision 906)
+@@ -34,41 +34,19 @@
+ 
+ struct member;
+ 
+-struct depend {
++struct reference {
+ 	/*! the name of the dependency */
+ 	const char *name;
+ 	/*! the display name of the dependency */
+ 	const char *displayname;
+ 	/*! if this dependency is a member, not an external object */
+ 	struct member *member;
++	/*! if this package was found */
++	unsigned char met:1;
+ 	/*! for linking */
+-	AST_LIST_ENTRY(depend) list;
++	AST_LIST_ENTRY(reference) list;
+ };
+ 
+-struct conflict {
+-	/*! the name of the conflict */
+-	const char *name;
+-	/*! the display name of the conflict */
+-	const char *displayname;
+-	/*! if this conflict is a member, not an external object */
+-	const struct member *member;
+-	/*! for linking */
+-	AST_LIST_ENTRY(conflict) list;
+-};
+-
+-struct use {
+-	/*! the name of the used package */
+-	const char *name;
+-	/*! the display name of the used package */
+-	const char *displayname;
+-	/*! if this used package is a member, not an external object */
+-	struct member *member;
+-	/*! if this used package was found */
+-	unsigned char met;
+-	/*! for linking */
+-	AST_LIST_ENTRY(use) list;
+-};
+-
+ enum failure_types {
+ 	NO_FAILURE = 0,
+ 	SOFT_FAILURE = 1,
+@@ -104,11 +82,11 @@
+ 	 * when explicitly set. */
+ 	unsigned int explicitly_enabled_only:1;
+ 	/*! dependencies of this module */
+-	AST_LIST_HEAD_NOLOCK(, depend) deps;
++	AST_LIST_HEAD_NOLOCK(, reference) deps;
+ 	/*! conflicts of this module */
+-	AST_LIST_HEAD_NOLOCK(, conflict) conflicts;
++	AST_LIST_HEAD_NOLOCK(, reference) conflicts;
+ 	/*! optional packages used by this module */
+-	AST_LIST_HEAD_NOLOCK(, use) uses;
++	AST_LIST_HEAD_NOLOCK(, reference) uses;
+ 	/*! for making a list of modules */
+ 	AST_LIST_ENTRY(member) list;
+ };
+Index: asterisk/menuselect/menuselect_curses.c
+===================================================================
+--- asterisk/menuselect/menuselect_curses.c	(revision 904)
++++ asterisk/menuselect/menuselect_curses.c	(revision 906)
+@@ -182,9 +182,9 @@
+ static void display_mem_info(WINDOW *menu, struct member *mem, int start, int end)
+ {
+ 	char buf[64];
+-	struct depend *dep;
+-	struct conflict *con;
+-	struct use *use;
++	struct reference *dep;
++	struct reference *con;
++	struct reference *use;
+ 
+ 	wmove(menu, end - start + 2, max_x / 2 - 16);
+ 	wclrtoeol(menu);
+Index: asterisk/menuselect/linkedlists.h
+===================================================================
+--- asterisk/menuselect/linkedlists.h	(revision 904)
++++ asterisk/menuselect/linkedlists.h	(revision 906)
+@@ -222,14 +222,16 @@
+   the list traversal (and without having to re-traverse the list to modify the
+   previous entry, if any).
+  */
+-#define AST_LIST_REMOVE_CURRENT(head, field)						\
++#define AST_LIST_REMOVE_CURRENT(head, field) do {					\
++	__new_prev->field.next = NULL;							\
+ 	__new_prev = __list_prev;							\
+ 	if (__list_prev)								\
+ 		__list_prev->field.next = __list_next;					\
+ 	else										\
+ 		(head)->first = __list_next;						\
+ 	if (!__list_next)								\
+-		(head)->last = __list_prev;
++		(head)->last = __list_prev;						\
++	} while (0)
+ 
+ /*!
+   \brief Inserts a list entry before the current entry during a traversal.
