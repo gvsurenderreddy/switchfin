@@ -1,0 +1,69 @@
+--- yate/configure.in.orig	2011-08-28 10:55:30.143360959 +0100
++++ yate/configure.in	2011-08-28 10:56:43.569333455 +0100
+@@ -715,18 +715,18 @@
+     SPEEX_LIB="-Wl,-Bstatic $SPEEX_LIB -Wl,-Bdynamic"
+ fi
+ if [[ "x$ac_cv_use_libspeex" = "xyes" ]]; then
+-for i in /usr/include /usr/include/speex /usr/local/include /usr/local/include/speex; do
++for i in /usr/include /usr/local/include; do
+     ac_cv_use_libspeex="$i"
+-    test -f "$ac_cv_use_libspeex/speex.h" && break
++    test -f "$ac_cv_use_libspeex/speex/speex.h" && break
+ done
+ fi
+ if [[ "x$ac_cv_use_libspeex" != "xno" ]]; then
+-AC_MSG_CHECKING([for speex.h in $ac_cv_use_libspeex])
+-if [[ -f "$ac_cv_use_libspeex/speex.h" ]]; then
++AC_MSG_CHECKING([for speex.h in $ac_cv_use_libspeex/speex])
++if [[ -f "$ac_cv_use_libspeex/speex/speex.h" ]]; then
+ SAVE_CFLAGS="$CFLAGS"
+ CFLAGS="$CFLAGS -Wall -Werror -I$ac_cv_use_libspeex"
+ AC_TRY_COMPILE([
+-#include <speex.h>
++#include <speex/speex.h>
+ ],[
+ int i = SPEEX_MODEID_UWB;
+ speex_lib_ctl(SPEEX_LIB_GET_MAJOR_VERSION, &i);
+--- yate/configure.orig	2011-08-28 10:55:37.847253153 +0100
++++ yate/configure	2011-08-28 10:57:35.091612467 +0100
+@@ -7805,15 +7805,15 @@
+     SPEEX_LIB="-Wl,-Bstatic $SPEEX_LIB -Wl,-Bdynamic"
+ fi
+ if [ "x$ac_cv_use_libspeex" = "xyes" ]; then
+-for i in /usr/include /usr/include/speex /usr/local/include /usr/local/include/speex; do
++for i in /usr/include /usr/local/include; do
+     ac_cv_use_libspeex="$i"
+-    test -f "$ac_cv_use_libspeex/speex.h" && break
++    test -f "$ac_cv_use_libspeex/speex/speex.h" && break
+ done
+ fi
+ if [ "x$ac_cv_use_libspeex" != "xno" ]; then
+-{ $as_echo "$as_me:$LINENO: checking for speex.h in $ac_cv_use_libspeex" >&5
+-$as_echo_n "checking for speex.h in $ac_cv_use_libspeex... " >&6; }
+-if [ -f "$ac_cv_use_libspeex/speex.h" ]; then
++{ $as_echo "$as_me:$LINENO: checking for speex.h in $ac_cv_use_libspeex/speex" >&5
++$as_echo_n "checking for speex.h in $ac_cv_use_libspeex/speex... " >&6; }
++if [ -f "$ac_cv_use_libspeex/speex/speex.h" ]; then
+ SAVE_CFLAGS="$CFLAGS"
+ CFLAGS="$CFLAGS -Wall -Werror -I$ac_cv_use_libspeex"
+ cat >conftest.$ac_ext <<_ACEOF
+@@ -7823,7 +7823,7 @@
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+ 
+-#include <speex.h>
++#include <speex/speex.h>
+ 
+ int
+ main ()
+--- yate/modules/speexcodec.cpp.orig	2011-03-23 17:14:55.000000000 +0000
++++ yate/modules/speexcodec.cpp	2011-08-28 10:52:02.732263413 +0100
+@@ -27,7 +27,7 @@
+ #include <yatephone.h>
+ 
+ extern "C"  {
+-#include <speex.h>
++#include <speex/speex.h>
+ #ifdef _WINDOWS
+ /* For some reason the DLL does not export the mode variables */
+ #define speex_nb_mode (*speex_lib_get_mode(SPEEX_MODEID_NB))

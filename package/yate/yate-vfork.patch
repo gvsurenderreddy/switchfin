@@ -1,0 +1,273 @@
+diff -Naur yate.orig/configure yate/configure
+--- yate.orig/configure	2011-08-26 22:16:22.761796499 +0100
++++ yate/configure	2011-08-27 14:09:38.903409353 +0100
+@@ -717,6 +717,7 @@
+ HAVE_POLL
+ HAVE_PRCTL
+ HAVE_GETCWD
++HAVE_FORK
+ EGREP
+ GREP
+ CPP
+@@ -5021,6 +5022,109 @@
+ fi
+ done
+ 
++
++HAVE_FORK=""
++
++for ac_func in fork
++do
++as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
++{ $as_echo "$as_me:$LINENO: checking for $ac_func" >&5
++$as_echo_n "checking for $ac_func... " >&6; }
++if { as_var=$as_ac_var; eval "test \"\${$as_var+set}\" = set"; }; then
++  $as_echo_n "(cached) " >&6
++else
++  cat >conftest.$ac_ext <<_ACEOF
++/* confdefs.h.  */
++_ACEOF
++cat confdefs.h >>conftest.$ac_ext
++cat >>conftest.$ac_ext <<_ACEOF
++/* end confdefs.h.  */
++/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
++   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
++#define $ac_func innocuous_$ac_func
++
++/* System header to define __stub macros and hopefully few prototypes,
++    which can conflict with char $ac_func (); below.
++    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
++    <limits.h> exists even on freestanding compilers.  */
++
++#ifdef __STDC__
++# include <limits.h>
++#else
++# include <assert.h>
++#endif
++
++#undef $ac_func
++
++/* Override any GCC internal prototype to avoid an error.
++   Use char because int might match the return type of a GCC
++   builtin and then its argument prototype would still apply.  */
++#ifdef __cplusplus
++extern "C"
++#endif
++char $ac_func ();
++/* The GNU C library defines this for functions which it implements
++    to always fail with ENOSYS.  Some functions are actually named
++    something starting with __ and the normal name is an alias.  */
++#if defined __stub_$ac_func || defined __stub___$ac_func
++choke me
++#endif
++
++int
++main ()
++{
++return $ac_func ();
++  ;
++  return 0;
++}
++_ACEOF
++rm -f conftest.$ac_objext conftest$ac_exeext
++if { (ac_try="$ac_link"
++case "(($ac_try" in
++  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
++  *) ac_try_echo=$ac_try;;
++esac
++eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
++$as_echo "$ac_try_echo") >&5
++  (eval "$ac_link") 2>conftest.er1
++  ac_status=$?
++  grep -v '^ *+' conftest.er1 >conftest.err
++  rm -f conftest.er1
++  cat conftest.err >&5
++  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
++  (exit $ac_status); } && {
++	 test -z "$ac_c_werror_flag" ||
++	 test ! -s conftest.err
++       } && test -s conftest$ac_exeext && {
++	 test "$cross_compiling" = yes ||
++	 $as_test_x conftest$ac_exeext
++       }; then
++  eval "$as_ac_var=yes"
++else
++  $as_echo "$as_me: failed program was:" >&5
++sed 's/^/| /' conftest.$ac_ext >&5
++
++	eval "$as_ac_var=no"
++fi
++
++rm -rf conftest.dSYM
++rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
++      conftest$ac_exeext conftest.$ac_ext
++fi
++ac_res=`eval 'as_val=${'$as_ac_var'}
++		 $as_echo "$as_val"'`
++	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
++$as_echo "$ac_res" >&6; }
++as_val=`eval 'as_val=${'$as_ac_var'}
++		 $as_echo "$as_val"'`
++   if test "x$as_val" = x""yes; then
++  cat >>confdefs.h <<_ACEOF
++#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
++_ACEOF
++ HAVE_FORK="-DHAVE_FORK"
++fi
++done
++
+ 
+ 
+ HAVE_PRCTL=""
+diff -Naur yate.orig/configure.in yate/configure.in
+--- yate.orig/configure.in	2011-08-26 22:16:22.748796681 +0100
++++ yate/configure.in	2011-08-26 22:29:49.569506252 +0100
+@@ -108,6 +108,10 @@
+ AC_CHECK_FUNCS([getcwd], [HAVE_GETCWD="-DHAVE_GETCWD"])
+ AC_SUBST(HAVE_GETCWD)
+ 
++HAVE_FORK=""
++AC_CHECK_FUNCS([fork], [HAVE_FORK="-DHAVE_FORK"])
++AC_SUBST(HAVE_FORK)
++
+ HAVE_PRCTL=""
+ AC_MSG_CHECKING([for prctl])
+ have_prctl="no"
+diff -Naur yate.orig/engine/Engine.cpp yate/engine/Engine.cpp
+--- yate.orig/engine/Engine.cpp	2011-08-26 22:16:22.748796681 +0100
++++ yate/engine/Engine.cpp	2011-08-26 22:55:49.324679466 +0100
+@@ -694,6 +694,8 @@
+ static bool s_logrotator = false;
+ static volatile bool s_rotatenow = false;
+ static volatile bool s_runagain = true;
++
++#ifdef HAVE_FORK
+ static unsigned int s_rundelay = RUNDELAY_MIN;
+ static pid_t s_childpid = -1;
+ static pid_t s_superpid = -1;
+@@ -894,6 +896,7 @@
+     ::fprintf(stderr,"Supervisor (%d) exiting with code %d\n",s_superpid,retcode);
+     return retcode;
+ }
++#endif
+ #endif /* _WINDOWS */
+ 
+ 
+@@ -1608,9 +1611,11 @@
+ "   --remove       Remove the Windows service\n"
+ #else
+ "   -d             Daemonify, suppress output unless logged\n"
++#ifdef HAVE_FORK
+ "   -s             Supervised, restart if crashes or locks up\n"
+ "   -r             Enable rotation of log file (needs -s and -l)\n"
+ #endif
++#endif
+     ,s_cfgfile.safe()
+     ,s_usrpath.safe());
+ }
+@@ -1721,6 +1726,7 @@
+ 		    case 'd':
+ 			daemonic = true;
+ 			break;
++#ifdef HAVE_FORK
+ 		    case 's':
+ 			supervised = true;
+ 			break;
+@@ -1728,6 +1734,7 @@
+ 			s_logrotator = true;
+ 			break;
+ #endif
++#endif
+ 		    case 't':
+ 			s_logtruncate = true;
+ 			break;
+@@ -2072,8 +2079,10 @@
+ 
+     int retcode = -1;
+ #ifndef _WINDOWS
++#ifdef HAVE_FORK
+     if (supervised)
+ 	retcode = supervise();
++#endif
+     if (retcode >= 0)
+ 	return retcode;
+ #endif
+diff -Naur yate.orig/engine/Makefile.in yate/engine/Makefile.in
+--- yate.orig/engine/Makefile.in	2011-08-26 22:16:22.748796681 +0100
++++ yate/engine/Makefile.in	2011-08-26 22:32:28.431283185 +0100
+@@ -77,7 +77,7 @@
+ 	-strip --strip-debug --discard-locals ../$(YLIB)
+ 
+ Engine.o: @srcdir@/Engine.cpp $(MKDEPS) $(EINC) ../yateversn.h ../yatepaths.h
+-	$(COMPILE) @FDSIZE_HACK@ @HAVE_PRCTL@ @HAVE_GETCWD@ -c $<
++	$(COMPILE) @FDSIZE_HACK@ @HAVE_PRCTL@ @HAVE_GETCWD@ @HAVE_FORK@ -c $<
+ 
+ Channel.o: @srcdir@/Channel.cpp $(MKDEPS) $(PINC)
+ 	$(COMPILE) -c $<
+diff -Naur yate.orig/modules/extmodule.cpp yate/modules/extmodule.cpp
+--- yate.orig/modules/extmodule.cpp	2011-08-26 22:16:22.753796611 +0100
++++ yate/modules/extmodule.cpp	2011-08-26 22:40:11.159807888 +0100
+@@ -331,7 +331,11 @@
+ 	return false;
+     }
+ #else
++#ifdef HAVE_FORK
+     int pid = ::fork();
++#else
++    int pid = ::vfork();
++#endif
+     if (pid < 0) {
+ 	Debug(DebugWarn, "Failed to fork(): %d: %s", errno, strerror(errno));
+ 	return false;
+@@ -967,7 +971,11 @@
+ 	::close(ext2yate[1]);
+ 	return false;
+     }
++#ifdef HAVE_FORK
+     pid = ::fork();
++#else
++    pid = ::vfork();
++#endif
+     if (pid < 0) {
+ 	Debug(DebugWarn, "Failed to fork(): %s", strerror(errno));
+ 	::close(yate2ext[0]);
+diff -Naur yate.orig/modules/Makefile.in yate/modules/Makefile.in
+--- yate.orig/modules/Makefile.in	2011-08-26 22:16:22.754796597 +0100
++++ yate/modules/Makefile.in	2011-08-26 22:43:21.590143059 +0100
+@@ -34,7 +34,7 @@
+ DEFS :=
+ INCLUDES := -I.. -I@top_srcdir@
+ CFLAGS := @CFLAGS@ @MODULE_CFLAGS@ @INLINE_FLAGS@
+-CPPFLAGS := @CFLAGS@ @MODULE_CPPFLAGS@ @INLINE_FLAGS@
++CPPFLAGS := @CFLAGS@ @MODULE_CPPFLAGS@ @INLINE_FLAGS@ @HAVE_FORK@
+ LDFLAGS:= @LDFLAGS@
+ YATELIBS:= -L.. -lyate @LIBS@
+ MODFLAGS:= @MODULE_LDFLAGS@
+diff -Naur yate.orig/modules/moh.cpp yate/modules/moh.cpp
+--- yate.orig/modules/moh.cpp	2011-08-26 22:16:22.757796555 +0100
++++ yate/modules/moh.cpp	2011-08-26 22:39:20.257520201 +0100
+@@ -189,7 +189,11 @@
+ 	Debug(DebugWarn, "Unable to create ext->yate pipe: %s",strerror(errno));
+ 	return false;
+     }
++#ifdef HAVE_FORK
+     pid = ::fork();
++#else
++    pid = ::vfork();
++#endif
+     if (pid < 0) {
+ 	Debug(DebugWarn, "Failed to fork(): %s", strerror(errno));
+ 	::close(ext2yate[0]);
+diff -Naur yate.orig/yate-config.in yate/yate-config.in
+--- yate.orig/yate-config.in	2011-08-26 22:16:22.746796709 +0100
++++ yate/yate-config.in	2011-08-26 22:31:12.799341558 +0100
+@@ -287,6 +287,9 @@
+ 	--param=HAVE_GETCWD)
+ 	    echo "@HAVE_GETCWD@"
+ 	    ;;
++	--param=HAVE_FORK)
++	    echo "@HAVE_FORK@"
++	    ;;
+ 	*)
+ 	    echo "I didn't understand: $1" >&2
+ 	    echo "$ustr" >&2

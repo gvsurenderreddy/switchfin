@@ -1,0 +1,5 @@
+config SF_PACKAGE_YATE
+	bool "Yate"
+	default n
+	help
+		Yet Another Telephony Engine.
