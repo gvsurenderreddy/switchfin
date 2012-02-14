@@ -16,7 +16,7 @@ SPANDSP_UNZIP=zcat
 SPANDSP_DIR=$(BUILD_DIR)/spandsp-$(SPANDSP_VERSION)
 SPANDSP_CONFIGURE_OPTS=--host=bfin-linux-uclibc --enable-fixed-point --disable-static --includedir=$(STAGING_INC) --libdir=$(TARGET_DIR)/lib
 TIFF_LDFLAGS=-L$(BUILD_DIR)/tiff-$(TIFF_VERSION)/libtiff/.libs
-TIFF_CFLAGS=-I$(BUILD_DIR)/tiff-$(TIFF_VERSION)/libtiff
+TIFF_CPPFLAGS=-I$(BUILD_DIR)/tiff-$(TIFF_VERSION)/libtiff
 
 
 $(DL_DIR)/$(SPANDSP_SOURCE):
@@ -29,7 +29,10 @@ $(SPANDSP_DIR)/.unpacked: $(DL_DIR)/$(SPANDSP_SOURCE)
 	touch $(SPANDSP_DIR)/.unpacked
 
 $(SPANDSP_DIR)/.configured: $(SPANDSP_DIR)/.unpacked
-	cd $(SPANDSP_DIR); LDFLAGS=$(TIFF_LDFLAGS) CFLAGS=$(TIFF_CFLAGS) ./configure $(SPANDSP_CONFIGURE_OPTS)
+	cd $(SPANDSP_DIR); LDFLAGS="$(TIFF_LDFLAGS)" CPPFLAGS="$(TIFF_CPPFLAGS)" \
+	ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes \
+	./configure $(SPANDSP_CONFIGURE_OPTS)
+
 	touch $(SPANDSP_DIR)/.configured
 
 spandsp: libtiff $(SPANDSP_DIR)/.configured
@@ -42,4 +45,3 @@ spandsp: libtiff $(SPANDSP_DIR)/.configured
 
 spandsp-dirclean:
 	rm -rf $(SPANDSP_DIR)
-
