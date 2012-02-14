@@ -45,8 +45,8 @@ ASTERISK_UNZIP=zcat
 APP_FAX_SITE=https://agx-ast-addons.svn.sourceforge.net/svnroot/agx-ast-addons/trunk
 APP_FAX_REV=69
 
-ASTERISK_CPPFLAGS=-I$(STAGING_INC)
-ASTERISK_CFLAGS=-g -mfast-fp -ffast-math -fno-jump-tables -D__FIXED_PT__
+ASTERISK_CPPFLAGS=-I$(STAGING_INC) -D__FIXED_PT__
+ASTERISK_CFLAGS=-g -mfast-fp -ffast-math -fno-jump-tables
 ASTERISK_LDFLAGS=-L$(STAGING_LIB)
 ASTERISK_DEP=sqlite3 $(if $(filter $(SF_PR1_APPLIANCE),y), libpri) $(if $(filter $(SF_PACKAGE_LUA),y), _lua)
 ASTERISK_CONFIGURE_OPTS=--host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-sdl --without-curl --with-ssl --with-crypto --disable-xmldoc --with-dahdi=$(DAHDI_DIR)/linux --with-tonezone --with-sqlite3 --with-speex --with-speexdsp --with-gsm --with-ncurses
@@ -56,9 +56,13 @@ ASTERISK_CONFIGURE_OPTS+= --with-iksemel=$(TARGET_DIR)/usr
 endif
 
 ifeq ($(filter $(SF_SPANDSP_FAX) $(SF_SPANDSP_CALLERID),y),y)
-ASTERISK_CFLAGS+= $(if $(filter $(SF_SPANDSP_CALLERID),y), -DUSE_SPANDSP_CALLERID)
+ASTERISK_CPPFLAGS+= $(if $(filter $(SF_SPANDSP_CALLERID),y), -DUSE_SPANDSP_CALLERID)
 ASTERISK_DEP+= spandsp
+ifeq ($(strip $(SF_ASTERISK_1_4)),y)
+ASTERISK_LDFLAGS+= -lspandsp -ltiff
+else
 ASTERISK_CONFIGURE_OPTS+= --with-spandsp
+endif
 else
 ASTERISK_CONFIGURE_OPTS+= --without-spandsp
 endif

@@ -23,8 +23,8 @@ ASTERISK-H323_SOURCE=$(ASTERISK-H323_NAME).tar.gz
 ASTERISK-H323_SITE=http://downloads.digium.com/pub/asterisk/releases
 ASTERISK-H323_UNZIP=zcat
 
-ASTERISK-H323_CPPFLAGS=-I$(STAGING_INC)
-ASTERISK-H323_CFLAGS=-g -mfast-fp -ffast-math -fno-jump-tables -D__FIXED_PT__
+ASTERISK-H323_CPPFLAGS=-I$(STAGING_INC) -D__FIXED_PT__
+ASTERISK-H323_CFLAGS=-g -mfast-fp -ffast-math -fno-jump-tables
 ASTERISK-H323_LDFLAGS=-L$(STAGING_LIB)
 ASTERISK-H323_DEP=
 ASTERISK-H323_CONFIGURE_OPTS= --host=bfin-linux-uclibc --disable-largefile --without-pwlib --without-curl
