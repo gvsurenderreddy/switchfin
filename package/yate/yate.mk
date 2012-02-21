@@ -35,7 +35,7 @@ yate: $(YATE_DIR)/.configured
 	$(MAKE) -C $(YATE_DIR)/share/sounds/ install DESTDIR=$(TARGET_DIR)
 	cp $(YATE_DIR)/libyate*.so* $(TARGET_DIR)/usr/lib/
 	$(TARGET_STRIP) --strip-unneeded -o $(TARGET_DIR)/usr/bin/yate $(YATE_DIR)/yate
-	$(TARGET_STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libyate*.so* $(TARGET_DIR)/usr/lib/yate/{,**/}*.yate
+	$(TARGET_STRIP) --strip-unneeded $(TARGET_DIR)/usr/lib/libyate*.so* $(TARGET_DIR)/usr/lib/yate/*.yate $(TARGET_DIR)/usr/lib/yate/*/*.yate
 
 yate-clean:
 	$(MAKE) -C $(YATE_DIR)/ clean

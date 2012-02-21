@@ -31,7 +31,7 @@ $(N2N_WORKING)/.configured: $(N2N_WORKING)/.unpacked
 
 n2n: $(N2N_WORKING)/.configured
 	CFLAGS="-O3 $(TARGET_CFLAGS) -I$(STAGING_INC) -L$(STAGING_LIB)" make -C $(N2N_WORKING) CC=$(TARGET_CC) DEBUG= edge supernode
-	cp -f $(N2N_WORKING)/{edge,supernode} $(TARGET_DIR)/usr/sbin/
+	cp -f $(N2N_WORKING)/edge $(N2N_WORKING)/supernode $(TARGET_DIR)/usr/sbin/
 
 n2n-clean n2n-dirclean:
 	rm -rf $(BUILD_DIR)/n2n_v[12]
@@ -40,7 +40,7 @@ ifeq ($(strip $(SF_PACKAGE_N2N)),y)
 n2n_: n2n
 else
 n2n_:
-	rm -f $(TARGET_DIR)/usr/sbin/{edge,supernode}
+	rm -f $(TARGET_DIR)/usr/sbin/edge $(TARGET_DIR)/usr/sbin/supernode
 endif
 
 ################################################
